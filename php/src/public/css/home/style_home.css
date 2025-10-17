@@ -6,6 +6,7 @@
   font-family: 'Inter', sans-serif;
   padding: 2rem 1rem;   /* ruang di dalam kontainer */
   box-sizing: border-box;
+  margin-top: 2rem;
 }
 
 /* Konten utama */

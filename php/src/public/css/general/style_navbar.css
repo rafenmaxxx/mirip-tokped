@@ -9,9 +9,11 @@
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
   font-family: "Inter", sans-serif;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  z-index: 1000; 
 }
 
 /* ===== Logo ===== */
