@@ -4,7 +4,7 @@ export async function LoadProduct() {
 
   try {
     const res = await fetch("/api/product", {
-      method: "POST",
+      method: "GET",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
