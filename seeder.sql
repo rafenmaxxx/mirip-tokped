@@ -1,5 +1,25 @@
 -- SEEDER DATA TOKOPEDIA 
 
+-- haput data initiate
+DELETE FROM order_items;
+DELETE FROM orders;
+DELETE FROM cart_items;
+DELETE FROM category_items;
+DELETE FROM products;
+DELETE FROM categories;
+DELETE FROM stores;
+DELETE FROM users;
+
+-- matikan trigger sementara
+SET session_replication_role = replica;
+
+-- hapus semua tabel (urutan bebas)
+TRUNCATE TABLE order_items, orders, cart_items, category_items, products, categories, stores, users RESTART IDENTITY;
+
+-- nyalakan trigger lagi
+SET session_replication_role = DEFAULT;
+
+
 -- USERS
 INSERT INTO users (email, password, role, name, address, balance) VALUES
     ('seller1@mail.com', 'pw1', 'SELLER', 'Seller 1', 'Jl. Mawar No.1', 1000000),
@@ -16,11 +36,11 @@ INSERT INTO users (email, password, role, name, address, balance) VALUES
 
 -- STORES
 INSERT INTO stores (user_id, store_name, store_description, store_logo_path, balance) VALUES
-    (1, 'Toko Gadget', 'Menjual produk gadget', '/img/store1.png', 100000),
-    (2, 'Toko Fashion', 'Menjual produk fashion', '/img/store2.png', 200000),
-    (3, 'Toko Buku', 'Menjual buku dan alat tulis', '/img/store3.png', 150000),
-    (4, 'Toko Olahraga', 'Peralatan olahraga lengkap', '/img/store4.png', 120000),
-    (5, 'Toko Rumah Tangga', 'Perlengkapan rumah tangga', '/img/store5.png', 80000);
+    (1, 'Toko Gadget', 'Menjual produk gadget', '/data/store/store1.png', 100000),
+    (2, 'Toko Fashion', 'Menjual produk fashion', '/data/store/store2.png', 200000),
+    (3, 'Toko Buku', 'Menjual buku dan alat tulis', '/data/store/store3.png', 150000),
+    (4, 'Toko Olahraga', 'Peralatan olahraga lengkap', '/data/store/store4.png', 120000),
+    (5, 'Toko Rumah Tangga', 'Perlengkapan rumah tangga', '/data/store/store5.png', 80000);
 
 -- CATEGORIES
 INSERT INTO categories (name) VALUES
@@ -32,20 +52,20 @@ INSERT INTO categories (name) VALUES
 
 -- PRODUCTS
 INSERT INTO products (store_id, product_name, description, price, stock, main_image_path) VALUES
-    (1, 'Smartphone X1', 'Gadget terbaru', 3000000, 15, '/img/products/smartphone_x1.png'),
-    (1, 'Headphone Pro', 'Headphone wireless', 500000, 30, '/img/products/headphone.png'),
+    (1, 'Smartphone X1', 'Gadget terbaru', 3000000, 15, '/data/products/smartphone_x1.png'),
+    (1, 'Headphone Pro', 'Headphone wireless', 500000, 30, '/data/products/headphone.png'),
 
-    (2, 'Kaos Trendy', 'Kaos modis untuk anak muda', 75000, 100, '/img/products/kaos.png'),
-    (2, 'Celana Jeans', 'Jeans slim fit', 150000, 80, '/img/products/jeans.png'),
+    (2, 'Kaos Trendy', 'Kaos modis untuk anak muda', 75000, 100, '/data/products/kaos.png'),
+    (2, 'Celana Jeans', 'Jeans slim fit', 150000, 80, '/data/products/jeans.png'),
 
-    (3, 'Novel Fantasi', 'Buku fiksi populer', 60000, 50, '/img/products/novel.png'),
-    (3, 'Buku Tulis Premium', 'Buku catatan berkualitas', 25000, 200, '/img/products/book.png'),
+    (3, 'Novel Fantasi', 'Buku fiksi populer', 60000, 50, '/data/products/novel.png'),
+    (3, 'Buku Tulis Premium', 'Buku catatan berkualitas', 25000, 200, '/data/products/book.png'),
 
-    (4, 'Sepatu Lari', 'Sepatu sport ringan', 400000, 40, '/img/products/shoes.png'),
-    (4, 'Matras Yoga', 'Matras anti slip', 200000, 25, '/img/products/yoga_mat.png'),
+    (4, 'Sepatu Lari', 'Sepatu sport ringan', 400000, 40, '/data/products/shoes.png'),
+    (4, 'Matras Yoga', 'Matras anti slip', 200000, 25, '/data/products/yoga_mat.png'),
 
-    (5, 'Panci Anti Lengket', 'Panci dapur premium', 180000, 30, '/img/products/panci.png'),
-    (5, 'Vacuum Cleaner Mini', 'Penyedot debu portabel', 500000, 10, '/img/products/vacuum.png');
+    (5, 'Panci Anti Lengket', 'Panci dapur premium', 180000, 30, '/data/products/panci.png'),
+    (5, 'Vacuum Cleaner Mini', 'Penyedot debu portabel', 500000, 10, '/data/products/vacuum.png');
 
 -- CATEGORY_ITEMS
 INSERT INTO category_items (category_id, product_id) VALUES
