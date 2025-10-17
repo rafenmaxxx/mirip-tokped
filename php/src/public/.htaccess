@@ -1,0 +1,14 @@
+Options -Indexes
+RewriteEngine On
+DirectoryIndex index.html
+
+# Jika file atau folder-nya memang ada, biarkan Apache melayaninya
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# API route harus di atas catch-all
+RewriteRule ^api/(.*)$ index.php?route=$1 [QSA,L]
+
+# Semua request lainnya arahkan ke index.html (SPA)
+RewriteRule ^.*$ index.html [L]

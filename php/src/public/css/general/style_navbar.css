@@ -1,0 +1,122 @@
+/* ===== Navbar Container ===== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  font-family: "Inter", sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ===== Logo ===== */
+.navbar__logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #00a14b;
+  cursor: pointer;
+}
+
+/* ===== Search Bar ===== */
+.navbar__search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  padding: 0.25rem 0.5rem;
+  max-width: 500px;
+}
+
+.navbar__search input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  font-size: 0.95rem;
+}
+
+.navbar__search-btn {
+  background-color: #00a14b;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.navbar__search-btn:hover {
+  background-color: #009042;
+}
+
+/* ===== Filter Dropdown ===== */
+.navbar__filter select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  background: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navbar__filter select:hover {
+  border-color: #00a14b;
+}
+
+/* ===== Auth Buttons ===== */
+.navbar__auth {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-login {
+  background-color: transparent;
+  border: 1px solid #00a14b;
+  color: #00a14b;
+}
+
+.btn-login:hover {
+  background-color: #00a14b;
+  color: white;
+}
+
+.btn-register {
+  background-color: #00a14b;
+  color: white;
+}
+
+.btn-register:hover {
+  background-color: #009042;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .navbar__search {
+    order: 3;
+    width: 100%;
+    max-width: none;
+  }
+}

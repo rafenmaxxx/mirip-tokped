@@ -1,10 +1,3 @@
-DROP DATABASE IF EXISTS tokopedia;
-CREATE DATABASE tokopedia;
-
-
-\c tokopedia;
-
-
 -- 1. ENUM TYPE
 DROP TYPE IF EXISTS user_role CASCADE;
 CREATE TYPE user_role AS ENUM ('BUYER', 'SELLER');
