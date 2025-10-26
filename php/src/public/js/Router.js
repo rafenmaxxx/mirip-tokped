@@ -1,3 +1,4 @@
+import { GETMODULE } from "./api/api.js";
 import { route } from "./route.js";
 import { LoadComponent, RemoveComponent } from "./util/component_loader.js";
 
@@ -21,33 +22,31 @@ export class Router {
         ? `${route.html}?v=${Date.now()}` // REMOVE IN PRODUCTION
         : route.html;
 
-      const res = await fetch(htmlPath, {
-        cache: this.devMode ? "no-store" : "default",
-      }); // REMOVE IN PRODUCTION
-
-      if (res.status === 401) {
-        this.navigateTo("/login");
-        return;
-      }
-      if (!res.ok) {
-        this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
-        return;
-      }
+      GETMODULE(
+        htmlPath,
+        {},
+        (data) => {
+          this.app.innerHTML = data;
+        },
+        (err) => {
+          if (err) {
+            this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
+          }
+        }
+      );
 
       if (route.useNavbar) {
-        await LoadComponent(
+        LoadComponent(
           "navbar",
           this.devMode
             ? `/components/general/navbar.html?v=${Date.now()}`
             : "/components/general/navbar.html" // REMOVE IN PRODUCTION
         );
+        this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
+        this.loadCSS(["/css/general/style_navbar.css"]);
       } else {
         await RemoveComponent("navbar");
       }
-
-      const html = await res.text();
-      this.app.innerHTML = html;
-
       await this.loadCSS(route.css || []);
       await this.handleFunc(path);
     } catch (err) {
@@ -123,7 +122,8 @@ export class Router {
   }
 
   navigateTo(route) {
-    if (window.location.pathname !== route) {
+    const fullPath = window.location.pathname + window.location.search;
+    if (fullPath !== route) {
       history.pushState({}, "", route);
       this.handleRoute();
     } else {
