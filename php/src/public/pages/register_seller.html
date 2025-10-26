@@ -1,0 +1,45 @@
+<div class="register-card">
+    <h1>Register Seller</h1>
+    <p>Welcome to Mirip-Tokped</p>
+
+    <form action="/api/user" method="POST" enctype="multipart/form-data" class="form-card">
+        <div class="form-group">
+            <label for="name">Nama</label>
+            <input type="text" id="name" name="name" required placeholder="Masukkan Nama">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="Masukkan email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Masukkan password">
+        </div>
+        <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" required
+                placeholder="Konfirmasi password">
+        </div>
+        <div class="form-group">
+            <label for="store-name">Nama Toko</label>
+            <input type="text" id="store-name" name="store-name" required placeholder="Masukkan Nama Toko">
+        </div>
+        <div class="form-group">
+            <label for="store-desc">Deskripsi Toko</label>
+            <textarea type="text" id="store-desc" name="store-desc" required
+                placeholder="Masukkan Deskripsi Toko"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="store-logo">Logo Toko</label>
+            <input type="file" id="store-logo" name="store-logo" required>
+        </div>
+
+        <input type="hidden" name="role" value="SELLER">
+        <input type="hidden" name="balance" value="0">
+
+        <button type="submit">Daftar</button>
+        <div class="register-link">
+            Sudah punya akun? <a href="/login">Masuk Sekarang!</a>
+        </div>
+    </form>
+</div>
