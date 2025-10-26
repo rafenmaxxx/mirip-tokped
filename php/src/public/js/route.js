@@ -2,7 +2,7 @@ export const route = {
   "/": {
     html: "/pages/home.html",
     js: [
-      { path: "./api/api_home.js", func: ["LoadHome"] },
+      { path: "./lib/home/home.js", func: ["LoadHome"] },
       { path: "./lib/slider.js", func: ["initHeroSlider"] },
     ],
     css: [
@@ -16,26 +16,55 @@ export const route = {
   "/home": {
     html: "/pages/home.html",
     js: [
-      { path: "./api/api_home.js", func: ["LoadHome"] },
+      { path: "./lib/home/home.js", func: ["LoadHome"] },
       { path: "./lib/slider.js", func: ["initHeroSlider"] },
     ],
-    css: [
-      "/css/general/style_navbar.css",
-      "/css/home/style_sliding_card.css",
-      "/css/home/style_home.css",
+    css: ["/css/home/style_sliding_card.css", "/css/home/style_home.css"],
+    useNavbar: true,
+  },
+  "/product-detail": {
+    html: "/pages/product_detail.html",
+    js: [
+      {
+        path: "./lib/product-detail/product_detail.js",
+        func: ["InitProductDetail"],
+      },
     ],
+    css: ["css/product-detail/style_product_detail.css", "/css/style.css"],
     useNavbar: true,
   },
   "/login": {
     html: "/pages/login.html",
     js: [],
-    css: [],
+    css: ["/css/login/style_login.css", "/css/style.css"],
     useNavbar: false,
   },
   "/register": {
-    html: "/pages/register.html",
+    html: "/pages/register_choice.html",
+    js: [
+      {
+        path: "./lib/register/register_choice.js",
+        func: ["initRegisterChoice"],
+      },
+    ],
+    css: ["/css/register/style_register_choice.css", "/css/style.css"],
+    useNavbar: false,
+  },
+  "/register/buyer": {
+    html: "/pages/register_buyer.html",
+    js: [
+      {
+        path: "./lib/register/register_buyer.js",
+        func: ["InitRegisterBuyer"],
+      },
+    ],
+    css: ["/css/register/style_register.css", "/css/style.css"],
+    useNavbar: false,
+  },
+  "/register/seller": {
+    html: "/pages/register_seller.html",
     js: [],
-    css: [],
+    css: ["/css/register/style_register.css", "/css/style.css"],
     useNavbar: false,
   },
 };
