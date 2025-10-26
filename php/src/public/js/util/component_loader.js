@@ -1,18 +1,28 @@
-export async function LoadComponent(tag_id, components_path) {
+import { GETMODULE } from "./../api/api.js";
+export function LoadComponent(tag_id, components_path) {
   const container = document.getElementById(tag_id);
   if (!container) return;
 
-  const res = await fetch(components_path);
-  if (!res.ok) {
-    console.error("Failed to load ", tag_id, " : ", res.status);
-    return;
-  }
-
-  const html = await res.text();
-  container.innerHTML = html;
+  GETMODULE(
+    components_path,
+    {},
+    (data) => {
+      container.innerHTML = data;
+    },
+    (err) => {
+      if (err) {
+        this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
+      }
+    }
+  );
 }
 
 export async function RemoveComponent(tag_id) {
   const navbar = document.getElementById(tag_id);
   navbar.innerHTML = "";
+}
+
+export function ChangeInnerHtmlById(tag, data) {
+  const elmt = document.getElementById(tag);
+  elmt.innerHTML = data;
 }
