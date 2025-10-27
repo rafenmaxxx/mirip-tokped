@@ -66,5 +66,16 @@
     "js": [],
     "css": ["/css/register/style_register.css", "/css/style.css"],
     "useNavbar": false
+  },
+  "/detail-store": {
+    "html": "/pages/detail_store.html",
+    "js": [
+      {
+        "path": "./lib/detail-store/detail_store.js",
+        "func": ["LoadDetailStore"]
+      }
+    ],
+    "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
+    "useNavbar": true
   }
 }

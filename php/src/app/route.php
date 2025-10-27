@@ -17,9 +17,9 @@ switch ($route) {
         require_once __DIR__ . '/controller/c_path.php';
         break;
     case 'detail_store':
-        require_once __DIR__ . '/controller/c_detail_store.php';
+        require_once __DIR__ . '/controller/c_store.php';
         break;
-        
+
     default:
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Route tidak ditemukan']);
