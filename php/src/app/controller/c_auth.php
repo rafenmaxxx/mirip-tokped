@@ -13,10 +13,9 @@ switch ($method) {
             echo json_encode(['status' => 'success', 'message' => 'Check Success', 'data' => $result]);
         } else {
             header('Content-Type: application/json');
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Check Gagal', 'data' => $result]);
+            http_response_code(200);
+            echo json_encode(['status' => 'not found', 'message' => 'Acan Login', 'data' => $result]);
         }
-
         break;
 
     default:
