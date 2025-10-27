@@ -1,29 +1,26 @@
-/* Kontainer utama, selalu center dan max-width agar stabil */
+
 .home_page {
-  width: 90%;           /* fleksibel */
-  max-width: 1200px;    /* tidak terlalu melebar di layar besar */
-  margin: 0 auto;       /* center horizontal */
+  width: 90%;          
+  max-width: 1200px;   
+  margin: 0 auto;      
   font-family: 'Inter', sans-serif;
-  padding: 2rem 1rem;   /* ruang di dalam kontainer */
+  padding: 2rem 1rem;  
   box-sizing: border-box;
   margin-top: 2rem;
 }
 
-/* Konten utama */
 .home_content {
   margin-top: 2rem;
   width: 100%;
 }
 
-/* Product catalog sebagai grid responsif */
 .product_catalog {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;          /* jarak antar kartu */
+  gap: 1rem;         
   margin-top: 2rem;
 }
 
-/* Setiap kartu produk */
 .product_card {
   background-color: #fff;
   border: 1px solid #eee;
@@ -38,7 +35,7 @@
 
 }
 
-/* Hover efek */
+
 .product_card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -52,7 +49,7 @@
 }
 
 
-/* Gambar produk */
+
 .product_image img {
   width: 160px;
   height:160px;
@@ -60,14 +57,14 @@
   object-fit: cover;
 }
 
-/* Nama produk */
+
 .product_name {
   font-weight: 600;
   margin-top: 0.5rem;
   text-align: center;
 }
 
-/* Harga produk */
+
 .product_price {
   color: #00a14b;
   font-weight: 700;
@@ -75,7 +72,7 @@
   text-align: center;
 }
 
-/* Nama toko */
+
 .product_store {
   font-size: 0.85rem;
   color: #555;
@@ -83,7 +80,7 @@
   text-align: right;
 }
 
-/* Responsif untuk mobile */
+
 @media (max-width: 768px) {
   .home_page {
     width: 95%;

@@ -1,0 +1,117 @@
+body {
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.register-card {
+    background-color: #ffffff;
+    width: 100%;
+
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.register-card h1 {
+    color: #1a9b5b;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.register-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.8rem;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 1.2rem;
+}
+
+.form-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px 50px; 
+}
+
+.form-card .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-card button,
+.form-card .register-link {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+}
+
+
+.form-card input[type="file"] {
+    grid-column: 1 / -1;
+    border: none;
+}
+
+label {
+    display: block;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.3rem;
+}
+
+input,textarea {
+    width: 100%;
+
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #1a9b5b;
+    box-shadow: 0 0 4px rgba(26, 155, 91, 0.3);
+}
+
+button {
+    width: 100%;
+    background-color: #1a9b5b;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #148a4e;
+}
+
+.register-link {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.register-link a {
+    color: #1a9b5b;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
