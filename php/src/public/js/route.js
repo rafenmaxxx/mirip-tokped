@@ -38,4 +38,13 @@ export const route = {
     css: [],
     useNavbar: false,
   },
+  "/store": {
+    html: "/pages/detail_store.html",
+    js: [{ path: "./api/api_detail_store.js", func: ["LoadDetailStore"] }],
+    css: [
+      "/css/general/style_navbar.css",
+      "/css/detail_store/style_detail_store.css",
+    ],
+    useNavbar: true,
+  },
 };
