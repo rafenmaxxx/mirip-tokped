@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../db/db.php';
 
-class Store
+class User
 {
     private $conn;
 
@@ -10,7 +10,7 @@ class Store
         $this->conn = Database::getInstance()->getConnection();
     }
 
-    public function createStore($name, $email, $password, $address, $role, $balance)
+    public function createUser($name, $email, $password, $address, $role, $balance)
     {
         try {
             $stmt = $this->conn->prepare("
@@ -45,12 +45,5 @@ class Store
                 "message" => $e->getMessage()
             ];
         }
-    }
-
-    public function getByStoreId($store_id)
-    {
-        $stmt = $this->conn->prepare("SELECT * FROM stores WHERE store_id=:store_id");
-        $stmt->execute([':store_id' => $store_id]);
-        return $stmt->fetch();
     }
 }

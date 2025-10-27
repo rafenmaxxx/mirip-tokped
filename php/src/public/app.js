@@ -1,5 +1,4 @@
 import { Router } from "./js/Router.js";
 
-const router = new Router("app");
+export const router = new Router("app", true);
 router.init();
-

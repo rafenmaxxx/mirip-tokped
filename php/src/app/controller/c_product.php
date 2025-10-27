@@ -6,17 +6,22 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
+        $search = $_GET['search'] ?? null;
         $id = $_GET['id'] ?? null;
         $store_id = $_GET['store_id'] ?? null;
         
-        if ($id) {
-            // Jika ada parameter id
-            $data = $model->getById($id);
+       
+        if ($search) {
+            // Jika ada parameter search
+            $data = $model->getByName($search);
+        } else if ($id) {
+            // ada id
+            $data = $model->getDetailById($id);
         } else if ($store_id) {
             // Jika ada parameter store_id
             $data = $model->getByStoreId($store_id);
         } else {
-            // Jika tidak ada parameter id
+            // Jika tidak ada parameter
             $data = $model->getAll();
         }
 

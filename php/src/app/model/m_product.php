@@ -22,11 +22,18 @@ class Product
         return $stmt->fetchAll();
     }
 
-    public function getById($id)
+    public function getDetailById($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM products WHERE id=:id");
-        $res = $stmt->execute([':id' => $id]);
-        return $res;
+        $stmt = $this->conn->prepare("SELECT * FROM products p JOIN stores s ON p.store_id = s.store_id WHERE p.product_id=:id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
+
+    public function getByName($name)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM products p WHERE p.product_name ILIKE :name OR p.description ILIKE :name");
+        $stmt->execute([":name" => "%$name%"]);
+        return $stmt->fetchAll();
     }
 
     public function getByStoreId($store_id)

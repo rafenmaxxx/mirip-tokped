@@ -1,0 +1,103 @@
+/* Latar belakang */
+body {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Container utama */
+.register-choice {
+  text-align: center;
+  background-color: #fff;
+  padding: 2rem 3rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+}
+
+.register-choice h1 {
+  color: #1a9b5b;
+  margin-bottom: 0.5rem;
+}
+
+.register-choice p {
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+
+/* Container kartu */
+.choice-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Kartu pilihan */
+.register-card {
+  flex: 1;
+  min-width: 220px;
+  background-color: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.register-card h2 {
+  color: #1a9b5b;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.register-card p {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.register-card img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-top: 1rem;
+  border-radius: 8px;
+  max-height: 200px;
+}
+
+/* Efek hover & selected */
+.register-card:hover {
+  border-color: #1a9b5b;
+  box-shadow: 0 0 10px rgba(26, 155, 91, 0.2);
+  transform: translateY(-3px);
+}
+
+.register-card.selected {
+  border-color: #1a9b5b;
+  background-color: #e6f9ef;
+  box-shadow: 0 0 12px rgba(26, 155, 91, 0.25);
+}
+
+/* Tombol submit */
+.submit-btn {
+  margin-top: 2rem;
+  width: 100%;
+  background-color: #1a9b5b;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #148a4e;
+}
