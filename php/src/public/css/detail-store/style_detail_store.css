@@ -128,6 +128,38 @@
   text-align: right;
 }
 
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+
+.btn-checkout {
+  background-color: #00a14b;
+  color: white;
+  font-weight: bold;
+}
+
+.btn-checkout:hover {
+  background-color: #009042;
+}
+
+.btn-cart {
+  background-color: transparent;
+  border: 1px solid #00a14b;
+  color: #00a14b;
+  font-weight: bold;
+}
+
+.btn-cart:hover {
+  background-color: #00a14b;
+  color: white;
+}
+
 /* Responsif untuk mobile */
 @media (max-width: 768px) {
   .detail_store_page {

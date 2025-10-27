@@ -31,6 +31,10 @@ function LoadProduct(data) {
                     <div class="product_name">${p.product_name}</div>
                     <div class="product_price">${price}</div>
                     <div class="product_store">Toko ${p.store_id}</div>
+                    <div class="product_buttons">
+                      <button class="btn btn-cart">Add to Cart</button>
+                      <button class="btn btn-checkout">Checkout</button>
+                    </div>
                   </div>
                 </div>
               `;
