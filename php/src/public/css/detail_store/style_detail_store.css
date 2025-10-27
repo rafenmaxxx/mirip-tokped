@@ -1,0 +1,148 @@
+/* Kontainer utama, selalu center dan max-width agar stabil */
+.detail_store_page {
+  width: 90%;           
+  max-width: 1200px;    
+  margin: 0 auto;      
+  font-family: 'Inter', sans-serif;
+  padding: 2rem 1rem;   
+  box-sizing: border-box;
+  margin-top: 2rem;
+  
+}
+
+.detail_store_profile {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto; 
+  align-self: center;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  font-family: "Inter", sans-serif;
+  background: #fff;
+  padding: 2rem;
+}
+
+.store_card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; 
+  padding: 1rem;
+}
+
+.store_image img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.store_desc {
+  display: flex;
+  flex-direction: column;
+}
+
+.store_name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.store_description {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Konten utama */
+.detail_store_content {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Product catalog sebagai grid responsif */
+.product_catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;          /* jarak antar kartu */
+  margin-top: 2rem;
+}
+
+/* Setiap kartu produk */
+.product_card {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+/* Hover efek */
+.product_card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product_desc {
+  width: 100%;
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+}
+
+
+/* Gambar produk */
+.product_image img {
+  width: 160px;
+  height:160px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Nama produk */
+.product_name {
+  font-weight: 600;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Harga produk */
+.product_price {
+  color: #00a14b;
+  font-weight: 700;
+  margin: 0.3rem 0;
+  text-align: center;
+}
+
+/* Nama toko */
+.product_store {
+  font-size: 0.85rem;
+  color: #555;
+  width: 100%; 
+  text-align: right;
+}
+
+/* Responsif untuk mobile */
+@media (max-width: 768px) {
+  .detail_store_page {
+    width: 95%;
+    padding: 1rem;
+  }
+  
+  .product_card {
+    padding: 0.8rem;
+  }
+}
+
+/* Responsive
+@media (max-width: 768px) {
+  .hero-slide img { height: 300px; }
+  .hero-slide__info h2 { font-size: 1.5rem; }
+  .hero-slide__info p { font-size: 1rem; }
+} */
