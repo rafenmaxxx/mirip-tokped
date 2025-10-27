@@ -1,5 +1,5 @@
 import { GETMODULE } from "./../api/api.js";
-export function LoadComponent(tag_id, components_path) {
+export function LoadComponent(tag_id, components_path, callback) {
   const container = document.getElementById(tag_id);
   if (!container) return;
 
@@ -8,6 +8,9 @@ export function LoadComponent(tag_id, components_path) {
     {},
     (data) => {
       container.innerHTML = data;
+      if (typeof callback == "function") {
+        callback();
+      }
     },
     (err) => {
       if (err) {

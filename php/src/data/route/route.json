@@ -11,7 +11,8 @@
       "/css/home/style_sliding_card.css",
       "/css/home/style_home.css"
     ],
-    "useNavbar": true
+    "useNavbar": true,
+    "access": ["GUEST", "BUYER"]
   },
   "/home": {
     "html": "/pages/home.html",
@@ -20,7 +21,8 @@
       { "path": "./lib/slider.js", "func": ["initHeroSlider"] }
     ],
     "css": ["/css/home/style_sliding_card.css", "/css/home/style_home.css"],
-    "useNavbar": true
+    "useNavbar": true,
+    "access": ["GUEST", "BUYER"]
   },
   "/product-detail": {
     "html": "/pages/product_detail.html",
@@ -31,13 +33,15 @@
       }
     ],
     "css": ["css/product-detail/style_product_detail.css", "/css/style.css"],
-    "useNavbar": true
+    "useNavbar": true,
+    "access": ["BUYER"]
   },
   "/login": {
     "html": "/pages/login.html",
     "js": [],
     "css": ["/css/login/style_login.css", "/css/style.css"],
-    "useNavbar": false
+    "useNavbar": false,
+    "access": ["GUEST"]
   },
   "/register": {
     "html": "/pages/register_choice.html",
@@ -48,7 +52,8 @@
       }
     ],
     "css": ["/css/register/style_register_choice.css", "/css/style.css"],
-    "useNavbar": false
+    "useNavbar": false,
+    "access": ["GUEST"]
   },
   "/register/buyer": {
     "html": "/pages/register_buyer.html",
@@ -59,12 +64,21 @@
       }
     ],
     "css": ["/css/register/style_register.css", "/css/style.css"],
-    "useNavbar": false
+    "useNavbar": false,
+    "access": ["GUEST"]
   },
   "/register/seller": {
     "html": "/pages/register_seller.html",
     "js": [],
     "css": ["/css/register/style_register.css", "/css/style.css"],
-    "useNavbar": false
+    "useNavbar": false,
+    "access": ["GUEST"]
+  },
+  "/unauthorized": {
+    "html": "/pages/unauthorized.html",
+    "js": [],
+    "css": [],
+    "useNavbar": false,
+    "access": ["GUEST", "BUYER", "SELLER"]
   }
 }
