@@ -14,48 +14,51 @@ export class Router {
   async loadView(path) {
     GET(
       "/api/path",
-      { path: path },
+      { path },
       (data) => {
+        // jika route tidak ditemukan atau user tidak punya akses
+        if (!data || data.status !== "success" || !data.data) {
+          this.navigateTo("/unauthorized");
+          return;
+        }
+
         const route = data.data;
+
         try {
-          // Tambahkan cache-buster saat devMode aktif
+          // load HTML
           const htmlPath = this.devMode
-            ? `${route.html}?v=${Date.now()}` // REMOVE IN PRODUCTION
+            ? `${route.html}?v=${Date.now()}`
             : route.html;
 
           GETMODULE(
             htmlPath,
             {},
-            (data) => {
-              this.app.innerHTML = data;
+            (html) => {
+              this.app.innerHTML = html;
             },
-            (err) => {
-              if (err) {
-                this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
-              }
+            () => {
+              this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
             }
           );
 
-          if (route.useNavbar) {
-            if (!this.navBarInit) {
-              this.navBarInit = true;
-              LoadComponent(
-                "navbar",
-                this.devMode
-                  ? `/components/general/navbar.html?v=${Date.now()}`
-                  : "/components/general/navbar.html", // REMOVE IN PRODUCTION
-                () => {
-                  this.loadModuleOnce("./lib/general/navbar.js", [
-                    "InitNavbar",
-                  ]);
-                  this.loadCSS(["/css/general/style_navbar.css"]);
-                }
-              );
-            }
-          } else {
+          // Navbar
+          if (route.useNavbar && !this.navBarInit) {
+            this.navBarInit = true;
+            LoadComponent(
+              "navbar",
+              this.devMode
+                ? `/components/general/navbar.html?v=${Date.now()}`
+                : "/components/general/navbar.html",
+              () => {
+                this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
+                this.loadCSS(["/css/general/style_navbar.css"]);
+              }
+            );
+          } else if (!route.useNavbar) {
             RemoveComponent("navbar");
             this.navBarInit = false;
           }
+
           this.loadCSS(route.css || []);
           this.handleFunc(route.js);
         } catch (err) {
