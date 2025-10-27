@@ -41,10 +41,12 @@ export class Router {
               "navbar",
               this.devMode
                 ? `/components/general/navbar.html?v=${Date.now()}`
-                : "/components/general/navbar.html" // REMOVE IN PRODUCTION
+                : "/components/general/navbar.html", // REMOVE IN PRODUCTION
+              () => {
+                this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
+                this.loadCSS(["/css/general/style_navbar.css"]);
+              }
             );
-            this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
-            this.loadCSS(["/css/general/style_navbar.css"]);
           } else {
             RemoveComponent("navbar");
           }
