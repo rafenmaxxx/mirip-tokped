@@ -6,7 +6,7 @@ export class Router {
     // devMode = true untuk development
     this.app = document.getElementById(appElementId);
     this.devMode = devMode; // REMOVE IN PRODUCTION
-
+    this.navBarInit = false;
     this.moduleCache = {};
     this.cssCache = new Set();
   }
@@ -37,18 +37,24 @@ export class Router {
           );
 
           if (route.useNavbar) {
-            LoadComponent(
-              "navbar",
-              this.devMode
-                ? `/components/general/navbar.html?v=${Date.now()}`
-                : "/components/general/navbar.html", // REMOVE IN PRODUCTION
-              () => {
-                this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
-                this.loadCSS(["/css/general/style_navbar.css"]);
-              }
-            );
+            if (!this.navBarInit) {
+              this.navBarInit = true;
+              LoadComponent(
+                "navbar",
+                this.devMode
+                  ? `/components/general/navbar.html?v=${Date.now()}`
+                  : "/components/general/navbar.html", // REMOVE IN PRODUCTION
+                () => {
+                  this.loadModuleOnce("./lib/general/navbar.js", [
+                    "InitNavbar",
+                  ]);
+                  this.loadCSS(["/css/general/style_navbar.css"]);
+                }
+              );
+            }
           } else {
             RemoveComponent("navbar");
+            this.navBarInit = false;
           }
           this.loadCSS(route.css || []);
           this.handleFunc(route.js);
