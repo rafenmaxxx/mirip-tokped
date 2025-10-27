@@ -6,12 +6,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'POST':
-        $model->logout();
-         header('Content-Type: text/html; charset=utf-8');
-        echo "<script>
-                alert('Berhasil Logout');
-                window.location.href = '/';
-            </script>";
+        $result = $model->logout();
+        header('Content-Type: application/json');
+        echo json_encode($result);
         break;
 
     default:
