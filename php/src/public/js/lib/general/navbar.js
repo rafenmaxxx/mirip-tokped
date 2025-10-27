@@ -1,7 +1,42 @@
 import { router } from "../../../app.js";
+import { GET, POST } from "../../api/api.js";
+
+
 
 function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
+}
+
+function morphAuthBtn(data) {
+  const btn = document.getElementById("navbar-auth-btn");
+  const chart = document.getElementById("navbar-chart");
+  const balance = document.getElementById("navbar-balance");
+  if (data.status == "success") {
+    // udah login
+    btn.innerHTML = `<a href="/profile"><button class="btn btn-login">Profile</button></a>
+        <a href="/logout "><button class="btn btn-register" id="btn-logout">Log Out</button></a>`;
+    const logoutBtn = document.getElementById("btn-logout");
+    logoutBtn.addEventListener("click", () => {
+      POST(
+        "/api/logout",
+        {},
+        (data) => {
+          if (data.status) {
+            router.navigateTo("/"); // redirect setelah logout
+          } else {
+            alert("Logout gagal: " + data.message);
+          }
+        },
+        () => {
+          alert("Logout gagal: error jaringan");
+        }
+      );
+    });
+  } else {
+    // blom login
+    chart.innerHTML = "";
+    balance.innerHTML = "";
+  }
 }
 
 export function InitNavbar() {
@@ -15,4 +50,7 @@ export function InitNavbar() {
   logo.addEventListener("click", () => {
     router.navigateTo("/home");
   });
+
+  // CEK USER DAH LOGIN APA BELOM
+  GET("/api/auth", {}, morphAuthBtn, () => {});
 }
