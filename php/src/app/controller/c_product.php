@@ -7,10 +7,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         $id = $_GET['id'] ?? null;
-
+        $store_id = $_GET['store_id'] ?? null;
+        
         if ($id) {
             // Jika ada parameter id
             $data = $model->getById($id);
+        } else if ($store_id) {
+            // Jika ada parameter store_id
+            $data = $model->getByStoreId($store_id);
         } else {
             // Jika tidak ada parameter id
             $data = $model->getAll();
