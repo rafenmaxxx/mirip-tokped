@@ -8,7 +8,6 @@ class Auth
     public function __construct()
     {
         $this->conn = Database::getInstance()->getConnection();
-        session_start();
     }
 
     public function login($email, $password)
@@ -33,7 +32,7 @@ class Auth
 
 
             $_SESSION['user'] = [
-                'id' => $user['id'],
+                'id' => $user['user_id'],
                 'email' => $user['email'],
                 'role' => $user['role']
             ];
@@ -41,7 +40,7 @@ class Auth
             return [
                 "status" => true,
                 "user" => [
-                    "id" => $user['id'],
+                    "id" => $user['user_id'],
                     "email" => $user['email'],
                     "role" => $user['role']
                 ]
