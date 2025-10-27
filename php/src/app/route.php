@@ -20,8 +20,13 @@ switch ($route) {
         break;
     case 'login':
         require_once __DIR__ . '/controller/c_login.php';
+        break;
     case 'logout':
         require_once __DIR__ . '/controller/c_logout.php';
+        break;
+    case 'auth':
+        require_once __DIR__ . '/controller/c_auth.php';
+        break;
     default:
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Route tidak ditemukan']);
