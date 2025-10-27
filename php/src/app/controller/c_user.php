@@ -30,7 +30,7 @@ switch ($method) {
         }
 
         // kalo SELLER -> register TOKO
-        
+
         break;
 
     default:
