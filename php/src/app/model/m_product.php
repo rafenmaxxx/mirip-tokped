@@ -28,4 +28,11 @@ class Product
         $res = $stmt->execute([':id' => $id]);
         return $res;
     }
+
+    public function getByStoreId($store_id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM products WHERE store_id=:store_id");
+        $stmt->execute([':store_id' => $store_id]);
+        return $stmt->fetchAll();
+    }
 }
