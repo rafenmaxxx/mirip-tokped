@@ -77,5 +77,16 @@
     ],
     "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
     "useNavbar": true
+  },
+  "/cart": {
+    "html": "/pages/cart.html",
+    "js": [
+      {
+        "path": "./lib/cart/cart.js",
+        "func": ["LoadCartPage"]
+      }
+    ],
+    "css": ["/css/cart/style_cart.css", "/css/style.css"],
+    "useNavbar": true
   }
 }
