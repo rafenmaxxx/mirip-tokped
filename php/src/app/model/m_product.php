@@ -35,4 +35,11 @@ class Product
         $stmt->execute([":name" => "%$name%"]);
         return $stmt->fetchAll();
     }
+
+    public function getTitle($search)
+    {
+        $stmt = $this->conn->prepare("SELECT product_name FROM products p WHERE p.product_name ILIKE :search");
+        $stmt->execute([":search" => "%$search%"]);
+        return $stmt->fetchAll();
+    }
 }
