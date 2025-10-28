@@ -8,8 +8,9 @@ export function LoadComponent(tag_id, components_path, callback) {
     {},
     (data) => {
       container.innerHTML = data;
-      if (typeof callback == "function") {
-        callback();
+
+      if (typeof callback === "function") {
+        callback(data);
       }
     },
     (err) => {

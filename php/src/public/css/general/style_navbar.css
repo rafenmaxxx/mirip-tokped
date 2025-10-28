@@ -108,6 +108,29 @@
   background-color: #009042;
 }
 
+.search-suggestions {
+  top: 80%;
+  position:absolute;
+  background: white;
+  border: 1px solid #ccc;
+  width: 250px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+  z-index: 1000;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-suggestions div {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.search-suggestions div:hover {
+  background-color: #f3f3f3;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .navbar {
@@ -122,3 +145,4 @@
     max-width: none;
   }
 }
+

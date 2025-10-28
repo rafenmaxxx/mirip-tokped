@@ -1,4 +1,7 @@
-import { LoadComponent } from "../../util/component_loader.js";
+import {
+  ChangeInnerHtmlById,
+  LoadComponent,
+} from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { router } from "../../../app.js";
 
@@ -65,10 +68,13 @@ function ChangeCatalogLabel(label) {
   elmt.innerHTML = label;
 }
 
-export async function LoadHome() {
+export function LoadHome() {
   let param = new URLSearchParams(window.location.search);
   if (!param.toString()) {
-    await LoadComponent("slider", "/components/home/sliding_card.html");
+    LoadComponent("slider", "/components/home/sliding_card.html");
+    if (!document.getElementById("slider-id")) {
+      LoadComponent("slider", "/components/home/sliding_card.html");
+    }
     GET("/api/product", {}, LoadProduct, ProductErr);
     ChangeCatalogLabel("Product You Might Want");
   } else {
