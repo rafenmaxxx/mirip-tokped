@@ -1,0 +1,252 @@
+.cart_page {
+  width: 90%;           
+  max-width: 1200px;    
+  margin: 0 auto;      
+  font-family: 'Inter', sans-serif;
+  padding: 2rem 1rem;   
+  box-sizing: border-box;
+  margin-top: 2rem;
+}
+
+.cart_page_data {
+  display: flex;
+  justify-content: flex-start;  /* ⬅️ biar gap yang atur jarak */
+  align-items: flex-start;
+  gap: 50px;                    /* ⬅️ tambahkan jarak jelas */
+  padding: 20px 40px;
+  box-sizing: border-box;
+}
+
+
+/* =======================
+   Bagian KIRI: Cart Items
+======================= */
+.cart_content {
+  flex: 3;                /* lebar 3 bagian */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;           /* biar tidak overflow */
+}
+
+/* =======================
+   Bagian KANAN: Summary
+======================= */
+.cart_summary_card {
+  flex: 1;                /* lebar 1 bagian */
+  max-width: 320px;       /* batas maksimal */
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  position: sticky;
+  margin-top: 45px;
+  top: 80px;              /* jarak dari atas layar */
+  height: fit-content;    /* tinggi mengikuti isi */
+}
+
+/* =======================
+   Responsif di HP/tablet
+======================= */
+@media (max-width: 900px) {
+  .cart_page_data {
+    flex-direction: column;  /* ubah jadi vertikal */
+    padding: 10px;
+  }
+
+  .cart_summary_card {
+    position: static;        /* nonaktifkan sticky di layar kecil */
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+
+.cart_title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;            /* hilangkan semua margin */
+  
+}
+
+.cart_item_card {
+  /* border: 1px solid #ddd; */
+  border-radius: 12px;
+  padding: 1rem;
+  /* margin-bottom: 1.5rem; */
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 800px;
+}
+
+.cart_store_heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px; /* opsional, buat jarak bawah */
+  border-bottom: 1px solid #eee;
+}
+
+.cart_store_name {
+  margin: 0; /* hilangkan margin default h3 */
+  font-size: 1.1rem;
+}
+
+.btn-remove-store {
+  background-color: #e74c3c; /* warna merah */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-remove-store:hover {
+  background-color: #c0392b;
+}
+
+.cart_subtotal {
+  display: flex;
+  justify-content: flex-end; /* dorong isi ke kanan */
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 8px 0;
+  border-top: 1px solid #eee;
+  color: #2c3e50;
+}
+
+.cart_items {
+  margin-bottom: 2rem;
+}
+
+.cart_item_image img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.cart_item_detail {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* jarak antara gambar dan info */
+  padding: 10px 0;
+  /* border-bottom: 1px solid #eee; */
+}
+
+.cart_item_image img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.cart_item_info_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1; /* biar lebar mengikuti sisa ruang */
+}
+
+.cart_item_info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart_item_name {
+  font-weight: 500;
+  margin: 0;
+}
+
+.cart_item_price {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.cart_quantity {
+  align-self: flex-end; /* posisikan ke kanan */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cart_quantity button {
+  padding: 4px 8px;
+  background-color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cart_quantity button:hover {
+  background-color: #ddd;
+}
+
+.summary {
+  border-top: 2px solid #e0e0e0;
+  padding-top: 1rem;
+  text-align: right;
+}
+
+.summary_item {
+  display: flex;
+  justify-content: space-between; /* nama di kiri, harga di kanan */
+  align-items: center;            /* biar sejajar secara vertikal */
+  margin-bottom: 0.5rem;
+}
+
+.summary h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary_total {
+  border-top: 1px solid #eee;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1a9b5b;
+}
+
+.summary_total_price {
+  display: flex;
+  justify-content: flex-end; 
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1a9b5b;
+}
+
+.btn-checkout-summary {
+  width: 100%;
+  padding: 12px;
+  background-color: #00a14b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.btn-checkout-summary:hover {
+  background-color: #009042;
+}
+
+.empty_cart_img{
+  width: 200px;
+  height: 200px;
+  display: block;
+  margin: 2rem auto;
+}
+  
+
+@media (max-width: 768px) {
+  .cart_page {
+    width: 95%;
+    padding: 0.5rem;
+  }
+}
