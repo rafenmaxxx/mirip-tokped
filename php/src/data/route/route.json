@@ -86,7 +86,7 @@
     "useNavbar": false,
     "access": ["GUEST", "BUYER", "SELLER"]
   },
-  "/detail-store": {
+  "/store": {
     "html": "/pages/detail_store.html",
     "js": [
       {
@@ -95,6 +95,7 @@
       }
     ],
     "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
-    "useNavbar": true
+    "useNavbar": true,
+    "access": ["GUEST", "BUYER", "SELLER"]
   }
 }
