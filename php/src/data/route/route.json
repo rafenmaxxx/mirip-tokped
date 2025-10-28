@@ -9,7 +9,8 @@
       "/css/general/style_navbar.css",
       "/css/style.css",
       "/css/home/style_sliding_card.css",
-      "/css/home/style_home.css"
+      "/css/home/style_home.css",
+      "/css/home/style_filter.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
@@ -20,7 +21,11 @@
       { "path": "./lib/home/home.js", "func": ["LoadHome"] },
       { "path": "./lib/slider.js", "func": ["initHeroSlider"] }
     ],
-    "css": ["/css/home/style_sliding_card.css", "/css/home/style_home.css"],
+    "css": [
+      "/css/home/style_sliding_card.css",
+      "/css/home/style_home.css",
+      "/css/home/style_filter.css"
+    ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
   },
