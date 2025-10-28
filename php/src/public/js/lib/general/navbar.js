@@ -1,7 +1,9 @@
 import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
+import { LoadComponent, RemoveComponent } from "../../util/component_loader.js";
 
 let debounceTimer = null;
+let filterActive = false;
 
 function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
@@ -97,6 +99,8 @@ export function InitNavbar() {
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
   const logo = document.getElementById("navbar-logo");
+  const filterBtn = document.getElementById("filter-btn");
+
   searchBtn.addEventListener("click", () => {
     HandleSearchNavbar(searchInput.value.trim());
   });
@@ -109,6 +113,44 @@ export function InitNavbar() {
     showSuggestion(e.target.value);
   });
 
+  filterBtn.addEventListener("click", () => {
+    if (!filterActive) {
+      LoadComponent("filter-id", "/components/home/filter.html", () => {
+        const applyBtn = document.getElementById("applyFilterBtn");
+        const categoryCheckboxes = document.querySelectorAll(
+          ".filter-checkboxes input[type='checkbox']"
+        );
+        const minPriceInput = document.getElementById("minPrice");
+        const maxPriceInput = document.getElementById("maxPrice");
+
+        applyBtn.addEventListener("click", () => {
+          const selectedCategories = Array.from(categoryCheckboxes)
+            .filter((cb) => cb.checked)
+            .map((cb) => cb.value);
+
+          const minPrice = minPriceInput.value
+            ? parseFloat(minPriceInput.value)
+            : null;
+          const maxPrice = maxPriceInput.value
+            ? parseFloat(maxPriceInput.value)
+            : null;
+
+          const filterObj = {
+            categories: selectedCategories,
+            minPrice,
+            maxPrice,
+          };
+
+          const filterParam = encodeURIComponent(JSON.stringify(filterObj));
+          router.navigateTo("/home?filter=" + filterParam);
+        });
+      });
+      filterActive = true;
+    } else {
+      RemoveComponent("filter-id");
+      filterActive = false;
+    }
+  });
   // CEK USER DAH LOGIN APA BELOM
   GET("/api/auth", {}, morphAuthBtn, () => {});
 }

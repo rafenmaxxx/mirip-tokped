@@ -8,8 +8,9 @@ switch ($method) {
     case 'GET':
         $search = $_GET['search'] ?? null;
         $id = $_GET['id'] ?? null;
-
+        $filter = $_GET['filter'] ?? null;
         $title = $_GET['title'] ?? null;
+
         if ($search) {
             // Jika ada parameter search
             $data = $model->getByName($search);
@@ -19,6 +20,14 @@ switch ($method) {
         } else if ($title) {
             // ada title -> return list of title buat autocomplete
             $data = $model->getTitle($title);
+        } else if ($filter) {
+            // ada filter -> filter product
+            $filterData = json_decode($filter, true);
+            $categories = $filterData['categories'] ?? [];
+            $minPrice = $filterData['minPrice'] ?? null;
+            $maxPrice = $filterData['maxPrice'] ?? null;
+
+            $data = $model->getFilterProduct($categories, $minPrice, $maxPrice);
         } else {
             // Jika tidak ada parameter
             $data = $model->getAll();

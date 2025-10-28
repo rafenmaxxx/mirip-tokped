@@ -42,4 +42,34 @@ class Product
         $stmt->execute([":search" => "%$search%"]);
         return $stmt->fetchAll();
     }
+
+    public function getFilterProduct($categories = [], $minPrice = null, $maxPrice = null)
+    {
+        $query = "SELECT DISTINCT p.* 
+              FROM products p
+              LEFT JOIN category_items ci ON p.product_id = ci.product_id
+              LEFT JOIN categories c ON ci.category_id = c.category_id
+              WHERE 1=1";
+        $params = [];
+
+        if (!empty($categories)) {
+            $placeholders = implode(',', array_fill(0, count($categories), '?'));
+            $query .= " AND c.name IN ($placeholders)";
+            $params = array_merge($params, $categories);
+        }
+
+        if ($minPrice !== null) {
+            $query .= " AND p.price >= ?";
+            $params[] = $minPrice;
+        }
+
+        if ($maxPrice !== null) {
+            $query .= " AND p.price <= ?";
+            $params[] = $maxPrice;
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
