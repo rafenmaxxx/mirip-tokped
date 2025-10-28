@@ -2,30 +2,20 @@
     <div class="navbar__logo" id="navbar-logo">MIRIP-TOKPED</div>
 
     <div class="navbar__search">
-        <input type="text" placeholder="Cari produk..." id="searchInput" />
-        <button class="navbar__search-btn" id="searchBtn"> search </button>
+        <input type="text" name="product-search" placeholder="Cari produk..." id="searchInput" />
+
+        <button type="button" class="navbar__search-btn" id="searchBtn"> search </button>
+        <div id="searchSuggestions" class="search-suggestions"></div>
     </div>
 
-    <div class="navbar__filter">
-        <select>
-            <option>Semua Kategori</option>
-            <option>Elektronik</option>
-            <option>Pakaian</option>
-            <option>Kecantikan</option>
-            <option>Semua Kategori</option>
-            <option>Elektronik</option>
-            <option>Pakaian</option>
-            <option>Kecantikan</option>
-        </select>
-    </div>
+    <div id="filter-btn"> <button class="btn btn-login">Filter</button></div>
 
-    <div> <button class="btn btn-login">Balance : Rp</button></a></div>
+    <div id="navbar-balance"> <button class="btn btn-login">Balance : Rp</button></div>
 
-    <div> <button class="btn btn-login">Chart</button></a></div>
+    <div id="navbar-chart"> <button class="btn btn-login">Chart</button></div>
 
 
-    <div class="navbar__auth">
-        <a href="/login"><button class="btn btn-login">Login</button></a>
-        <a href="/register "><button class="btn btn-register">Register</button></a>
+    <div class="navbar__auth" id="navbar-auth-btn">
     </div>
 </nav>
+<div class="filter-container" id="filter-id"></div>
