@@ -66,5 +66,16 @@
     "js": [],
     "css": ["/css/register/style_register.css", "/css/style.css"],
     "useNavbar": false
+  },
+  "/seller": {
+    "html": "/pages/seller_dashboard.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_dashboard.js",
+        "func": ["InitSellerDashboard"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_dashboard.css", "/css/style.css"],
+    "useNavbar": true
   }
 }
