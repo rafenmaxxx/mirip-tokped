@@ -8,14 +8,17 @@ switch ($method) {
     case 'GET':
         $search = $_GET['search'] ?? null;
         $id = $_GET['id'] ?? null;
-        
-       
+
+        $title = $_GET['title'] ?? null;
         if ($search) {
             // Jika ada parameter search
             $data = $model->getByName($search);
         } else if ($id) {
             // ada id
             $data = $model->getDetailById($id);
+        } else if ($title) {
+            // ada title -> return list of title buat autocomplete
+            $data = $model->getTitle($title);
         } else {
             // Jika tidak ada parameter
             $data = $model->getAll();
