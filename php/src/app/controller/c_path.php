@@ -15,7 +15,7 @@ switch ($method) {
         $data = $model->getPath($route);
 
         if ($data === null) {
-            http_response_code(404);
+            http_response_code(200);
             echo json_encode(['status' => 'error', 'message' => 'Route tidak ditemukan']);
         } else {
             echo json_encode(['status' => 'success', 'data' => $data]);

@@ -9,7 +9,7 @@ export function GET(url, params = {}, callback, err) {
 
   const xhr = new XMLHttpRequest();
   xhr.open("GET", req_url, true);
-
+  xhr.withCredentials = true;
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -44,7 +44,7 @@ export function GETMODULE(url, params = {}, callback, err) {
 
   const xhr = new XMLHttpRequest();
   xhr.open("GET", req_url, true);
-
+  xhr.withCredentials = true;
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -78,7 +78,7 @@ export function POST(url, params = {}, callback, err) {
   const xhr = new XMLHttpRequest();
   xhr.open("POST", url, true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
+  xhr.withCredentials = true;
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -112,7 +112,7 @@ export function PUT(url, params = {}, callback, err) {
   const xhr = new XMLHttpRequest();
   xhr.open("PUT", url, true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
+  xhr.withCredentials = true;
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -148,7 +148,7 @@ export function DELETE(url, params = {}, callback, err) {
   const xhr = new XMLHttpRequest();
   xhr.open("DELETE", req_url, true);
   xhr.setRequestHeader("Content-Type", "application/json");
-
+  xhr.withCredentials = true;
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
