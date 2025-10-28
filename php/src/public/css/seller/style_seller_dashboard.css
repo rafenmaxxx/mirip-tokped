@@ -1,0 +1,218 @@
+/* Atur body untuk layout yang lebih baik */
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f5f5f5; /* Warna latar belakang abu-abu muda */
+    margin: 0;
+    padding: 0;
+}
+
+/* Pembungkus utama untuk konten di bawah navbar */
+.content-wrapper {
+    max-width: 1200px; /* Sesuaikan dengan lebar max website Anda */
+    margin: 20px auto; /* Memberi jarak dari navbar dan menengahkan */
+    padding: 0 15px;
+    /* Ubah atau tambahkan ini: */
+    margin-top: 100px; /* Memberi jarak 20px dari elemen di atasnya (navbar) */
+}
+
+/* ======================= PROFILE HEADER ======================= */
+.profile-header {
+    display: flex; /* Menggunakan Flexbox untuk tata letak horizontal */
+    align-items: center; /* Menyelaraskan item secara vertikal di tengah */
+    background-color: #FFFFFF; /* Ubah menjadi PUTIH */
+    border: 1px solid #E0E0E0; /* Beri border tipis agar terlihat */
+    /* Opsional: tambahkan bayangan halus untuk efek "mengambang" */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 30px; /* Padding di sekitar konten */
+    margin-bottom: 30px; /* Jarak ke bagian di bawahnya */
+    position: relative; /* Diperlukan untuk tombol edit */
+}
+
+.profile-avatar {
+    width: 100px; /* Lebar wadah gambar */
+    height: 100px; /* Tinggi wadah gambar */
+    border-radius: 50%; /* Membuat bentuk lingkaran */
+    overflow: hidden; /* Memastikan gambar tetap di dalam lingkaran */
+    margin-right: 25px; /* Jarak antara avatar dan info toko */
+    border: 3px solid #ccc; /* Border opsional untuk avatar */
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Memastikan gambar mengisi lingkaran tanpa distorsi */
+    display: block;
+}
+
+.profile-info {
+    flex-grow: 1; /* Memungkinkan info toko mengambil sisa ruang */
+}
+
+.profile-info .store-name {
+    font-size: 2rem; /* Ukuran nama toko */
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.profile-info .store-description {
+    font-size: 1.1rem; /* Ukuran deskripsi toko */
+    color: #555;
+    margin: 0;
+}
+
+.edit-button {
+    background-color: #00AA5B; /* HIJAU TOKOPEDIA */
+    color: white; /* Pastikan teks tetap putih */
+    padding: 12px 25px;
+    border: none;
+    border-radius: 25px; /* Membuat tombol lonjong */
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    /* posisi absolut jika ingin lebih fleksibel, tapi flexbox sudah cukup di sini */
+    /* position: absolute; */
+    /* bottom: 30px; */
+    /* right: 30px; */
+}
+
+.edit-button:hover {
+    background-color: #2a694c; /* Hijau yang sedikit lebih gelap untuk hover */
+}
+
+/* ======================= STORE STATS ======================= */
+.store-stats {
+    /* Memberi jarak ke bagian "Product You Might Want" di bawahnya */
+    margin-bottom: 30px; 
+}
+
+.stats-grid {
+    display: grid;
+    /* Membuat 4 kolom dengan lebar yang sama */
+    grid-template-columns: repeat(4, 1fr); 
+    /* Jarak antar kartu */
+    gap: 20px; 
+}
+
+.stat-card {
+    background-color: #FFFFFF; /* Ubah menjadi PUTIH */
+    border: 1px solid #E0E0E0; /* Beri border tipis agar terlihat */
+    /* Opsional: tambahkan bayangan halus untuk efek "mengambang" */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 25px 20px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 1.5rem; /* 16px */
+    font-weight: 600;
+    color: #333;
+    /* Memberi jarak besar antara label dan value */
+    margin: 0 0 30px 0; 
+}
+
+.stat-value {
+    font-size: 1.5rem; /* Sekitar 35px */
+    font-weight: 400;
+    color: #333;
+    margin: 0;
+    /* Mencegah teks pendapatan terpotong jika terlalu panjang */
+    word-wrap: break-word; 
+}
+
+/* ======================= QUICK ACTIONS ======================= */
+/* Tidak perlu diubah */
+.quick-actions {
+    display: grid;
+    /* DIUBAH: Kolom pertama dan kedua mendapat 1 bagian, 
+      kolom ketiga mendapat 1.5 bagian. 
+      Sesuaikan angka '1.5fr' jika perlu.
+    */
+    grid-template-columns: 1.1fr 1.1fr 1.5fr; 
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Sedikit diubah: kurangi padding, atur tinggi, dan justify-content */
+.action-card {
+    background-color: #FFFFFF; /* Ubah menjadi PUTIH */
+    border: 1px solid #E0E0E0; /* Beri border tipis agar terlihat */
+    /* Opsional: tambahkan bayangan halus untuk efek "mengambang" */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 25px; /* Kurangi padding sedikit */
+    height: 180px; /* Sesuaikan tinggi jika perlu */
+    position: relative;
+    /* Hapus flex properti dari sini jika ada */
+}
+
+/* Diubah: Atur layout utama menjadi 2 kolom */
+.action-card a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* UBAH INI: dari 'flex-start' menjadi 'center' */
+    justify-content: center; 
+    height: 100%;
+    width: 100%;
+}
+
+
+
+/* Diubah: Pastikan ukuran ikon pas dan beri jarak kanan */
+.action-icon {
+    width: 100px; 
+    height: 100px;
+    margin: 0; /* Hapus margin lama */
+    margin-right: 25px; /* Memberi jarak ke konten kanan */
+    flex-shrink: 0; /* Mencegah ikon menyusut */
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+.action-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* CSS BARU: Untuk wrapper konten kanan */
+.action-content {
+    display: flex;
+    flex-direction: column; /* Judul di atas tombol */
+    align-items: center; /* Teks rata tengah */
+    justify-content: center;
+}
+
+/* Diubah: Atur margin untuk judul */
+.action-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    margin-bottom: 15px; /* Jarak antara judul dan tombol */
+    text-align: center;
+}
+
+/* Diubah: Atur margin untuk tombol */
+.action-button {
+    background-color: #00AA5B; /* HIJAU TOKOPEDIA */
+    color: white; /* Pastikan teks tetap putih */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0; /* Hapus margin lama */
+}
+
+.action-button:hover {
+    background-color: #2a694c; /* Hijau yang sedikit lebih gelap untuk hover */
+}
