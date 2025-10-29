@@ -76,9 +76,101 @@ class Cart
 
             $grouped[$store_id]['subtotal'] += (float)$row['total_item'];
         }
+        
 
         // Kembalikan sebagai array numerik
-        return array_values($grouped);
+        // return array_values($grouped);
+        return [
+            'buyer_id' => (int)$buyer_id,
+            'stores' => array_values($grouped)
+        ];
+    }
+
+    public function getByStoreAndBuyer($buyer_id, $store_id)
+    {
+        $sql = "
+            SELECT 
+                ci.cart_item_id,
+                p.store_id,
+                s.store_name,
+                ci.product_id,
+                p.product_name,
+                p.stock,
+                ci.quantity,
+                p.price,
+                (ci.quantity * p.price) AS total_item,
+                p.main_image_path AS product_image
+            FROM cart_items ci
+            JOIN products p ON ci.product_id = p.product_id
+            JOIN stores s ON p.store_id = s.store_id
+            WHERE ci.buyer_id = :buyer_id AND p.store_id = :store_id
+            ORDER BY ci.cart_item_id;
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':buyer_id' => $buyer_id,
+            ':store_id' => $store_id
+        ]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($rows)) {
+            return null; // atau return array kosong sesuai kebutuhan
+        }
+
+        // Ambil info toko dari row pertama
+        $store_info = [
+            'store_id' => $rows[0]['store_id'],
+            'store_name' => $rows[0]['store_name'],
+            'subtotal' => 0,
+            'items' => []
+        ];
+
+        // Loop semua items
+        foreach ($rows as $row) {
+            $store_info['items'][] = [
+                'cart_item_id' => $row['cart_item_id'],
+                'product_id' => $row['product_id'],
+                'product_name' => $row['product_name'],
+                'stock' => (int)$row['stock'],
+                'quantity' => (int)$row['quantity'],
+                'price' => (float)$row['price'],
+                'total' => (float)$row['total_item'],
+                'image' => $row['product_image']
+            ];
+
+            $store_info['subtotal'] += (float)$row['total_item'];
+        }
+
+        return [
+            'buyer_id' => (int)$buyer_id,
+            'store' => $store_info
+        ];
+    }
+
+    public function getStoreIdByCartItem($cart_item_id)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT p.store_id 
+            FROM cart_items ci
+            JOIN products p ON ci.product_id = p.product_id
+            WHERE ci.cart_item_id = :cart_item_id
+        ");
+        $stmt->execute([':cart_item_id' => $cart_item_id]);
+        $result = $stmt->fetch();
+        return $result ? (int)$result['store_id'] : null;
+    }
+
+    public function getBuyerIdByCartItem($cart_item_id)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT buyer_id 
+            FROM cart_items
+            WHERE cart_item_id = :cart_item_id
+        ");
+        $stmt->execute([':cart_item_id' => $cart_item_id]);
+        $result = $stmt->fetch();
+        return $result ? (int)$result['buyer_id'] : null;
     }
 
     public function addToCart($buyer_id, $product_id, $quantity)
@@ -121,6 +213,20 @@ class Cart
         return $stmt->execute([':cart_item_id' => $cart_item_id]);
     }
 
+    public function removeStoreFromCart($buyer_id, $store_id)
+    {
+        $stmt = $this->conn->prepare("
+            DELETE ci
+            FROM cart_items ci
+            JOIN products p ON ci.product_id = p.product_id
+            WHERE ci.buyer_id = :buyer_id AND p.store_id = :store_id
+        ");
+        return $stmt->execute([
+            ':buyer_id' => $buyer_id,
+            ':store_id' => $store_id
+        ]);
+    }
+
     public function clearBuyerCart($buyer_id)
     {
         $stmt = $this->conn->prepare("DELETE FROM cart_items WHERE buyer_id = :buyer_id");
@@ -131,36 +237,48 @@ class Cart
 
     public function increamentQuantity($cart_item_id, $amount)
     {
+        $amount = (int)$amount;
         if ($amount <= 0) {
             return false; 
         }
         
-        $stmt = $this->conn->prepare("UPDATE cart_items SET quantity = quantity + :amount WHERE id = :cart_item_id");
+        $stmt = $this->conn->prepare("UPDATE cart_items SET quantity = quantity + :amount WHERE cart_item_id = :cart_item_id");
         return $stmt->execute([
             ':amount' => $amount,
             ':cart_item_id' => $cart_item_id
         ]);
+    }
+
+    public function getQuantity($cart_item_id)
+    {
+        $stmt = $this->conn->prepare("SELECT quantity FROM cart_items WHERE cart_item_id = :cart_item_id");
+        $stmt->execute([':cart_item_id' => $cart_item_id]);
+        $result = $stmt->fetch();
+        return $result ? (int)$result['quantity'] : 0;
     }
     
     public function decreamentQuantity($cart_item_id, $amount)
     {   
+        $amount = (int)$amount;
         if ($amount <= 0) {
             return false; 
         }
 
-        $total = $this->getTotalQuantity($cart_item_id);
+        $total = $this->getQuantity($cart_item_id);
 
-        if ($total <= 0) {
+        if ($total <= 1 || $total - $amount <= 0) {
             $stmt = $this->removeFromCart($cart_item_id);
             return;
         }
 
-        $stmt = $this->conn->prepare("UPDATE cart_items SET quantity = quantity - :amount WHERE id = :cart_item_id");
+        $stmt = $this->conn->prepare("UPDATE cart_items SET quantity = quantity - :amount WHERE cart_item_id = :cart_item_id");
         return $stmt->execute([
             ':amount' => $amount,
             ':cart_item_id' => $cart_item_id
         ]);
     }
+
+    
 
     public function getQuantityByBuyer($buyer_id)
     {
