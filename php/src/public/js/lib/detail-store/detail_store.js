@@ -1,13 +1,15 @@
 import { LoadComponent } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
+import { POST } from "../../api/api.js";
 import { router } from "../../../app.js";
 
 function morphProductBtn(data) {
   if (data.status == "success" && data.data.role == "BUYER") {
     const buttons = document.querySelectorAll(".product_buttons");
     buttons.forEach((btnContainer, index) => {
+      const product_id = btnContainer.getAttribute("product-id");
       const html = `
-        <button class="btn btn-cart">Add to Cart</button>
+        <button class="btn btn-cart" product-id="${product_id}">Add to Cart</button>
         <button class="btn btn-checkout">Checkout</button>
       `;
       btnContainer.innerHTML = html;
@@ -24,8 +26,19 @@ function morphProductBtn(data) {
     const cartButtons = document.querySelectorAll(".btn-cart");
     cartButtons.forEach((btn, index) => {
       btn.addEventListener("click", (e) => {
+        const product_id = btn.getAttribute("product-id");
         e.stopPropagation();
-        alert("Added to cart!");
+        POST(
+          "/api/cart",
+          { action: "add", product_id: product_id, buyer_id: data.data.id},
+          (response) => {
+            if (response.status === "success") {
+              alert("Added to cart!");
+            } else {
+              alert("Failed to add to cart.");
+            }
+          },(err) => {}
+        );
       });
     });
   }
@@ -60,7 +73,7 @@ function LoadProduct(data) {
                     <div class="product_name">${p.product_name}</div>
                     <div class="product_price">${price}</div>
                     <div class="product_store">Toko ${p.store_id}</div>
-                    <div class="product_buttons"></div>
+                    <div class="product_buttons" product-id="${p.product_id}"></div>
                   </div>
                 </div>
               `;
