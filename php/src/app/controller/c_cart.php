@@ -8,24 +8,32 @@ switch ($method) {
     case 'GET':
         $id = $_GET['id'] ?? null;
         $buyer_id = $_GET['buyer_id'] ?? null;
-        $total = $_GET['total'] ?? false;
+        $store_id = $_GET['store_id'] ?? null;
+        $total = $_GET['total'] ?? null;
         $action = $_GET['action'] ?? null;
 
+        
         if ($id) {
             // ada id
             $data = $model->getById($id);
+        } else if ($buyer_id && $store_id && !$action) {
+            // ada buyer_id dan store_id (untuk refresh single store)
+            $data = $model->getByStoreAndBuyer($buyer_id, $store_id);
         } else if ($buyer_id && $total) {
             // ada buyer_id dan total
             $data = $model->getTotal($buyer_id);
         } else if ($buyer_id) {
             // Jika ada parameter buyer_id
             $data = $model->getByBuyer($buyer_id);
-        }else if ($action === 'increament' && $id) {
-            // Jika ada parameter action=quantity dan buyer_id
-            $data = $model->increamentQuantity($id, 1);
-        } else if ($action === 'decreament' && $id) {
-            // Jika ada parameter action=quantity dan buyer_id
-            $data = $model->decreamentQuantity($id, 1);
+        } else if ($action === 'delete' && $id) {
+            // Jika ada parameter action=delete dan id
+            $data = $model->removeFromCart($id);
+        } else if ($action === 'delete' && $store_id && $buyer_id) {
+            // Jika ada parameter action=delete dan store_id dan buyer_id
+            $data = $model->removeStoreFromCart($buyer_id, $store_id);
+        } else if ($action === 'clear' && $buyer_id) {
+            // Jika ada parameter action=clear dan buyer_id
+            $data = $model->clearBuyerCart($buyer_id);
         } else {
             // Jika tidak ada parameter
             $data = $model->getAll();
@@ -83,14 +91,39 @@ switch ($method) {
         }
         break;
     
-    case 'PATCH':
-        parse_str(file_get_contents("php://input"), $patchData);
-        $cart_item_id = $patchData['cart_item_id'] ?? null;
-        $quantity = $patchData['quantity'] ?? null;
+    case 'PUT':
+        parse_str(file_get_contents("php://input"), $_PUT);
+        $cart_item_id = $_PUT['cart_item_id'] ?? null;
+        $action = $_PUT['action'] ?? null;
 
-        if ($cart_item_id && $quantity !== null) {
-            $result = $model->updateQuantity($cart_item_id, $quantity);
-            echo json_encode($result);
+        if ($action === 'increament' && $cart_item_id) {
+            $success = $model->increamentQuantity($cart_item_id, 1);
+            $store_id = $model->getStoreIdByCartItem($cart_item_id);
+            $buyer_id = $model->getBuyerIdByCartItem($cart_item_id);
+            
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'cart_item_id' => $cart_item_id,
+                    'store_id' => $store_id,
+                    'buyer_id' => $buyer_id,
+                    'action' => 'increament'
+                ]
+            ]);
+        } else if ($action === 'decreament' && $cart_item_id) {
+            $success = $model->decreamentQuantity($cart_item_id, 1);
+            $store_id = $model->getStoreIdByCartItem($cart_item_id);
+            $buyer_id = $model->getBuyerIdByCartItem($cart_item_id);
+            
+            echo json_encode([
+                'status' => 'success',
+                'data' => [
+                    'cart_item_id' => $cart_item_id,
+                    'store_id' => $store_id,
+                    'buyer_id' => $buyer_id,
+                    'action' => 'decreament'
+                ]
+            ]);
         } else {
             http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
