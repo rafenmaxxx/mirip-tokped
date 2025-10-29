@@ -2,6 +2,35 @@ import { LoadComponent } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { router } from "../../../app.js";
 
+function morphProductBtn(data) {
+  if (data.status == "success" && data.data.role == "BUYER") {
+    const buttons = document.querySelectorAll(".product_buttons");
+    buttons.forEach((btnContainer, index) => {
+      const html = `
+        <button class="btn btn-cart">Add to Cart</button>
+        <button class="btn btn-checkout">Checkout</button>
+      `;
+      btnContainer.innerHTML = html;
+    });
+
+    const checkoutButtons = document.querySelectorAll(".btn-checkout");
+    checkoutButtons.forEach((btn, index) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        router.navigateTo("/checkout?product_id=" + products[index].product_id);
+      });
+    });
+
+    const cartButtons = document.querySelectorAll(".btn-cart");
+    cartButtons.forEach((btn, index) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        alert("Added to cart!");
+      });
+    });
+  }
+}
+
 function LoadProduct(data) {
   const container = document.getElementById("product-data");
   if (!container) return;
@@ -31,10 +60,7 @@ function LoadProduct(data) {
                     <div class="product_name">${p.product_name}</div>
                     <div class="product_price">${price}</div>
                     <div class="product_store">Toko ${p.store_id}</div>
-                    <div class="product_buttons">
-                      <button class="btn btn-cart">Add to Cart</button>
-                      <button class="btn btn-checkout">Checkout</button>
-                    </div>
+                    <div class="product_buttons"></div>
                   </div>
                 </div>
               `;
@@ -51,6 +77,8 @@ function LoadProduct(data) {
         router.navigateTo("/product-detail?id=" + products[index].product_id);
       });
     });
+
+    GET("/api/auth", {}, morphProductBtn, () => {});
   } else {
     container.innerHTML = data.message || "No data available";
   }
@@ -80,7 +108,6 @@ function LoadProfileStore(data) {
           </div>
       `;
     
-    // tampilkan hasil
     container.innerHTML = html;
   } else {
     container.innerHTML = data.message || "No data available";
@@ -103,22 +130,16 @@ function ProductErr(err) {
   }
 }
 
-function ChangeCatalogLabel(label) {
-  let elmt = document.getElementById("product-label");
-  elmt.innerHTML = label;
-}
-
 export async function LoadDetailStore() {
   let param = new URLSearchParams(window.location.search);
   const param_id = param.get("store_id");
 
   if (!param_id) {
-    const default_store_id = 1; // Ganti dengan ID toko default yang diinginkan
-    GET("/api/detail_store", { store_id: default_store_id }, LoadProfileStore, ProfileErr);
-    GET("/api/product", { store_id: default_store_id }, LoadProduct, ProductErr);
+    router.navigateTo("/unauthorized");
   }else {
     GET("/api/detail_store", { store_id: param_id }, LoadProfileStore, ProfileErr);
     GET("/api/product", { store_id: param_id }, LoadProduct, ProductErr);
+    
   }
 }
 

@@ -1,3 +1,4 @@
+import { router } from "../../../app.js";
 import { GET } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 
@@ -22,6 +23,8 @@ function LoadDetail(data) {
     "s-img",
     `<img src="${s_img_url}" alt="${res.store_name} Logo" class="seller-avatar">`
   );
+  const storeBtn = document.getElementById("v-store");
+  storeBtn.setAttribute("href", "/store?store_id=" + res.store_id);
 }
 
 function IsErr(err) {}
@@ -30,4 +33,8 @@ export function InitProductDetail() {
   const params = new URLSearchParams(window.location.search);
   const param_id = params.get("id");
   GET("/api/product", { id: param_id }, LoadDetail, IsErr);
+  const backBtn = document.getElementById("back-btn");
+  backBtn.addEventListener("click", () => {
+    router.navigateTo("/");
+  });
 }

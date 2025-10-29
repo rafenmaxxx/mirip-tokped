@@ -26,6 +26,18 @@ class Path
 
     public function getPath($path)
     {
-        return $this->routes[$path] ?? null;
+
+        $data = $this->routes[$path] ?? null;
+        if (!$data) return null;
+
+        $access = $data['access'] ?? [];
+
+        if (isset($_SESSION['user'])) {
+            $role = $_SESSION['user']['role'];
+            return in_array($role, $access) ? $data : null;
+        } else {
+
+            return in_array('GUEST', $access) ? $data : null;
+        }
     }
 }

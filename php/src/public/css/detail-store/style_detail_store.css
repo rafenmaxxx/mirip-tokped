@@ -7,7 +7,6 @@
   padding: 2rem 1rem;   
   box-sizing: border-box;
   margin-top: 2rem;
-  
 }
 
 .detail_store_profile {
@@ -54,21 +53,18 @@
   color: #555;
 }
 
-/* Konten utama */
 .detail_store_content {
   margin-top: 2rem;
   width: 100%;
 }
 
-/* Product catalog sebagai grid responsif */
 .product_catalog {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;          /* jarak antar kartu */
+  gap: 1rem;          
   margin-top: 2rem;
-}
+} 
 
-/* Setiap kartu produk */
 .product_card {
   background-color: #fff;
   border: 1px solid #eee;
@@ -80,10 +76,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-
 }
 
-/* Hover efek */
 .product_card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -96,8 +90,6 @@
   align-items: flex-start; 
 }
 
-
-/* Gambar produk */
 .product_image img {
   width: 160px;
   height:160px;
@@ -105,14 +97,12 @@
   object-fit: cover;
 }
 
-/* Nama produk */
 .product_name {
   font-weight: 600;
   margin-top: 0.5rem;
   text-align: center;
 }
 
-/* Harga produk */
 .product_price {
   color: #00a14b;
   font-weight: 700;
@@ -120,7 +110,6 @@
   text-align: center;
 }
 
-/* Nama toko */
 .product_store {
   font-size: 0.85rem;
   color: #555;
@@ -128,20 +117,27 @@
   text-align: right;
 }
 
+.product_buttons {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .btn {
-  border: none;
   border-radius: 8px;
   padding: 0.4rem 1rem;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 0.5rem;
+  min-width:auto;
 }
 
 .btn-checkout {
   background-color: #00a14b;
   color: white;
   font-weight: bold;
+  margin-left: auto;
 }
 
 .btn-checkout:hover {
@@ -160,6 +156,13 @@
   color: white;
 }
 
+/* Desktop sedang */
+@media (max-width: 1400px) {
+  .product_catalog {
+    grid-template-columns: repeat(3, 1fr); /* 3 kolom */
+  }
+}
+
 /* Responsif untuk mobile */
 @media (max-width: 768px) {
   .detail_store_page {
@@ -171,10 +174,3 @@
     padding: 0.8rem;
   }
 }
-
-/* Responsive
-@media (max-width: 768px) {
-  .hero-slide img { height: 300px; }
-  .hero-slide__info h2 { font-size: 1.5rem; }
-  .hero-slide__info p { font-size: 1rem; }
-} */
