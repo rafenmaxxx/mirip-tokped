@@ -77,9 +77,6 @@ class Cart
             $grouped[$store_id]['subtotal'] += (float)$row['total_item'];
         }
         
-
-        // Kembalikan sebagai array numerik
-        // return array_values($grouped);
         return [
             'buyer_id' => (int)$buyer_id,
             'stores' => array_values($grouped)
@@ -115,10 +112,10 @@ class Cart
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($rows)) {
-            return null; // atau return array kosong sesuai kebutuhan
+            return null; 
         }
 
-        // Ambil info toko dari row pertama
+        // info toko dari row pertama
         $store_info = [
             'store_id' => $rows[0]['store_id'],
             'store_name' => $rows[0]['store_name'],
@@ -126,7 +123,6 @@ class Cart
             'items' => []
         ];
 
-        // Loop semua items
         foreach ($rows as $row) {
             $store_info['items'][] = [
                 'cart_item_id' => $row['cart_item_id'],
@@ -177,9 +173,12 @@ class Cart
     {
         try {
             $stmt = $this->conn->prepare("
-            INSERT INTO cart_items (buyer_id, product_id, quantity)
-            VALUES (:buyer_id, :product_id, :quantity)
-        ");
+                INSERT INTO cart_items (buyer_id, product_id, quantity)
+                VALUES (:buyer_id, :product_id, :quantity)
+                ON CONFLICT (buyer_id, product_id) 
+                DO UPDATE SET 
+                    quantity = cart_items.quantity + quantity
+            ");
 
             $success = $stmt->execute([
                 "buyer_id" => $buyer_id,
@@ -189,19 +188,19 @@ class Cart
 
             if ($success) {
                 return [
-                    "status" => true,
+                    "status" => "success",
+                    "message" => "Product added to cart",
                     "id" => $this->conn->lastInsertId()
                 ];
             } else {
                 return [
-                    "status" => false,
+                    "status" => "error",
                     "message" => "Insert failed for unknown reason"
                 ];
             }
         } catch (PDOException $e) {
-
             return [
-                "status" => false,
+                "status" => "error",
                 "message" => $e->getMessage()
             ];
         }
