@@ -95,6 +95,19 @@
       }
     ],
     "css": ["/css/seller/style_seller_dashboard.css", "/css/style.css"],
-    "useNavbar": true
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products": {
+    "html": "/pages/seller_product.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product.js",
+        "func": ["InitSellerProduct"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
   }
 }
