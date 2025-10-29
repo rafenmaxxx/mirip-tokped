@@ -25,7 +25,7 @@ function morphProductBtn(data) {
     cartButtons.forEach((btn, index) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        router.navigateTo("/cart?product_id=" + products[index].product_id);
+        alert("Added to cart!");
       });
     });
   }
