@@ -9,7 +9,6 @@ switch ($method) {
         $id = $_GET['id'] ?? null;
         $buyer_id = $_GET['buyer_id'] ?? null;
         $store_id = $_GET['store_id'] ?? null;
-        $total = $_GET['total'] ?? null;
         $action = $_GET['action'] ?? null;
 
         
@@ -19,8 +18,8 @@ switch ($method) {
         } else if ($buyer_id && $store_id && !$action) {
             // ada buyer_id dan store_id (untuk refresh single store)
             $data = $model->getByStoreAndBuyer($buyer_id, $store_id);
-        } else if ($buyer_id && $total) {
-            // ada buyer_id dan total
+        } else if ($buyer_id && $action === 'summary') {
+            // ada buyer_id dan action=summary
             $data = $model->getTotal($buyer_id);
         } else if ($buyer_id) {
             // Jika ada parameter buyer_id
@@ -44,7 +43,9 @@ switch ($method) {
 
     case 'POST':
         $action = $_POST['action'] ?? null;
-
+        $buyer_id = $_POST['buyer_id'] ?? null;
+        $product_id = $_POST['product_id'] ?? null;
+       
         switch ($action) {
             case 'add':
                 $buyer_id = $_POST['buyer_id'] ?? null;
@@ -52,7 +53,7 @@ switch ($method) {
                 $quantity = $_POST['quantity'] ?? 1;
 
                 if ($buyer_id && $product_id) {
-                    $result = $model->addToCart($buyer_id, $product_id, $quantity);
+                    $result = $model->addToCart($buyer_id, $product_id, 1);
                     echo json_encode($result);
                 } else {
                     http_response_code(400);
