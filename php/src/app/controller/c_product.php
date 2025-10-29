@@ -8,6 +8,7 @@ switch ($method) {
     case 'GET':
         $search = $_GET['search'] ?? null;
         $id = $_GET['id'] ?? null;
+        $store_id = $_GET['store_id'] ?? null;
         $filter = $_GET['filter'] ?? null;
         $title = $_GET['title'] ?? null;
 
@@ -28,6 +29,9 @@ switch ($method) {
             $maxPrice = $filterData['maxPrice'] ?? null;
 
             $data = $model->getFilterProduct($categories, $minPrice, $maxPrice);
+        } else if ($store_id) {
+            // Jika ada parameter store_id
+            $data = $model->getByStoreId($store_id);
         } else {
             // Jika tidak ada parameter
             $data = $model->getAll();
