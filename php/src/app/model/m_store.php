@@ -46,4 +46,11 @@ class Store
             ];
         }
     }
+
+    public function getByStoreId($store_id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM stores WHERE store_id=:store_id");
+        $stmt->execute([':store_id' => $store_id]);
+        return $stmt->fetch();
+    }
 }
