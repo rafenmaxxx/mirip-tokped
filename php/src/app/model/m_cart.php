@@ -32,7 +32,8 @@ class Cart
                 p.store_id,
                 s.store_name,
                 ci.product_id,
-                p.product_name AS product_name,
+                p.product_name,
+                p.stock,
                 ci.quantity,
                 p.price,
                 (ci.quantity * p.price) AS total_item,
@@ -66,6 +67,7 @@ class Cart
                 'cart_item_id' => $row['cart_item_id'],
                 'product_id' => $row['product_id'],
                 'product_name' => $row['product_name'],
+                'stock' => (int)$row['stock'],
                 'quantity' => (int)$row['quantity'],
                 'price' => (float)$row['price'],
                 'total' => (float)$row['total_item'],
@@ -158,15 +160,6 @@ class Cart
             ':amount' => $amount,
             ':cart_item_id' => $cart_item_id
         ]);
-    }
-
-    public function updateQuantity($cart_item_id, $quantity)
-    {
-        if ($quantity < 0) {
-            return $this->decreamentQuantity($cart_item_id, abs($quantity)); 
-        } else {
-            return $this->increamentQuantity($cart_item_id, $quantity); 
-        }
     }
 
     public function getQuantityByBuyer($buyer_id)

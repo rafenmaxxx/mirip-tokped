@@ -34,9 +34,9 @@ function LoadCartItems(data) {
                 <p class="cart_item_price">${price}</p>
               </div>
               <div class="cart_quantity">
-                  <a href="/decreament"><button class="btn btn-decrease-quantity" data-item-id="${detail.cart_item_id}" id="decrease-qty-btn-${index}-${dindex}">-</button></a>
-                  <span class="quantity_value" id="quantity-value-${index}-${dindex}">${detail.quantity}</span>
-                  <a href="/increament"><button class="btn btn-increase-quantity" data-item-id="${detail.cart_item_id}" id="increase-qty-btn-${index}-${dindex}">+</button></a>
+                  <button class="btn btn-decrease-quantity" item-quantity="${detail.quantity}" cart-id="${detail.cart_id}" id="decrease-qty-btn-${index}-${dindex}">-</button>
+                  <span class="quantity_value" id="quantity-value-${detail.cart_id}">${detail.quantity}</span>
+                  <button class="btn btn-increase-quantity" item-stock="${detail.stock}" item-quantity="${detail.quantity}" cart-id="${detail.cart_id}" id="increase-qty-btn-${index}-${dindex}">+</button>
               </div>
             </div>
           </div>`;
@@ -62,7 +62,15 @@ function LoadCartItems(data) {
     }).join("");
 
     container.innerHTML = `
-          <h2 id="cart-label" class="cart_title">Cart</h2>${html}
+          <h2 id="cart-label" class="cart_title">Cart</h2>
+          <div class="modal" id="confirm-modal">
+              <div class="modal_content"></div>
+              <div class="modal_actions">
+                  <button class="btn btn-cancel" id="modal-cancel-btn">Batal</button>
+                  <button class="btn btn-confirm" id="modal-confirm-btn">Hapus</button>
+              </div>
+          </div>
+          ${html}
     `;
 
     if (html == "") {
@@ -87,10 +95,63 @@ function LoadCartItems(data) {
         console.log("Remove store:", storeId);
       });
     });
+
+    const increaseButtons = document.querySelectorAll(".btn-increase-quantity");
+    increaseButtons.forEach((btn, index) => {
+      btn.addEventListener("click", () => {
+        const quantity = parseInt(btn.getAttribute("item-quantity"));
+        const stock = parseInt(btn.getAttribute("item-stock"));
+        const cart_item_id = btn.getAttribute("cart-id");
+        if (stock > quantity) {
+          GET("/api/cart", { cart_item_id: cart_item_id, action: "increament" }, (data) => {});
+          const quantityValue = document.getElementById(`quantity-value-${cart_item_id}`);
+          if (quantityValue) {
+            quantityValue.textContent = quantity + 1;
+          }
+        } else {
+          alert("Stok produk tidak mencukupi!");
+        }
+      });
+    });
+
+    const decreaseButtons = document.querySelectorAll(".btn-decrease-quantity");
+    decreaseButtons.forEach((btn, index) => {
+      btn.addEventListener("click", () => {
+        const quantity = parseInt(btn.getAttribute("item-quantity"));
+        const cart_item_id = btn.getAttribute("cart-id");
+        if (quantity > 1) {
+          GET("/api/cart", { cart_item_id: cart_item_id, action: "decreament" }, (data) => {});
+          const quantityValue = document.getElementById(`quantity-value-${cart_item_id}`);
+          if (quantityValue) {
+            quantityValue.textContent = quantity - 1;
+          }
+        } else {
+          openModal();
+        }
+      });
+    });
+
+    
+
   } else {
     container.innerHTML = data.message || "No data available";
   }
 }
+
+function openModal() {
+  document.getElementById("confirm-modal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("confirm-modal").style.display = "none";
+}
+
+function confirmDelete() {
+  // Logika penghapusan produk dari cart
+  console.log("Produk dihapus dari keranjang.");
+  closeModal();
+}
+
 
 function LoadSummary(data) {
   const container = document.getElementById("cart-summary");

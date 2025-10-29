@@ -9,6 +9,7 @@ switch ($method) {
         $id = $_GET['id'] ?? null;
         $buyer_id = $_GET['buyer_id'] ?? null;
         $total = $_GET['total'] ?? false;
+        $action = $_GET['action'] ?? null;
 
         if ($id) {
             // ada id
@@ -19,6 +20,12 @@ switch ($method) {
         } else if ($buyer_id) {
             // Jika ada parameter buyer_id
             $data = $model->getByBuyer($buyer_id);
+        }else if ($action === 'increament' && $id) {
+            // Jika ada parameter action=quantity dan buyer_id
+            $data = $model->increamentQuantity($id, 1);
+        } else if ($action === 'decreament' && $id) {
+            // Jika ada parameter action=quantity dan buyer_id
+            $data = $model->decreamentQuantity($id, 1);
         } else {
             // Jika tidak ada parameter
             $data = $model->getAll();
