@@ -5,63 +5,83 @@ import { router } from "../../../app.js";
 
 // Function untuk refresh single store card
 function refreshStoreCard(buyer_id, store_id) {
-  GET("/api/cart", { buyer_id: buyer_id, store_id: store_id }, (data) => {
-    if (data.status === "success" && data.data && data.data.store) {
+  GET(
+    "/api/cart", 
+    { buyer_id: buyer_id, store_id: store_id }, 
+    (data) => {
+      console.log("Data received:", data); // ← tambahkan log
+      
+      // Pastikan data valid
+      if (!data || data.status !== "success" || !data.data || !data.data.store) {
+        console.error("Invalid data structure:", data);
+        return;
+      }
+      
       const storeData = data.data.store;
       const storeCard = document.querySelector(`[data-store-card-id="${store_id}"]`);
       
-      if (storeCard) {
-        // Update store card content
-        const details = storeData.items.map((detail, dindex) => {
-          const price = detail.price.toLocaleString("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-          });
-          
-          const imageUrl =
-            detail.image && detail.image !== ""
-              ? `/api/image?file=${detail.image}`
-              : `https://picsum.photos/200/200?random=${dindex + 1}`;
-          
-          return ` 
-            <div class="cart_item_detail">
-              <div class="cart_item_image">
-                  <img src="${imageUrl}">
-              </div>
-              <div class="cart_item_info_container">
-                <div class="cart_item_info">
-                  <p class="cart_item_name">${detail.product_name}</p>
-                  <p class="cart_item_price">${price}</p>
-                </div>
-                <div class="cart_quantity">
-                    <button class="btn btn-decreament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${store_id}" data-buyer-id="${buyer_id}">-</button>
-                    <span class="quantity_value" id="quantity-value-${detail.cart_item_id}" data-stock="${detail.stock}">${detail.quantity}</span>
-                    <button class="btn btn-increament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${store_id}" data-buyer-id="${buyer_id}">+</button>
-                </div>
-              </div>
-            </div>`;
-        }).join("");
+      if (!storeCard) {
+        console.error("Store card not found for store_id:", store_id);
+        return;
+      }
 
-        storeCard.querySelector('.cart_item_details').innerHTML = details;
-        storeCard.querySelector('.cart_subtotal').innerHTML = storeData.subtotal.toLocaleString("id-ID", {
+      // Update store card content
+      const details = storeData.items.map((detail, dindex) => {
+        const price = detail.price.toLocaleString("id-ID", {
           style: "currency",
           currency: "IDR",
           minimumFractionDigits: 0,
         });
+        
+        const imageUrl =
+          detail.image && detail.image !== ""
+            ? `/api/image?file=${detail.image}`
+            : `https://picsum.photos/200/200?random=${dindex + 1}`;
+        
+        return ` 
+          <div class="cart_item_detail">
+            <div class="cart_item_image">
+                <img src="${imageUrl}">
+            </div>
+            <div class="cart_item_info_container">
+              <div class="cart_item_info">
+                <p class="cart_item_name">${detail.product_name}</p>
+                <p class="cart_item_price">${price}</p>
+              </div>
+              <div class="cart_quantity">
+                  <button class="btn btn-decreament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${store_id}" data-buyer-id="${buyer_id}">-</button>
+                  <span class="quantity_value" id="quantity-value-${detail.cart_item_id}" data-stock="${detail.stock}">${detail.quantity}</span>
+                  <button class="btn btn-increament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${store_id}" data-buyer-id="${buyer_id}">+</button>
+              </div>
+            </div>
+          </div>`;
+      }).join("");
 
-        // Re-attach event listeners untuk buttons di store card ini
-        attachQuantityButtonListeners(storeCard);
+      const detailsContainer = storeCard.querySelector('.cart_item_details');
+      const subtotalContainer = storeCard.querySelector('.cart_subtotal');
+      
+      if (detailsContainer) {
+        detailsContainer.innerHTML = details;
       }
-    }
-  }, (err) => {
-    console.error("Error refreshing store card:", err);
-  });
+      
+      if (subtotalContainer) {
+        subtotalContainer.innerHTML = storeData.subtotal.toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        });
+      }
+
+      // Re-attach event listeners
+      attachQuantityButtonListeners(storeCard);
+    }, 
+    () => {}
+  );
 }
 
 // Function untuk refresh summary
 function refreshSummary(buyer_id) {
-  GET("/api/cart", { buyer_id: buyer_id, total: true }, LoadSummary, SummaryErr);
+  GET("/api/cart", { buyer_id: buyer_id, action: 'summary' }, LoadSummary, SummaryErr);
 }
 
 // Function untuk attach event listeners pada quantity buttons
@@ -196,16 +216,18 @@ function LoadCartItems(data) {
 
     if (html == "") {
       const emptyCart = `
-          <div class="empty_cart">
-              <div class="empty_cart_image">
-                    <img src="..\/..\/..\/img\/empty-cart.png" class="empty_cart_img">
-              </div>
-              <h2>Keranjang kamu masih kosong nih!</h2>
-              <button class="btn btn-shop" id="shop-now-btn">Mulai Belanja</button>
+          <div class="empty_cart_container">
+            <img src="..\/..\/..\/img\/empty-cart.png" alt="Empty Cart" class="empty_cart_img">
+            <p class="empty_cart_text">Keranjang kamu masih kosong nih!</p>
+            <button class="btn-start-shopping">Mulai Belanja</button>
           </div>
       `;
 
       container.innerHTML = emptyCart;
+      const shopBtn = document.querySelector(".btn-start-shopping");
+      shopBtn.addEventListener("click", () => {
+        router.navigateTo("/home");
+      });
     }
 
     // Attach event listeners untuk hapus toko
@@ -391,5 +413,5 @@ export async function LoadCartPage() {
   const buyer_id = param_id || 6; // Default buyer_id
   
   GET("/api/cart", { buyer_id: buyer_id }, LoadCartItems, CartItemsErr);
-  GET("/api/cart", { buyer_id: buyer_id, total: true }, LoadSummary, SummaryErr);
+  GET("/api/cart", { buyer_id: buyer_id, action: 'summary' }, LoadSummary, SummaryErr);
 }
