@@ -7,6 +7,10 @@ function HandleSearchNavbar(param) {
 export function InitNavbar() {
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
+  const cartBtn = document.getElementById("cartBtn");
+  cartBtn.addEventListener("click", () => {
+    router.navigateTo("/cart");
+  });
   const logo = document.getElementById("navbar-logo");
   searchBtn.addEventListener("click", () => {
     HandleSearchNavbar(searchInput.value.trim());
