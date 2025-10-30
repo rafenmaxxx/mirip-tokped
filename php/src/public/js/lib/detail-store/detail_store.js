@@ -143,7 +143,7 @@ function ProductErr(err) {
   }
 }
 
-export async function InitetailStore() {
+export async function InitDetailStore() {
   let param = new URLSearchParams(window.location.search);
   const param_id = param.get("store_id");
 
