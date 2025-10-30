@@ -5,6 +5,18 @@ $model = new User();
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    case 'GET':
+        $id = $_GET['id'] ?? null;
+        
+        if ($id) {
+            $data = $model->getById($id);
+        } else {
+            $data = $model->getAll();
+        }
+        
+        echo json_encode(['status' => 'success', 'data' => $data]);
+        break;
+
     case 'POST':
         header('Content-Type: text/html; charset=utf-8');
         $email = $_POST['email'] ?? null;
