@@ -18,6 +18,9 @@ switch ($route) {
     case 'path':
         require_once __DIR__ . '/controller/c_path.php';
         break;
+    case 'seller':
+        require_once __DIR__ . '/controller/c_seller.php';
+        break;
     case 'login':
         require_once __DIR__ . '/controller/c_login.php';
         break;
