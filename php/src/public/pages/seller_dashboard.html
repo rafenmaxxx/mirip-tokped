@@ -1,52 +1,62 @@
 <main class="content-wrapper">
-    
+
+    <!-- HEADER TOKO -->
     <section class="profile-header">
         <div class="profile-avatar">
             <img src="img/seller/profile.png" alt="Gambar Profil Toko">
         </div>
         <div class="profile-info">
-            <h2 class="store-name">nama toko</h2>
-            <p class="store-description">deskripsi toko</p>
+            <h2 class="store-name" id="store-name">Nama Toko</h2>
         </div>
-        <button class="edit-button">edit</button>
+        <button class="edit-button" id="editBtn">Edit</button>
     </section>
 
+    <!-- DESKRIPSI TOKO (CARD TERPISAH) -->
+    <section class="store-description-card">
+        <h3 class="desc-title">Deskripsi Toko</h3>
+        <p class="store-description" id="store-description">
+            Deskripsi toko akan ditampilkan di sini. Jika teks panjang, bagian ini bisa di-scroll untuk melihat semua
+            isi.
+        </p>
+    </section>
+
+    <!-- STATISTIK -->
     <section class="store-stats">
         <div class="stats-grid">
-            
+
             <div class="stat-card">
-                <p class="stat-label">total produk unik</p>
-                <p class="stat-value">24</p>
+                <p class="stat-label">Total Produk Unik</p>
+                <p class="stat-value">xxx</p>
             </div>
 
             <div class="stat-card">
-                <p class="stat-label">pending orders</p>
-                <p class="stat-value">10</p>
+                <p class="stat-label">Pending Orders</p>
+                <p class="stat-value">xxx</p>
             </div>
 
             <div class="stat-card">
-                <p class="stat-label">produk stok menipis</p>
-                <p class="stat-value">5</p>
+                <p class="stat-label">Produk Stok Menipis</p>
+                <p class="stat-value">xxx</p>
             </div>
 
             <div class="stat-card">
-                <p class="stat-label">total pendapatan</p>
-                <p class="stat-value">Rp. 12.500.000</p>
+                <p class="stat-label">Total Pendapatan</p>
+                <p class="stat-value">Rp. xxxx</p>
             </div>
 
         </div>
     </section>
 
+    <!-- AKSI CEPAT -->
     <section class="quick-actions">
         <div class="action-card">
             <a href="#">
                 <div class="action-icon">
                     <img src="img/seller/basket.png" alt="Kelola Produk">
                 </div>
-                
                 <div class="action-content">
-                    <h3 class="action-title">kelola produk</h3>
-                    <button class="action-button">klik di sini</button>
+                    <h3 class="action-title">Kelola Produk</h3>
+                    <button class="action-button" id="kelolaBtn">Klik di sini</button>
                 </div>
             </a>
         </div>
@@ -57,8 +67,8 @@
                     <img src="img/seller/order.png" alt="Lihat Order">
                 </div>
                 <div class="action-content">
-                    <h3 class="action-title">lihat order</h3>
-                    <button class="action-button">klik di sini</button>
+                    <h3 class="action-title">Lihat Order</h3>
+                    <button class="action-button" id="orderBtn">Klik di sini</button>
                 </div>
             </a>
         </div>
@@ -69,8 +79,8 @@
                     <img src="img/seller/add.png" alt="Tambah Produk Baru">
                 </div>
                 <div class="action-content">
-                    <h3 class="action-title">tambah produk baru</h3>
-                    <button class="action-button">klik di sini</button>
+                    <h3 class="action-title">Tambah Produk Baru</h3>
+                    <button class="action-button" id="addProdBtn">Klik di sini</button>
                 </div>
             </a>
         </div>

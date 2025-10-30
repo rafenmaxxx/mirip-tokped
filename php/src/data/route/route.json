@@ -15,7 +15,7 @@
       "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
-    "access": ["GUEST", "BUYER", "SELLER"]
+    "access": ["GUEST", "BUYER"]
   },
   "/home": {
     "html": "/pages/home.html",
@@ -31,7 +31,7 @@
       "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
-    "access": ["GUEST", "BUYER", "SELLER"]
+    "access": ["GUEST", "BUYER"]
   },
   "/product-detail": {
     "html": "/pages/product_detail.html",
@@ -99,8 +99,8 @@
     "html": "/pages/seller_dashboard.html",
     "js": [
       {
-        "path": "./lib/seller/seller_dashboard.js",
-        "func": ["InitSellerDashboard"]
+        "path": "./lib/seller/home/seller_home.js",
+        "func": ["InitSeller"]
       }
     ],
     "css": ["/css/seller/style_seller_dashboard.css", "/css/style.css"],
