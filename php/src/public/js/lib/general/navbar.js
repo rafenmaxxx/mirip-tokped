@@ -69,6 +69,9 @@ function morphAuthBtn(data) {
       );
     });
     InitBalance();
+    chart.addEventListener("click", () => {
+      router.navigateTo("/cart?buyer_id=" + data.data.id);
+    });
   } else {
     // blom login
     btn.innerHTML = ` <a href="/login"><button class="btn btn-login">Login</button></a>
@@ -129,7 +132,7 @@ let topupActive = false;
 
 export function InitNavbar() {
   const searchInput = document.getElementById("searchInput");
-  const searchBtn = document.getElementById("searchBtn");
+  const searchBtn = document.getElementById("searchBtn"); 
   const logo = document.getElementById("navbar-logo");
   const filterBtn = document.getElementById("filter-btn");
   const topupBtn = document.getElementById("balance-btn");

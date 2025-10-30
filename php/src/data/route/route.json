@@ -14,7 +14,7 @@
       "/css/home/style_filter.css"
     ],
     "useNavbar": true,
-    "access": ["GUEST", "BUYER"]
+    "access": ["GUEST", "BUYER", "SELLER"]
   },
   "/home": {
     "html": "/pages/home.html",
@@ -29,7 +29,7 @@
       "/css/home/style_filter.css"
     ],
     "useNavbar": true,
-    "access": ["GUEST", "BUYER"]
+    "access": ["GUEST", "BUYER", "SELLER"]
   },
   "/product-detail": {
     "html": "/pages/product_detail.html",
@@ -93,16 +93,100 @@
     "useNavbar": false,
     "access": ["GUEST", "BUYER", "SELLER"]
   },
+  "/seller": {
+    "html": "/pages/seller_dashboard.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_dashboard.js",
+        "func": ["InitSellerDashboard"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_dashboard.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products": {
+    "html": "/pages/seller_product.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product.js",
+        "func": ["InitSellerProduct"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products/add": {
+    "html": "/pages/seller_product_info.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product_add.js",
+        "func": ["InitSellerProductAdd"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products/edit": {
+    "html": "/pages/seller_product_info.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product_add.js",
+        "func": ["InitSellerProductAdd"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/orders": {
+    "html": "/pages/seller_order_management.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_order_management.js",
+        "func": ["InitSellerOrderManagement"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_order_management.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
   "/store": {
     "html": "/pages/detail_store.html",
     "js": [
       {
         "path": "./lib/detail-store/detail_store.js",
-        "func": ["LoadDetailStore"]
+        "func": ["InitDetailStore"]
       }
     ],
     "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
+  },
+  "/cart": {
+    "html": "/pages/cart.html",
+    "js": [
+      {
+        "path": "./lib/cart/cart.js",
+        "func": ["InitCartPage"]
+      }
+    ],
+    "css": ["/css/cart/style_cart.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
+  },
+  "/checkout": {
+    "html": "/pages/checkout.html",
+    "js": [
+      {
+        "path": "./lib/checkout/checkout.js",
+        "func": ["InitCheckoutPage"]
+      }
+    ],
+    "css": ["/css/checkout/style_checkout.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
   }
 }

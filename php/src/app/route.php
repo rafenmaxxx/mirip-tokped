@@ -18,6 +18,9 @@ switch ($route) {
     case 'path':
         require_once __DIR__ . '/controller/c_path.php';
         break;
+    case 'seller':
+        require_once __DIR__ . '/controller/c_seller.php';
+        break;
     case 'login':
         require_once __DIR__ . '/controller/c_login.php';
         break;
@@ -32,6 +35,8 @@ switch ($route) {
         break;
     case 'topup':
         require_once __DIR__ . '/controller/c_topup.php';
+    case 'cart':
+        require_once __DIR__ . '/controller/c_cart.php';
         break;
 
     default:
