@@ -11,7 +11,8 @@
       "/css/style.css",
       "/css/home/style_sliding_card.css",
       "/css/home/style_home.css",
-      "/css/home/style_filter.css"
+      "/css/home/style_filter.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
@@ -26,7 +27,8 @@
       "/css/home/style_sliding_card.css",
       "/css/general/style_balance.css",
       "/css/home/style_home.css",
-      "/css/home/style_filter.css"
+      "/css/home/style_filter.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
