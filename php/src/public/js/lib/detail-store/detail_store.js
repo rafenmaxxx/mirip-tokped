@@ -1,4 +1,3 @@
-import { LoadComponent } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { POST } from "../../api/api.js";
 import { router } from "../../../app.js";
@@ -27,6 +26,7 @@ function morphProductBtn(data) {
     cartButtons.forEach((btn, index) => {
       btn.addEventListener("click", (e) => {
         const product_id = btn.getAttribute("product-id");
+        console.log("Adding to cart:", product_id, data.data.id);
         e.stopPropagation();
         POST(
           "/api/cart",
@@ -37,7 +37,7 @@ function morphProductBtn(data) {
             } else {
               alert("Failed to add to cart.");
             }
-          },(err) => {}
+          },() => {}
         );
       });
     });
@@ -143,7 +143,7 @@ function ProductErr(err) {
   }
 }
 
-export async function LoadDetailStore() {
+export async function InitetailStore() {
   let param = new URLSearchParams(window.location.search);
   const param_id = param.get("store_id");
 
