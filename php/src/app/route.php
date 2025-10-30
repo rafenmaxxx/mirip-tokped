@@ -35,6 +35,7 @@ switch ($route) {
         break;
     case 'topup':
         require_once __DIR__ . '/controller/c_topup.php';
+        break;
     case 'cart':
         require_once __DIR__ . '/controller/c_cart.php';
         break;

@@ -27,6 +27,10 @@ export async function RemoveComponent(tag_id) {
 }
 
 export function ChangeInnerHtmlById(tag, data) {
-  const elmt = document.getElementById(tag);
-  elmt.innerHTML = data;
+  const el = document.getElementById(tag);
+  if (!el) {
+    console.error("Element not found:", tag);
+    return;
+  }
+  el.innerHTML = data;
 }

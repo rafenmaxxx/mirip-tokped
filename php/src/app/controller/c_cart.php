@@ -4,14 +4,22 @@ require_once __DIR__ . '/../model/m_cart.php';
 $model = new Cart();
 $method = $_SERVER['REQUEST_METHOD'];
 
+if (!isset($_SESSION['user'])) {
+    echo "<script>
+                alert('Login dulu Bos !');
+                window.location.href = '/login';
+            </script>";
+    exit;
+}
+
 switch ($method) {
     case 'GET':
         $id = $_GET['id'] ?? null;
-        $buyer_id = $_GET['buyer_id'] ?? null;
+        $buyer_id = $_SESSION['user']['id'];
         $store_id = $_GET['store_id'] ?? null;
         $action = $_GET['action'] ?? null;
 
-        
+
         if ($id) {
             // ada id
             $data = $model->getById($id);
@@ -37,9 +45,9 @@ switch ($method) {
 
     case 'POST':
         $action = $_POST['action'] ?? null;
-        $buyer_id = $_POST['buyer_id'] ?? null;
+        $buyer_id = $_SESSION['user']['id'];
         $product_id = $_POST['product_id'] ?? null;
-       
+
         switch ($action) {
             case 'add':
                 if ($buyer_id && $product_id) {
@@ -57,7 +65,7 @@ switch ($method) {
                 break;
         }
         break;
-    
+
     case 'PUT':
         parse_str(file_get_contents("php://input"), $_PUT);
         $cart_item_id = $_PUT['cart_item_id'] ?? null;
@@ -67,7 +75,7 @@ switch ($method) {
             $success = $model->increamentQuantity($cart_item_id, 1);
             $store_id = $model->getStoreIdByCartItem($cart_item_id);
             $buyer_id = $model->getBuyerIdByCartItem($cart_item_id);
-            
+
             echo json_encode([
                 'status' => 'success',
                 'data' => [
@@ -81,7 +89,7 @@ switch ($method) {
             $success = $model->decreamentQuantity($cart_item_id, 1);
             $store_id = $model->getStoreIdByCartItem($cart_item_id);
             $buyer_id = $model->getBuyerIdByCartItem($cart_item_id);
-            
+
             echo json_encode([
                 'status' => 'success',
                 'data' => [
@@ -99,7 +107,7 @@ switch ($method) {
     case 'DELETE':
         $cart_item_id = $_GET['cart_item_id'] ?? null;
         $action = $_GET['action'] ?? null;
-        $buyer_id = $_GET['buyer_id'] ?? null;
+        $buyer_id = $_SESSION['user']['id'];
         $store_id = $_GET['store_id'] ?? null;
 
         switch ($action) {
@@ -114,7 +122,7 @@ switch ($method) {
                 break;
 
             case 'remove_store':
-                
+
                 if ($buyer_id && $store_id) {
                     $result = $model->removeStoreFromCart($buyer_id, $store_id);
                     echo json_encode($result);
@@ -124,7 +132,7 @@ switch ($method) {
                 }
                 exit;
                 break;
-                
+
             case 'clear':
                 if ($buyer_id) {
                     $result = $model->clearBuyerCart($buyer_id);
