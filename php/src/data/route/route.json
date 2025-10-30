@@ -13,7 +13,7 @@
       "/css/home/style_filter.css"
     ],
     "useNavbar": true,
-    "access": ["GUEST", "BUYER"]
+    "access": ["GUEST", "BUYER", "SELLER"]
   },
   "/home": {
     "html": "/pages/home.html",
@@ -27,7 +27,7 @@
       "/css/home/style_filter.css"
     ],
     "useNavbar": true,
-    "access": ["GUEST", "BUYER"]
+    "access": ["GUEST", "BUYER", "SELLER"]
   },
   "/product-detail": {
     "html": "/pages/product_detail.html",
@@ -107,6 +107,30 @@
       }
     ],
     "css": ["/css/seller/style_seller_product.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products/add": {
+    "html": "/pages/seller_product_info.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product_add.js",
+        "func": ["InitSellerProductAdd"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products/edit": {
+    "html": "/pages/seller_product_info.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product_add.js",
+        "func": ["InitSellerProductAdd"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["SELLER"]
   },
