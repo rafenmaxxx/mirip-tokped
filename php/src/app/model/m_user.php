@@ -66,21 +66,24 @@ class User
         $fields = [];
         $params = [':id' => $id];
 
-        if ($new_name) {
-            $fields[] = "name = :name";
-            $params[':name'] = $new_name;
-        }
-        if ($new_address) {
-            $fields[] = "address = :address";
-            $params[':address'] = $new_address;
-        }
-        if ($new_password) {
-            $fields[] = "password = :password";
-            $params[':password'] = $new_password;
+        // Mapping field yang akan diupdate
+        $updates = [
+            'name' => $new_name,
+            'address' => $new_address,
+            'password' => $new_password
+        ];
+
+        // Hanya tambahkan field yang tidak null dan tidak kosong
+        foreach ($updates as $field => $value) {
+            if (!is_null($value) && $value !== '') {
+                $fields[] = "$field = :$field";
+                $params[":$field"] = $value;
+            }
         }
 
+        // Jika tidak ada field yang diubah, return data lama
         if (empty($fields)) {
-            return null; // Nothing to update
+            return $this->getById($id);
         }
 
         $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE user_id = :id";
@@ -89,4 +92,5 @@ class User
 
         return $this->getById($id);
     }
+
 }
