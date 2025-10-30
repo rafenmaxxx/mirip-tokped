@@ -9,6 +9,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         $action = $_GET['action'] ?? null;
+
         switch ($action):
             case 'balance':
                 if (!isset($_SESSION['user'])) {
@@ -18,7 +19,6 @@ switch ($method) {
                     </script>";
                     exit;
                 }
-
                 $id = $_SESSION['user']['id'];
                 $res = $model->getBalance($id);
 
@@ -39,7 +39,27 @@ switch ($method) {
                     ]);
                 }
                 break;
+            case "address":
+                $id = $_SESSION['user']['id'];
+                $res = $model->getAddressById($id);
 
+                header('Content-Type: application/json');
+                if ($res) {
+                    http_response_code(200);
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Get Address Success',
+                        'data' => $res
+                    ]);
+                } else {
+                    http_response_code(400);
+                    echo json_encode([
+                        'status' => 'failed',
+                        'message' => 'Get Address Failed',
+                        'data' => $res
+                    ]);
+                }
+                break;
             default:
                 http_response_code(405);
                 echo json_encode(['status' => 'error', 'message' => 'Action not allowed']);
