@@ -26,14 +26,12 @@ switch ($route) {
         break;
     case 'auth':
         require_once __DIR__ . '/controller/c_auth.php';
-        break;    case 'detail_store':
+        break;
+    case 'detail_store':
         require_once __DIR__ . '/controller/c_store.php';
         break;
     case 'topup':
         require_once __DIR__ . '/controller/c_topup.php';
-        break;
-    case 'detail_store':
-        require_once __DIR__ . '/controller/c_store.php';
         break;
 
     default:

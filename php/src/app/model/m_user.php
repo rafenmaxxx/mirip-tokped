@@ -60,4 +60,5 @@ class User
         $stmt->execute([":id" => $user_id]);
         return $stmt->fetch();
     }
+
 }
