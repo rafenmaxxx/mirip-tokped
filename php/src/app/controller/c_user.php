@@ -47,16 +47,34 @@ switch ($method) {
     case 'PUT':
         parse_str(file_get_contents("php://input"), $_PUT);
         $id = $_SESSION['user']['id'] ?? null;
-        $new_name = $_PUT['nama'] ?? null;
-        $new_address = $_PUT['alamat'] ?? null;
-        $new_password = $_PUT['password'] ?? null;
-
-        if ($id && ($new_name || $new_address || $new_password)) {
-            $data = $model->updateUser($id, $new_name, $new_address, $new_password);
-            echo json_encode(['status' => 'success', 'data' => $data]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
+        
+        // Helper function untuk normalisasi input
+        function normalizeInput($value) {
+            // Jika tidak ada, kosong, atau string "null", return null
+            if (empty($value) || $value === 'null' || $value === 'undefined') {
+                return null;
+            }
+            // Trim whitespace
+            return trim($value);
         }
+        
+        $new_name = normalizeInput($_PUT['nama'] ?? null);
+        $new_address = normalizeInput($_PUT['alamat'] ?? null);
+        $new_password = normalizeInput($_PUT['password'] ?? null);
+
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'User tidak ditemukan']);
+            break;
+        }
+
+        // Jika tidak ada data yang akan diubah
+        if (!$new_name && !$new_address && !$new_password) {
+            echo json_encode(['status' => 'error', 'message' => 'Tidak ada data yang diubah']);
+            break;
+        }
+
+        $data = $model->updateUser($id, $new_name, $new_address, $new_password);
+        echo json_encode(['status' => 'success', 'data' => $data]);
         break;
 
     default:
