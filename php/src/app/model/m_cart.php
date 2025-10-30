@@ -177,7 +177,7 @@ class Cart
                 VALUES (:buyer_id, :product_id, :quantity)
                 ON CONFLICT (buyer_id, product_id) 
                 DO UPDATE SET 
-                    quantity = cart_items.quantity + quantity
+                    quantity = cart_items.quantity + EXCLUDED.quantity
             ");
 
             $success = $stmt->execute([
@@ -208,22 +208,33 @@ class Cart
 
     public function removeFromCart($cart_item_id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM cart_items WHERE id = :cart_item_id");
-        return $stmt->execute([':cart_item_id' => $cart_item_id]);
+        $stmt = $this->conn->prepare("DELETE FROM cart_items WHERE cart_item_id = :cart_item_id");
+        $success = $stmt->execute([':cart_item_id' => $cart_item_id]);
+        return [
+            'status' => $success ? 'success' : 'error',
+            'message' => $success ? 'Item removed from cart' : 'Failed to remove item from cart'
+        ];
     }
 
     public function removeStoreFromCart($buyer_id, $store_id)
     {
         $stmt = $this->conn->prepare("
-            DELETE ci
-            FROM cart_items ci
-            JOIN products p ON ci.product_id = p.product_id
-            WHERE ci.buyer_id = :buyer_id AND p.store_id = :store_id
+            DELETE FROM cart_items
+            WHERE buyer_id = :buyer_id 
+            AND product_id IN (
+                SELECT product_id 
+                FROM products 
+                WHERE store_id = :store_id
+            )
         ");
-        return $stmt->execute([
+        $result= $stmt->execute([
             ':buyer_id' => $buyer_id,
             ':store_id' => $store_id
         ]);
+        return [
+            'status' => $result ? 'success' : 'error',
+            'message' => $result ? 'Store items removed from cart' : 'Failed to remove store items from cart'
+        ];
     }
 
     public function clearBuyerCart($buyer_id)
@@ -266,8 +277,7 @@ class Cart
         $total = $this->getQuantity($cart_item_id);
 
         if ($total <= 1 || $total - $amount <= 0) {
-            $stmt = $this->removeFromCart($cart_item_id);
-            return;
+            return $this->removeFromCart($cart_item_id);  // ✅ return hasil
         }
 
         $stmt = $this->conn->prepare("UPDATE cart_items SET quantity = quantity - :amount WHERE cart_item_id = :cart_item_id");
@@ -275,9 +285,7 @@ class Cart
             ':amount' => $amount,
             ':cart_item_id' => $cart_item_id
         ]);
-    }
-
-    
+    }  
 
     public function getQuantityByBuyer($buyer_id)
     {
@@ -300,7 +308,7 @@ class Cart
         return $result ? (float)$result['total_price'] : 0.0;
     }  
 
-    public function getTotal($buyer_id)
+    public function getSummary($buyer_id)
     {
         $total_price = $this->getTotalPrice($buyer_id);
         $total_quantity = $this->getQuantityByBuyer($buyer_id);
