@@ -25,6 +25,64 @@ class Order
         return $stmt->fetch();
     }
 
+    public function getByUserId($user_id)
+    {
+        $sql = "
+            SELECT 
+                o.*, 
+                s.store_name, p.product_name, oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+            FROM orders o
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            JOIN stores s ON o.store_id = s.store_id
+            JOIN products p ON oi.product_id = p.product_id
+            WHERE o.buyer_id = :user_id
+            ORDER BY o.created_at DESC
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':user_id' => $user_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $orders = [];
+        foreach ($rows as $row) {
+            $order_id = $row['order_id'];
+
+            // Jika order ini belum dimasukkan ke array
+            if (!isset($orders[$order_id])) {
+                $orders[$order_id] = [
+                    'order_id' => $row['order_id'],
+                    'buyer_id' => $row['buyer_id'],
+                    'store_id' => $row['store_id'],
+                    'store_name' => $row['store_name'],
+                    'total_price' => $row['total_price'],
+                    'shipping_address' => $row['shipping_address'],
+                    'status' => $row['status'],
+                    'reject_reason' => $row['reject_reason'],
+                    'confirmed_at' => $row['confirmed_at'],
+                    'delivery_time' => $row['delivery_time'],
+                    'received_at' => $row['received_at'],
+                    'created_at' => $row['created_at'],
+                    'items' => []
+                ];
+            }
+
+            // Jika ada item terkait, tambahkan
+            if ($row['order_item_id']) {
+                $orders[$order_id]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'product_name' => $row['product_name'],
+                    'quantity' => $row['quantity'],
+                    'price_at_order' => $row['price_at_order'],
+                    'subtotal' => $row['subtotal']
+                ];
+            }
+        }
+
+        // Ubah dari associative ke numerik array
+        return array_values($orders);
+    }
+
+
     public function createOrder($buyer_id, $store_id, $total_price, $shipping_address)
     {
         $stmt = $this->conn->prepare("INSERT INTO orders (buyer_id, store_id, total_price, shipping_address, created_at) VALUES (:buyer_id, :store_id, :total_price, :shipping_address, NOW()");
