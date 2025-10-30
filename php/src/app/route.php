@@ -32,6 +32,9 @@ switch ($route) {
     case 'detail_store':
         require_once __DIR__ . '/controller/c_store.php';
         break;
+    case 'cart':
+        require_once __DIR__ . '/controller/c_cart.php';
+        break;
 
     default:
         http_response_code(404);

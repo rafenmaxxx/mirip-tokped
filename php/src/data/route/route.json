@@ -91,11 +91,23 @@
     "js": [
       {
         "path": "./lib/detail-store/detail_store.js",
-        "func": ["LoadDetailStore"]
+        "func": ["InitDetailStore"]
       }
     ],
     "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
+  },
+  "/cart": {
+    "html": "/pages/cart.html",
+    "js": [
+      {
+        "path": "./lib/cart/cart.js",
+        "func": ["InitCartPage"]
+      }
+    ],
+    "css": ["/css/cart/style_cart.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
   }
 }
