@@ -1,7 +1,15 @@
-import { LoadComponent } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { PUT } from "../../api/api.js";
+import { DELETE } from "../../api/api.js";
 import { router } from "../../../app.js";
+
+function reloadCartPage(buyer_id) {
+  GET("/api/cart", { buyer_id: buyer_id }, (data) => {
+    LoadCartItems(data);
+    // Juga refresh summary
+    refreshSummary(buyer_id);
+  }, CartItemsErr);
+}
 
 // Function untuk refresh single store card
 function refreshStoreCard(buyer_id, store_id) {
@@ -79,7 +87,6 @@ function refreshStoreCard(buyer_id, store_id) {
   );
 }
 
-// Function untuk refresh summary
 function refreshSummary(buyer_id) {
   GET("/api/cart", { buyer_id: buyer_id, action: 'summary' }, LoadSummary, SummaryErr);
 }
@@ -128,13 +135,11 @@ function attachQuantityButtonListeners(container = document) {
       if (quantity > 1) {
         PUT("/api/cart", { cart_item_id: cart_item_id, action: "decreament" }, (response) => {
           if (response.status === "success") {
-            // Refresh store card dan summary
             refreshStoreCard(buyer_id, store_id);
             refreshSummary(buyer_id);
           }
         }, Increamenterr);
       } else {
-        // Show modal untuk konfirmasi delete dengan type 'item'
         openModal(cart_item_id, store_id, buyer_id, 'item');
       }
     });
@@ -142,6 +147,7 @@ function attachQuantityButtonListeners(container = document) {
 }
 
 function LoadCartItems(data) {
+  console.log("LoadCartItems received:", data); 
   const container = document.getElementById("cart-data");
   if (!container) return;
   
@@ -298,37 +304,81 @@ function closeModal() {
 }
 
 function confirmDelete() {
-  if (deleteType === 'store' && currentDeleteStoreId && currentDeleteBuyerId) {
-    // Hapus semua item dari toko
-    GET("/api/cart", { 
-      action: "delete", 
+  const buyerIdToReload = currentDeleteBuyerId;
+  
+  console.log("confirmDelete called with:", {
+    deleteType,
+    currentDeleteCartItemId,
+    currentDeleteStoreId,
+    currentDeleteBuyerId,
+    buyerIdToReload 
+  });
+
+
+  if (!buyerIdToReload) {
+    console.error("CRITICAL: buyer_id is null or undefined!");
+    alert("Error: Buyer ID tidak ditemukan");
+    closeModal();
+    return; 
+  }
+
+  if (deleteType === 'store' && currentDeleteStoreId && buyerIdToReload) {
+    console.log("Deleting store with buyer_id:", buyerIdToReload);
+    
+    DELETE("/api/cart", { 
+      action: "remove_store", 
       store_id: currentDeleteStoreId, 
-      buyer_id: currentDeleteBuyerId 
+      buyer_id: buyerIdToReload 
     }, (response) => {
-      console.log("Store removed:", currentDeleteStoreId);
-      // Reload halaman karena store card dihapus
-      router.reload();
-      closeModal();
-    }, (err) => {
-      console.error("Error deleting store:", err);
-      closeModal();
-    });
-  } else if (deleteType === 'item' && currentDeleteCartItemId) {
-    // Hapus single item
-    PUT("/api/cart", { 
-      cart_item_id: currentDeleteCartItemId, 
-      action: "decreament" 
-    }, (response) => {
+      console.log("Store delete response:", response);
+      
       if (response.status === "success") {
-        // Refresh store card dan summary
-        refreshStoreCard(currentDeleteBuyerId, currentDeleteStoreId);
-        refreshSummary(currentDeleteBuyerId);
+        console.log("Store removed successfully");
+        console.log("Calling reloadCartPage with buyer_id:", buyerIdToReload);
+        closeModal();
+        
+        reloadCartPage(buyerIdToReload);
+        
+      } else {
+        closeModal();
+        alert("Gagal menghapus store: " + (response.message || ""));
       }
-      closeModal();
-    }, (err) => {
-      console.error("Error deleting item:", err);
-      closeModal();
+    }, () => {}
+  );
+    
+  } else if (deleteType === 'item' && currentDeleteCartItemId && buyerIdToReload) {
+    console.log("Deleting item with buyer_id:", buyerIdToReload);
+    
+    DELETE("/api/cart", { 
+      cart_item_id: currentDeleteCartItemId, 
+      action: "remove_item"
+    }, (response) => {
+      console.log("Item delete response:", response);
+      
+      if (response.status === "success") {
+        console.log("Item removed successfully");
+        console.log("Calling reloadCartPage with buyer_id:", buyerIdToReload);
+        closeModal();
+        
+        reloadCartPage(buyerIdToReload);
+        
+      } else {
+        closeModal();
+        alert("Gagal menghapus item: " + (response.message || ""));
+      }
+    }, () => {}
+  );
+    
+  } else {
+    console.error("Missing required data:", {
+      deleteType,
+      currentDeleteCartItemId,
+      currentDeleteStoreId,
+      currentDeleteBuyerId,
+      buyerIdToReload
     });
+    closeModal();
+    alert("Data tidak lengkap untuk menghapus");
   }
 }
 
@@ -406,11 +456,15 @@ function SummaryErr(err) {
   }
 }
 
-export async function LoadCartPage() {
+export async function InitCartPage() {
   let param = new URLSearchParams(window.location.search);
   const param_id = param.get("buyer_id");
   
-  const buyer_id = param_id || 6; // Default buyer_id
+  const buyer_id = param_id || null;
+  if (!buyer_id) {
+    router.navigateTo("/home");
+    return;
+  }
   
   GET("/api/cart", { buyer_id: buyer_id }, LoadCartItems, CartItemsErr);
   GET("/api/cart", { buyer_id: buyer_id, action: 'summary' }, LoadSummary, SummaryErr);
