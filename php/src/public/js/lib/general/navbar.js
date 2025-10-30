@@ -1,6 +1,7 @@
 import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
 import { LoadComponent, RemoveComponent } from "../../util/component_loader.js";
+import { showModalConfirmation } from "./modal.js";
 
 let debounceTimer = null;
 let filterActive = false;
@@ -53,17 +54,23 @@ function morphAuthBtn(data) {
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
     const logoutBtn = document.getElementById("btn-logout");
     logoutBtn.addEventListener("click", () => {
-      POST(
-        "/api/logout",
-        {},
-        (data) => {
-          if (data.status) {
-            router.navigateTo("/");
-            // ubah navbar
-            morphAuthBtn({ status: "error" });
-          } else {
-            alert("Logout gagal: " + data.message);
-          }
+      showModalConfirmation(
+        "Yakin Log Out ? ",
+        () => {
+          POST(
+            "/api/logout",
+            {},
+            (data) => {
+              if (data.status) {
+                router.navigateTo("/");
+                // ubah navbar
+                morphAuthBtn({ status: "error" });
+              } else {
+                alert("Logout gagal: " + data.message);
+              }
+            },
+            () => {}
+          );
         },
         () => {}
       );
