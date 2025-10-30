@@ -60,4 +60,33 @@ class User
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
+
+    public function updateUser($id, $new_name = null, $new_address = null, $new_password = null)
+    {
+        $fields = [];
+        $params = [':id' => $id];
+
+        if ($new_name) {
+            $fields[] = "name = :name";
+            $params[':name'] = $new_name;
+        }
+        if ($new_address) {
+            $fields[] = "address = :address";
+            $params[':address'] = $new_address;
+        }
+        if ($new_password) {
+            $fields[] = "password = :password";
+            $params[':password'] = $new_password;
+        }
+
+        if (empty($fields)) {
+            return null; // Nothing to update
+        }
+
+        $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE user_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+
+        return $this->getById($id);
+    }
 }
