@@ -16,94 +16,6 @@ function reloadCartPage() {
   );
 }
 
-// Function untuk refresh single store card
-function refreshStoreCard(store_id) {
-  GET(
-    "/api/cart",
-    { store_id: store_id },
-    (data) => {
-      //console.log("Data received:", data); // ← tambahkan log
-
-      // Pastikan data valid
-      if (
-        !data ||
-        data.status !== "success" ||
-        !data.data ||
-        !data.data.store
-      ) {
-        //console.error("Invalid data structure:", data);
-        return;
-      }
-
-      const storeData = data.data.store;
-      const storeCard = document.querySelector(
-        `[data-store-card-id="${store_id}"]`
-      );
-
-      if (!storeCard) {
-        //console.error("Store card not found for store_id:", store_id);
-        return;
-      }
-
-      // Update store card content
-      const details = storeData.items
-        .map((detail, dindex) => {
-          const price = detail.price.toLocaleString("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-          });
-
-          const imageUrl =
-            detail.image && detail.image !== ""
-              ? `/api/image?file=${detail.image}`
-              : `https://picsum.photos/200/200?random=${dindex + 1}`;
-
-          return ` 
-          <div class="cart_item_detail">
-            <div class="cart_item_image">
-                <img src="${imageUrl}">
-            </div>
-            <div class="cart_item_info_container">
-              <div class="cart_item_info">
-                <p class="cart_item_name">${detail.product_name}</p>
-                <p class="cart_item_price">${price}</p>
-              </div>
-              <div class="cart_quantity">
-                  <button class="btn btn-decreament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${store_id}">-</button>
-                  <span class="quantity_value" id="quantity-value-${detail.cart_item_id}" data-stock="${detail.stock}">${detail.quantity}</span>
-                  <button class="btn btn-increament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${store_id}">+</button>
-              </div>
-            </div>
-          </div>`;
-        })
-        .join("");
-
-      const detailsContainer = storeCard.querySelector(".cart_item_details");
-      const subtotalContainer = storeCard.querySelector(".cart_subtotal");
-
-      if (detailsContainer) {
-        detailsContainer.innerHTML = details;
-      }
-
-      if (subtotalContainer) {
-        subtotalContainer.innerHTML = storeData.subtotal.toLocaleString(
-          "id-ID",
-          {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-          }
-        );
-      }
-
-      // Re-attach event listeners
-      attachQuantityButtonListeners(storeCard);
-    },
-    () => {}
-  );
-}
-
 function refreshSummary() {
   GET("/api/cart", { action: "summary" }, LoadSummary, SummaryErr);
 }
@@ -137,6 +49,7 @@ function attachQuantityButtonListeners(container = document) {
               // refreshStoreCard(store_id);
               const newQty = quantity + 1;
               quantityValue.innerHTML = newQty;
+              updateStoreSubtotal(store_id);
               refreshSummary();
             }
           },
@@ -168,7 +81,10 @@ function attachQuantityButtonListeners(container = document) {
           { cart_item_id: cart_item_id, action: "decreament" },
           (response) => {
             if (response.status === "success") {
-              refreshStoreCard(store_id);
+              // refreshStoreCard(store_id);
+              const newQty = quantity - 1;
+              quantityValue.innerHTML = newQty;
+              updateStoreSubtotal(store_id);
               refreshSummary();
             }
           },
@@ -179,6 +95,37 @@ function attachQuantityButtonListeners(container = document) {
       }
     });
   });
+}
+
+function updateStoreSubtotal(store_id) {
+  const storeCard = document.querySelector(
+    `[data-store-card-id="${store_id}"]`
+  );
+  if (!storeCard) return;
+
+  const itemPrices = storeCard.querySelectorAll(".cart_item_price");
+  const itemQuantities = storeCard.querySelectorAll(".quantity_value");
+
+  let subtotal = 0;
+
+  itemPrices.forEach((priceEl, index) => {
+    const priceText = priceEl.textContent.replace(/[^\d]/g, "");
+    const price = parseInt(priceText) || 0;
+    const quantity = parseInt(itemQuantities[index].textContent) || 0;
+
+    subtotal += price * quantity;
+  });
+
+  const formattedSubtotal = subtotal.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
+
+  const subtotalContainer = storeCard.querySelector(".cart_subtotal");
+  if (subtotalContainer) {
+    subtotalContainer.innerHTML = formattedSubtotal;
+  }
 }
 
 function LoadCartItems(data) {
