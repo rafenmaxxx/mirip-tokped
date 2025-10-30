@@ -1,6 +1,7 @@
 import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
 import { LoadComponent, RemoveComponent } from "../../util/component_loader.js";
+import { showModalConfirmation } from "./modal.js";
 
 let debounceTimer = null;
 let filterActive = false;
@@ -9,37 +10,74 @@ function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
 }
 
+function InitBalance() {
+  GET(
+    "/api/user",
+    { action: "balance" },
+    (data) => {
+      const res = data.data;
+      const userBalance = document.getElementById("userBalance");
+      const val = res.balance.toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+      });
+      userBalance.innerHTML = val;
+    },
+    () => {}
+  );
+}
+
+function HandleTopUp(value) {
+  POST(
+    "/api/topup",
+    { value: value },
+    (data) => {
+      if (data.status == "success") {
+        alert("Top Up Berhasil");
+        InitBalance();
+      } else {
+        alert("Top Up Gagal");
+      }
+    },
+    () => {}
+  );
+}
+
 function morphAuthBtn(data) {
   const btn = document.getElementById("navbar-auth-btn");
   const chart = document.getElementById("navbar-chart");
-  const balance = document.getElementById("navbar-balance");
+  const balance = document.getElementById("balance-btn");
   if (data.status == "success") {
     // udah login
     btn.innerHTML = `<a href="/profile"><button class="btn btn-login">Profile</button></a>
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
     const logoutBtn = document.getElementById("btn-logout");
     logoutBtn.addEventListener("click", () => {
-      POST(
-        "/api/logout",
-        {},
-        (data) => {
-          if (data.status) {
-            router.navigateTo("/");
-            // ubah navbar
-            morphAuthBtn({ status: "error" });
-          } else {
-            alert("Logout gagal: " + data.message);
-          }
+      showModalConfirmation(
+        "Yakin Log Out ? ",
+        () => {
+          POST(
+            "/api/logout",
+            {},
+            (data) => {
+              if (data.status) {
+                router.navigateTo("/");
+                // ubah navbar
+                morphAuthBtn({ status: "error" });
+              } else {
+                alert("Logout gagal: " + data.message);
+              }
+            },
+            () => {}
+          );
         },
-        (err) => {
-          if (err) {
-            alert("Logout gagal: error jaringan");
-          }
-        }
+        () => {}
       );
     });
+    InitBalance();
     chart.addEventListener("click", () => {
-      router.navigateTo("/cart?buyer_id=" + data.data.id);
+      router.navigateTo("/cart");
     });
   } else {
     // blom login
@@ -97,12 +135,16 @@ function showSuggestion(query) {
     );
   }, 500);
 }
+let topupActive = false;
 
 export function InitNavbar() {
   const searchInput = document.getElementById("searchInput");
-  const searchBtn = document.getElementById("searchBtn"); 
+  const searchBtn = document.getElementById("searchBtn");
   const logo = document.getElementById("navbar-logo");
   const filterBtn = document.getElementById("filter-btn");
+  const topupBtn = document.getElementById("balance-btn");
+  const filterContainer = document.getElementById("filter-id");
+  const balanceContainer = document.getElementById("balance-id");
 
   searchBtn.addEventListener("click", () => {
     HandleSearchNavbar(searchInput.value.trim());
@@ -116,7 +158,13 @@ export function InitNavbar() {
     showSuggestion(e.target.value);
   });
 
+  // --- FILTER ---
   filterBtn.addEventListener("click", () => {
+    if (topupActive) {
+      RemoveComponent("balance-id");
+      topupActive = false;
+      balanceContainer.classList.remove("active");
+    }
     if (!filterActive) {
       LoadComponent("filter-id", "/components/home/filter.html", () => {
         const applyBtn = document.getElementById("applyFilterBtn");
@@ -149,11 +197,47 @@ export function InitNavbar() {
         });
       });
       filterActive = true;
+      filterContainer.classList.add("active");
     } else {
       RemoveComponent("filter-id");
       filterActive = false;
+      filterContainer.classList.remove("active");
     }
   });
-  // CEK USER DAH LOGIN APA BELOM
+
+  // --- TOP UP BALANCE ---
+  topupBtn?.addEventListener("click", () => {
+    if (filterActive) {
+      RemoveComponent("filter-id");
+      filterActive = false;
+      filterContainer.classList.remove("active");
+    }
+    if (!topupActive) {
+      LoadComponent("balance-id", "/components/general/balance.html", () => {
+        const topupInput = document.getElementById("topupAmount");
+        const submitBtn = document.getElementById("topupBtn");
+
+        submitBtn.addEventListener("click", (e) => {
+          const amount = parseFloat(topupInput.value);
+          if (!amount || amount <= 0) {
+            e.preventDefault();
+            alert("Masukkan nominal top up yang valid!");
+            return;
+          } else {
+            HandleTopUp(amount);
+          }
+        });
+      });
+      topupActive = true;
+      balanceContainer.classList.add("active");
+    } else {
+      RemoveComponent("balance-id");
+
+      topupActive = false;
+      balanceContainer.classList.remove("active");
+    }
+  });
+
+  // CEK USER DAH LOGIN APA BELUM
   GET("/api/auth", {}, morphAuthBtn, () => {});
 }

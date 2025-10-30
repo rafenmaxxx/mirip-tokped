@@ -29,16 +29,19 @@ switch ($route) {
         break;
     case 'auth':
         require_once __DIR__ . '/controller/c_auth.php';
-        break;    case 'detail_store':
-        require_once __DIR__ . '/controller/c_store.php';
         break;
     case 'detail_store':
         require_once __DIR__ . '/controller/c_store.php';
         break;
+    case 'topup':
+        require_once __DIR__ . '/controller/c_topup.php';
+        break;
     case 'cart':
         require_once __DIR__ . '/controller/c_cart.php';
         break;
-
+    case 'checkout':
+        require_once __DIR__ . '/controller/c_checkout.php';
+        break;
     default:
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Route tidak ditemukan']);

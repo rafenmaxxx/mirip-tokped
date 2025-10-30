@@ -7,10 +7,12 @@
     ],
     "css": [
       "/css/general/style_navbar.css",
+      "/css/general/style_balance.css",
       "/css/style.css",
       "/css/home/style_sliding_card.css",
       "/css/home/style_home.css",
-      "/css/home/style_filter.css"
+      "/css/home/style_filter.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
@@ -23,8 +25,10 @@
     ],
     "css": [
       "/css/home/style_sliding_card.css",
+      "/css/general/style_balance.css",
       "/css/home/style_home.css",
-      "/css/home/style_filter.css"
+      "/css/home/style_filter.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
@@ -74,7 +78,12 @@
   },
   "/register/seller": {
     "html": "/pages/register_seller.html",
-    "js": [],
+    "js": [
+      {
+        "path": "./lib/general/quill.js",
+        "func": ["InitQuill"]
+      }
+    ],
     "css": ["/css/register/style_register.css", "/css/style.css"],
     "useNavbar": false,
     "access": ["GUEST"]

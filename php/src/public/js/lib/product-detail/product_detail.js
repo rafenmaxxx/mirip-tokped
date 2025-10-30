@@ -4,8 +4,13 @@ import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 
 function LoadDetail(data) {
   const res = data.data;
+  const price = res.price.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
   ChangeInnerHtmlById("p-name", res.product_name);
-  ChangeInnerHtmlById("p-price", "Rp." + res.price);
+  ChangeInnerHtmlById("p-price", price);
   ChangeInnerHtmlById("p-desc", res.description);
   ChangeInnerHtmlById(
     "p-stock",
@@ -24,7 +29,9 @@ function LoadDetail(data) {
     `<img src="${s_img_url}" alt="${res.store_name} Logo" class="seller-avatar">`
   );
   const storeBtn = document.getElementById("v-store");
-  storeBtn.setAttribute("href", "/store?store_id=" + res.store_id);
+  storeBtn.addEventListener("click", () => {
+    router.navigateTo("/store?store_id=" + res.store_id);
+  });
 }
 
 function IsErr(err) {}

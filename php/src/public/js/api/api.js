@@ -83,7 +83,6 @@ export function POST(url, params = {}, callback, err) {
     if (xhr.status === 200) {
       try {
         const data = JSON.parse(xhr.responseText);
-        err(false);
         callback(data);
       } catch (parseErr) {
         console.error("JSON parse error:", parseErr);

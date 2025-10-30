@@ -47,6 +47,20 @@ class User
         }
     }
 
+    public function addBalance($user_id, $value)
+    {
+        $stmt = $this->conn->prepare("UPDATE users SET balance = balance + :val WHERE user_id = :id");
+        $stmt->execute([":id" => $user_id, ":val" => $value]);
+        return $stmt->fetchAll();
+    }
+
+    public function getBalance($user_id)
+    {
+        $stmt = $this->conn->prepare("SELECT balance FROM users WHERE user_id = :id");
+        $stmt->execute([":id" => $user_id]);
+        return $stmt->fetch();
+    }
+
     public function getAll()
     {
         $stmt = $this->conn->prepare("SELECT * FROM users");
@@ -57,6 +71,13 @@ class User
     public function getById($id)
     {
         $stmt = $this->conn->prepare("SELECT * FROM users WHERE user_id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
+
+    public function getAddressById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT address FROM users WHERE user_id = :id");
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
