@@ -35,6 +35,9 @@ switch ($route) {
     case 'cart':
         require_once __DIR__ . '/controller/c_cart.php';
         break;
+    case 'profile':
+        require_once __DIR__ . '/controller/c_user.php';
+        break;
 
     default:
         http_response_code(404);
