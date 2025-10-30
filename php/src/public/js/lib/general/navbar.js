@@ -9,10 +9,32 @@ function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
 }
 
+function InitBalance() {
+  GET(
+    "/api/user",
+    { action: "balance" },
+    (data) => {
+      const res = data.data;
+      const userBalance = document.getElementById("userBalance");
+      const val = res.balance.toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+      });
+      userBalance.innerHTML = val;
+    },
+    () => {}
+  );
+}
+
+function HandleTopUp(value) {
+  POST("/api/topup", { valuer: value }, () => {});
+}
+
 function morphAuthBtn(data) {
   const btn = document.getElementById("navbar-auth-btn");
   const chart = document.getElementById("navbar-chart");
-  const balance = document.getElementById("navbar-balance");
+  const balance = document.getElementById("balance-btn");
   if (data.status == "success") {
     // udah login
     btn.innerHTML = `<a href="/profile"><button class="btn btn-login">Profile</button></a>
@@ -31,13 +53,10 @@ function morphAuthBtn(data) {
             alert("Logout gagal: " + data.message);
           }
         },
-        (err) => {
-          if (err) {
-            alert("Logout gagal: error jaringan");
-          }
-        }
+        () => {}
       );
     });
+    InitBalance();
   } else {
     // blom login
     btn.innerHTML = ` <a href="/login"><button class="btn btn-login">Login</button></a>
@@ -94,12 +113,16 @@ function showSuggestion(query) {
     );
   }, 500);
 }
+let topupActive = false;
 
 export function InitNavbar() {
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
   const logo = document.getElementById("navbar-logo");
   const filterBtn = document.getElementById("filter-btn");
+  const topupBtn = document.getElementById("balance-btn");
+  const filterContainer = document.getElementById("filter-id");
+  const balanceContainer = document.getElementById("balance-id");
 
   searchBtn.addEventListener("click", () => {
     HandleSearchNavbar(searchInput.value.trim());
@@ -113,7 +136,13 @@ export function InitNavbar() {
     showSuggestion(e.target.value);
   });
 
+  // --- FILTER ---
   filterBtn.addEventListener("click", () => {
+    if (topupActive) {
+      RemoveComponent("balance-id");
+      topupActive = false;
+      balanceContainer.classList.remove("active");
+    }
     if (!filterActive) {
       LoadComponent("filter-id", "/components/home/filter.html", () => {
         const applyBtn = document.getElementById("applyFilterBtn");
@@ -146,11 +175,62 @@ export function InitNavbar() {
         });
       });
       filterActive = true;
+      filterContainer.classList.add("active");
     } else {
       RemoveComponent("filter-id");
       filterActive = false;
+      filterContainer.classList.remove("active");
     }
   });
-  // CEK USER DAH LOGIN APA BELOM
+
+  // --- TOP UP BALANCE ---
+  topupBtn?.addEventListener("click", () => {
+    if (filterActive) {
+      RemoveComponent("filter-id");
+      filterActive = false;
+      filterContainer.classList.remove("active");
+    }
+    if (!topupActive) {
+      LoadComponent("balance-id", "/components/general/balance.html", () => {
+        const topupInput = document.getElementById("topupAmount");
+        const submitBtn = document.getElementById("topupBtn");
+
+        submitBtn.addEventListener("click", () => {
+          const amount = parseFloat(topupInput.value);
+          if (!amount || amount <= 0) {
+            alert("Masukkan nominal top up yang valid!");
+            return;
+          }
+
+          POST(
+            "/api/topup",
+            { amount },
+            (res) => {
+              if (res.status === "success") {
+                alert("Top up berhasil!");
+                topupInput.value = "";
+                RemoveComponent("topup-id");
+                topupActive = false;
+              } else {
+                alert("Top up gagal: " + res.message);
+              }
+            },
+            () => {
+              alert("Terjadi error jaringan");
+            }
+          );
+        });
+      });
+      topupActive = true;
+      balanceContainer.classList.add("active");
+    } else {
+      RemoveComponent("balance-id");
+
+      topupActive = false;
+      balanceContainer.classList.remove("active");
+    }
+  });
+
+  // CEK USER DAH LOGIN APA BELUM
   GET("/api/auth", {}, morphAuthBtn, () => {});
 }
