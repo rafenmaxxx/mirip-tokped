@@ -46,4 +46,18 @@ class User
             ];
         }
     }
+
+    public function getAll()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM users");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE user_id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
 }
