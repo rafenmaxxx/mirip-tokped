@@ -6,7 +6,6 @@ import { router } from "../../../app.js";
 function reloadCartPage(buyer_id) {
   GET("/api/cart", { buyer_id: buyer_id }, (data) => {
     LoadCartItems(data);
-    // Juga refresh summary
     refreshSummary(buyer_id);
   }, CartItemsErr);
 }
@@ -424,8 +423,19 @@ function LoadSummary(data) {
             <button class="btn btn-checkout-summary" id="checkout-btn">Checkout Now</button>
         </div>
     `;
-    
     container.innerHTML = html;
+
+    const checkout = document.getElementById("checkout-btn");
+    if (checkout) {
+      GET("/api/auth", {}, (res) => {
+        console.log(res) ;
+        if (res.status) {
+          checkout.addEventListener("click", () => {
+            router.navigateTo("/checkout?buyer_id=" + res.data.id);
+          });
+        }
+      }, () => {});
+    }
   } else {
     container.innerHTML = data.message || "No data available";
   };
