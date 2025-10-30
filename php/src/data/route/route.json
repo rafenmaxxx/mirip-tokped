@@ -92,5 +92,17 @@
     "css": [],
     "useNavbar": false,
     "access": ["GUEST", "BUYER", "SELLER"]
+  },
+  "/store": {
+    "html": "/pages/detail_store.html",
+    "js": [
+      {
+        "path": "./lib/detail-store/detail_store.js",
+        "func": ["LoadDetailStore"]
+      }
+    ],
+    "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["GUEST", "BUYER", "SELLER"]
   }
 }

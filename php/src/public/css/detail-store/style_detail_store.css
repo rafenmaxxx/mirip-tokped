@@ -1,0 +1,176 @@
+/* Kontainer utama, selalu center dan max-width agar stabil */
+.detail_store_page {
+  width: 90%;           
+  max-width: 1200px;    
+  margin: 0 auto;      
+  font-family: 'Inter', sans-serif;
+  padding: 2rem 1rem;   
+  box-sizing: border-box;
+  margin-top: 2rem;
+}
+
+.detail_store_profile {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto; 
+  align-self: center;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  font-family: "Inter", sans-serif;
+  background: #fff;
+  padding: 2rem;
+}
+
+.store_card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; 
+  padding: 1rem;
+}
+
+.store_image img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.store_desc {
+  display: flex;
+  flex-direction: column;
+}
+
+.store_name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.store_description {
+  font-size: 1rem;
+  color: #555;
+}
+
+.detail_store_content {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.product_catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;          
+  margin-top: 2rem;
+} 
+
+.product_card {
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.product_card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product_desc {
+  width: 100%;
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+}
+
+.product_image img {
+  width: 160px;
+  height:160px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.product_name {
+  font-weight: 600;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.product_price {
+  color: #00a14b;
+  font-weight: 700;
+  margin: 0.3rem 0;
+  text-align: center;
+}
+
+.product_store {
+  font-size: 0.85rem;
+  color: #555;
+  width: 100%; 
+  text-align: right;
+}
+
+.product_buttons {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width:auto;
+}
+
+.btn-checkout {
+  background-color: #00a14b;
+  color: white;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.btn-checkout:hover {
+  background-color: #009042;
+}
+
+.btn-cart {
+  background-color: transparent;
+  border: 1px solid #00a14b;
+  color: #00a14b;
+  font-weight: bold;
+}
+
+.btn-cart:hover {
+  background-color: #00a14b;
+  color: white;
+}
+
+/* Desktop sedang */
+@media (max-width: 1400px) {
+  .product_catalog {
+    grid-template-columns: repeat(3, 1fr); /* 3 kolom */
+  }
+}
+
+/* Responsif untuk mobile */
+@media (max-width: 768px) {
+  .detail_store_page {
+    width: 95%;
+    padding: 1rem;
+  }
+  
+  .product_card {
+    padding: 0.8rem;
+  }
+}
