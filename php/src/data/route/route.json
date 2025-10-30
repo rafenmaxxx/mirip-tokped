@@ -121,5 +121,17 @@
     "css": ["/css/checkout/style_checkout.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["BUYER"]
+  },
+  "/order-history": {
+    "html": "/pages/order_history.html",
+    "js": [
+      {
+        "path": "./lib/order-history/order-history.js",
+        "func": ["InitOrderHistoryPage"]
+      }
+    ],
+    "css": ["/css/order-history/style_order_history.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
   }
 }
