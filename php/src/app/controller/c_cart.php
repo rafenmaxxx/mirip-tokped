@@ -20,20 +20,11 @@ switch ($method) {
             $data = $model->getByStoreAndBuyer($buyer_id, $store_id);
         } else if ($buyer_id && $action === 'summary') {
             // ada buyer_id dan action=summary
-            $data = $model->getTotal($buyer_id);
+            $data = $model->getSummary($buyer_id);
         } else if ($buyer_id) {
             // Jika ada parameter buyer_id
             $data = $model->getByBuyer($buyer_id);
-        } else if ($action === 'delete' && $id) {
-            // Jika ada parameter action=delete dan id
-            $data = $model->removeFromCart($id);
-        } else if ($action === 'delete' && $store_id && $buyer_id) {
-            // Jika ada parameter action=delete dan store_id dan buyer_id
-            $data = $model->removeStoreFromCart($buyer_id, $store_id);
-        } else if ($action === 'clear' && $buyer_id) {
-            // Jika ada parameter action=clear dan buyer_id
-            $data = $model->clearBuyerCart($buyer_id);
-        } else {
+         } else {
             // Jika tidak ada parameter
             $data = $model->getAll();
         }
@@ -48,36 +39,8 @@ switch ($method) {
        
         switch ($action) {
             case 'add':
-                $buyer_id = $_POST['buyer_id'] ?? null;
-                $product_id = $_POST['product_id'] ?? null;
-                $quantity = $_POST['quantity'] ?? 1;
-
                 if ($buyer_id && $product_id) {
                     $result = $model->addToCart($buyer_id, $product_id, 1);
-                    echo json_encode($result);
-                } else {
-                    http_response_code(400);
-                    echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
-                }
-                break;
-
-            case 'remove':
-                $cart_item_id = $_POST['cart_item_id'] ?? null;
-
-                if ($cart_item_id) {
-                    $result = $model->removeFromCart($cart_item_id);
-                    echo json_encode($result);
-                } else {
-                    http_response_code(400);
-                    echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
-                }
-                break;
-
-            case 'clear':
-                $buyer_id = $_POST['buyer_id'] ?? null;
-
-                if ($buyer_id) {
-                    $result = $model->clearBuyerCart($buyer_id);
                     echo json_encode($result);
                 } else {
                     http_response_code(400);
@@ -130,7 +93,51 @@ switch ($method) {
             echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
         }
         break;
+    case 'DELETE':
+        $cart_item_id = $_GET['cart_item_id'] ?? null;
+        $action = $_GET['action'] ?? null;
+        $buyer_id = $_GET['buyer_id'] ?? null;
+        $store_id = $_GET['store_id'] ?? null;
 
+        switch ($action) {
+            case 'remove_item':
+                if ($cart_item_id) {
+                    $result = $model->removeFromCart($cart_item_id);
+                    echo json_encode($result);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
+                }
+                break;
+
+            case 'remove_store':
+                
+                if ($buyer_id && $store_id) {
+                    $result = $model->removeStoreFromCart($buyer_id, $store_id);
+                    echo json_encode($result);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
+                }
+                exit;
+                break;
+                
+            case 'clear':
+                if ($buyer_id) {
+                    $result = $model->clearBuyerCart($buyer_id);
+                    echo json_encode($result);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
+                }
+                break;
+
+            default:
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
+                break;
+        }
+        break;
     default:
         http_response_code(405);
         echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
