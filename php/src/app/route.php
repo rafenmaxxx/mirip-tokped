@@ -27,6 +27,9 @@ switch ($route) {
     case 'auth':
         require_once __DIR__ . '/controller/c_auth.php';
         break;
+    case 'topup':
+        require_once __DIR__ . '/controller/c_topup.php';
+        break;
     default:
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Route tidak ditemukan']);

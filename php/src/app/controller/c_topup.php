@@ -1,6 +1,5 @@
-
 <?php
-require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_user.php';
 
 $model = new User();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -20,10 +19,12 @@ switch ($method) {
         $data = $model->addBalance($id, $value);
         if ($data) {
             http_response_code(200);
-            echo json_encode(['status' => 'success', 'message' => 'TopUp Success', 'data' => $data]);
+            echo json_encode(['status' => 'success', 'data' => $data]);
+            break;
         } else {
             http_response_code(400);
-            echo json_encode(['status' => 'failed', 'message' => 'TopUp Failed', 'data' => $data]);
+            echo json_encode(['status' => 'failed', 'data' => $data]);
+            break;
         }
 
     default:

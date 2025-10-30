@@ -76,7 +76,12 @@
   },
   "/register/seller": {
     "html": "/pages/register_seller.html",
-    "js": [],
+    "js": [
+      {
+        "path": "./lib/general/quill.js",
+        "func": ["InitQuill"]
+      }
+    ],
     "css": ["/css/register/style_register.css", "/css/style.css"],
     "useNavbar": false,
     "access": ["GUEST"]

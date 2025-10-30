@@ -28,7 +28,19 @@ function InitBalance() {
 }
 
 function HandleTopUp(value) {
-  POST("/api/topup", { valuer: value }, () => {});
+  POST(
+    "/api/topup",
+    { value: value },
+    (data) => {
+      if (data.status == "success") {
+        alert("Top Up Berhasil");
+        InitBalance();
+      } else {
+        alert("Top Up Gagal");
+      }
+    },
+    () => {}
+  );
 }
 
 function morphAuthBtn(data) {
@@ -195,30 +207,15 @@ export function InitNavbar() {
         const topupInput = document.getElementById("topupAmount");
         const submitBtn = document.getElementById("topupBtn");
 
-        submitBtn.addEventListener("click", () => {
+        submitBtn.addEventListener("click", (e) => {
           const amount = parseFloat(topupInput.value);
           if (!amount || amount <= 0) {
+            e.preventDefault();
             alert("Masukkan nominal top up yang valid!");
             return;
+          } else {
+            HandleTopUp(amount);
           }
-
-          POST(
-            "/api/topup",
-            { amount },
-            (res) => {
-              if (res.status === "success") {
-                alert("Top up berhasil!");
-                topupInput.value = "";
-                RemoveComponent("topup-id");
-                topupActive = false;
-              } else {
-                alert("Top up gagal: " + res.message);
-              }
-            },
-            () => {
-              alert("Terjadi error jaringan");
-            }
-          );
         });
       });
       topupActive = true;
