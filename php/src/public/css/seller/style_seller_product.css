@@ -1,18 +1,17 @@
 .main-container {
-    max-width: 1400px; /* Lebar maksimum konten */
+    max-width: 1400px;
     margin: 0 auto;
     padding: 25px;
     border-radius: 10px;
     background-color: #F9F9F9;
-    margin-top: 70px; /* Memberi jarak 20px dari elemen di atasnya (navbar) */
-    /* --- TAMBAHKAN INI --- */
+    margin-top: 70px;
     min-height: 100%;
     display: flex;
     flex-direction: column;
 
 }
 
-/* ======================= HEADER KONTROL ======================= */
+/* header */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -25,37 +24,33 @@
     gap: 15px;
 }
 
-/* 1. Atur container utamanya */
 .search-bar {
-    display: flex;         /* PENTING: Membuat input dan button sejajar */
-    align-items: center;   /* Membuatnya sejajar di tengah (vertikal) */
+    display: flex;
+    align-items: center;
     border: 1px solid #BDBDBD;
     border-radius: 6px;
     background-color: white;
-    overflow: hidden;        /* Memastikan button menyatu dengan border */
+    overflow: hidden;
     width: 250px;
 }
 
-/* 2. Atur input field */
 .search-bar input {
-    flex-grow: 1;        /* Membuat input mengisi sisa ruang */
+    flex-grow: 1;
     border: none;
     outline: none;
     padding: 10px 12px;
     font-size: 14px;
 }
 
-/* 3. Atur tombol pencarian */
 .search-bar .search-btn {
     border: none;
-    background: none;      /* Hapus latar belakang tombol */
+    background: none;
     cursor: pointer;
-    padding: 0 12px;       /* Jarak ikon dari sisi kanan */
+    padding: 0 12px;
     display: flex;
     align-items: center;
 }
 
-/* 4. Atur gambar di dalam tombol */
 .search-bar .search-btn img {
     width: 40px;
     height: 40px;
@@ -63,28 +58,20 @@
 }
 
 .filter-select {
-    /* === 1. SAMAKAN TINGGI (PADDING) === */
-    /* Samakan dengan padding vertikal search-bar */
-    padding-top: 9px;    /* Sesuaikan angka ini */
-    padding-bottom: 9px;  /* Sesuaikan angka ini */
-    
-    /* === 2. SERAGAMKAN LEBAR === */
-    min-width: 150px; /* Beri lebar minimum (sesuaikan angkanya) */
-
-    /* === Style Dasar Anda (biarkan saja) === */
+    padding-top: 9px;
+    padding-bottom: 9px;
+    min-width: 150px;
     border: 1px solid #BDBDBD;
     border-radius: 6px;
     background-color: white;
     font-size: 14px;
     cursor: pointer;
-    
-    /* Biarkan padding kiri dan kanan default */
     padding-left: 12px;
     padding-right: 12px;
 }
 
 .btn-add {
-    background-color: #00AA5B; /* Hijau Tokopedia */
+    background-color: #00AA5B;
     color: white;
     padding: 10px 18px;
     border: none;
@@ -99,53 +86,49 @@
     background-color: #008C4A;
 }
 
-/* ======================= GRID PRODUK ======================= */
+/* tabel produk */
 .product-grid {
     display: grid;
-    /* Membuat 3 kolom, 1fr = 1 bagian ruang yang tersedia */
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px; /* Jarak antar kartu */
+    gap: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
-    /* --- TAMBAHKAN INI --- */
     flex-grow: 1;
 }
 
-/* ======================= KARTU PRODUK ======================= */
 .product-card {
     background-color: #FFFFFF;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     display: flex;
-    flex-direction: column; /* <<< DIUBAH dari 'row' (default) */
+    flex-direction: column;
     padding: 15px;
-    gap: 15px; /* Jarak antara .card-contents dan .card-actions */
-    /* min-height: 190px; --- Hapus ini agar tinggi kartu pas */
+    gap: 15px;
 }
 
 .card-contents {
     display: flex;
-    flex-direction: row; /* Gambar di kiri, deskripsi di kanan */
-    gap: 15px; /* Jarak antara gambar dan deskripsi */
+    flex-direction: row;
+    gap: 15px;
 }
 
 .card-image {
     width: 140px;
     height: 140px;
-    flex-shrink: 0; /* Mencegah gambar menyusut */
+    flex-shrink: 0;
 }
 
 .card-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Memastikan gambar pas tanpa distorsi */
+    object-fit: cover;
     border-radius: 4px;
 }
 
 .card-description {
     display: flex;
-    flex-direction: column; /* Menumpuk konten secara vertikal */
-    flex-grow: 1; /* Mengambil sisa ruang */
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .product-name {
@@ -175,7 +158,6 @@
 }
 
 .card-actions {
-    /* margin-top: auto; --- DIHAPUS */
     display: flex;
     gap: 30px;
     align-items: center;
@@ -185,7 +167,7 @@
 .btn-delete {
     background: none;
     border: none;
-    color: #00AA5B; /* Merah */
+    color: #00AA5B;
     border: 1px solid #00AA5B;
     padding: 6px 14px;
     border-radius: 6px;
@@ -198,7 +180,7 @@
 }
 
 .btn-edit {
-    background-color: #00AA5B; /* Hijau */
+    background-color: #00AA5B;
     color: white;
     border: none;
     border-radius: 6px;
@@ -212,7 +194,7 @@
     background-color: #008C4A;
 }
 
-/* ======================= PAGINATION ======================= */
+/* footer */
 .pagination-footer {
     display: flex;
     justify-content: space-between;
@@ -262,8 +244,7 @@
 }
 
 
-/* ======================= RESPONSIVE (Opsional) ======================= */
-/* Untuk layar yang lebih kecil, buat grid menjadi 1 atau 2 kolom */
+/* responsive */
 @media (max-width: 1200px) {
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -275,7 +256,7 @@
         padding: 15px;
     }
     .product-grid {
-        grid-template-columns: 1fr; /* 1 kolom */
+        grid-template-columns: 1fr;
     }
     .page-header {
         flex-direction: column;
