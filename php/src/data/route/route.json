@@ -43,7 +43,7 @@
     ],
     "css": ["css/product-detail/style_product_detail.css", "/css/style.css"],
     "useNavbar": true,
-    "access": ["BUYER"]
+    "access": ["BUYER", "GUEST"]
   },
   "/login": {
     "html": "/pages/login.html",

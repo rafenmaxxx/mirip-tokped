@@ -1,5 +1,5 @@
 import { router } from "../../../app.js";
-import { GET } from "../../api/api.js";
+import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 
 function LoadDetail(data) {
@@ -34,6 +34,45 @@ function LoadDetail(data) {
   });
 }
 
+function LoadAddCartBtn(id) {
+  GET(
+    "/api/auth",
+    {},
+    (data) => {
+      if (data.status == "success") {
+        const res = data.data;
+        if (res.role == "BUYER") {
+          ChangeInnerHtmlById(
+            "add-cart",
+            `<button class="visit-store-btn" id="cartBtn">Add To Cart</button>`
+          );
+          const cartBtn = document.getElementById("cartBtn");
+          cartBtn.addEventListener("click", (e) => {
+            const product_id = id;
+            console.log("Adding to cart:", product_id, data.data.id);
+            e.stopPropagation();
+            POST(
+              "/api/cart",
+              { action: "add", product_id: product_id, buyer_id: data.data.id },
+              (response) => {
+                if (response.status === "success") {
+                  alert("Added to cart!");
+                } else {
+                  alert("Failed to add to cart.");
+                }
+              },
+              () => {}
+            );
+          });
+        }
+      }
+      {
+      }
+    },
+    () => {}
+  );
+}
+
 function IsErr(err) {}
 
 export function InitProductDetail() {
@@ -44,4 +83,5 @@ export function InitProductDetail() {
   backBtn.addEventListener("click", () => {
     router.navigateTo("/");
   });
+  LoadAddCartBtn(param_id);
 }
