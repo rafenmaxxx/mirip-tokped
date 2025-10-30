@@ -39,7 +39,7 @@ function morphAuthBtn(data) {
       );
     });
     chart.addEventListener("click", () => {
-      router.navigateTo("/cart");
+      router.navigateTo("/cart?buyer_id=" + data.data.id);
     });
   } else {
     // blom login
