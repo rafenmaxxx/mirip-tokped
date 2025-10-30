@@ -29,7 +29,9 @@ function LoadDetail(data) {
     `<img src="${s_img_url}" alt="${res.store_name} Logo" class="seller-avatar">`
   );
   const storeBtn = document.getElementById("v-store");
-  storeBtn.setAttribute("href", "/store?store_id=" + res.store_id);
+  storeBtn.addEventListener("click", () => {
+    router.navigateTo("/store?store_id=" + res.store_id);
+  });
 }
 
 function IsErr(err) {}
