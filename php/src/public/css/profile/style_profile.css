@@ -1,0 +1,193 @@
+/* ===== Container Utama ===== */
+#profile-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); /* Lembut dan dalam */
+    box-sizing: border-box;
+    margin-top: 6rem;
+}
+
+/* ===== Header ===== */
+.profil_header {
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: 25px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* ===== Layout Dua Kartu ===== */
+#profile-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* ===== Kartu Profil (Utama) ===== */
+.profile-card {
+    flex: 0 0 60%;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 24px;
+    box-sizing: border-box;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Lebih dalam untuk kartu utama */
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.profile-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+}
+
+/* ===== Kartu Edit (Lebih Kecil di Sisi Kanan) ===== */
+.edit-card {
+    flex: 0 0 35%;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); /* Lebih halus dari kartu utama */
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.edit-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* ===== Judul di Dalam Card ===== */
+.profile-card h2,
+.edit-card h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 20px;
+    color: #222;
+}
+
+/* ===== Grid untuk Field Biodata ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 30px;
+}
+
+/* ===== Setiap Field ===== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #444;
+}
+
+/* ===== Input & Textarea ===== */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #eee;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    background-color: #fff;
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+/* Editable aktif */
+.form-group.editable input:not([readonly]),
+.form-group.editable textarea:not([readonly]) {
+    background-color: #fff;
+    border-color: #007bff;
+}
+
+/* ===== Tombol ===== */
+.btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12); /* Shadow lembut */
+}
+
+/* Hover dan efek klik */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Warna tombol */
+.btn-edit {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-password {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ===== Tombol di Edit Card ===== */
+.edit-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edit-card .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* ===== Responsif ===== */
+@media (max-width: 900px) {
+    #profile-content {
+        flex-direction: column;
+    }
+
+    .profile-card,
+    .edit-card {
+        flex: 1 1 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-card .button-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+}
