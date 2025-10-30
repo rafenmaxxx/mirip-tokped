@@ -50,4 +50,11 @@ class Store
         $stmt->execute([':store_id' => $store_id]);
         return $stmt->fetch();
     }
+
+    public function getStoreByUserId($seller_id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM stores WHERE user_id=:id");
+        $stmt->execute([':id' => $seller_id]);
+        return $stmt->fetch();
+    }
 }

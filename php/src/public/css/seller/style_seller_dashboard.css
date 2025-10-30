@@ -6,7 +6,7 @@
     margin-top: 100px;
 }
 
-/* header */
+
 .profile-header {
     display: flex;
     align-items: center;
@@ -50,6 +50,9 @@
     font-size: 1.1rem;
     color: #555;
     margin: 0;
+    max-height: 120px;       
+    overflow-y: auto;       
+    padding-right: 5px;     
 }
 
 .edit-button {
@@ -67,7 +70,7 @@
     background-color: #2a694c;
 }
 
-/* stats */
+
 .store-stats {
     margin-bottom: 30px; 
 }
@@ -102,7 +105,7 @@
     word-wrap: break-word; 
 }
 
-/* actions */
+
 .quick-actions {
     display: grid;
     grid-template-columns: 1.1fr 1.1fr 1.5fr; 
@@ -179,4 +182,42 @@
 
 .action-button:hover {
     background-color: #2a694c;
+}
+
+.store-description-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+}
+
+.store-description-card .desc-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.store-description-card .store-description {
+    font-size: 1.05rem;
+    color: #555;
+    line-height: 1.6;
+    max-height: 180;       /* batas tinggi */
+    overflow-y: auto;        /* scroll jika teks panjang */
+    padding-right: 5px;
+}
+
+.store-description-card .store-description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.store-description-card .store-description::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.store-description-card .store-description::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
 }

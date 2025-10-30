@@ -6,6 +6,12 @@ $model = new Path();
 switch ($method) {
     case 'GET':
         $route = urldecode($_GET['path'] ?? '');
+        if (isset($_SESSION['user']) && $_SESSION['user']['role'] == 'SELLER') {
+            if ($route == '/' || $route == '/home') {
+                $route = '/seller';
+            }
+        }
+
         if ($route === '') {
             http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => 'No route specified']);
