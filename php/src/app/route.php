@@ -35,7 +35,9 @@ switch ($route) {
     case 'cart':
         require_once __DIR__ . '/controller/c_cart.php';
         break;
-
+    case 'order':
+        require_once __DIR__ . '/controller/c_order.php';
+        break;
     default:
         http_response_code(404);
         echo json_encode(['status' => 'error', 'message' => 'Route tidak ditemukan']);
