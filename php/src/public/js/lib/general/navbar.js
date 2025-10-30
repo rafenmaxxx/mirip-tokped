@@ -15,7 +15,7 @@ function morphAuthBtn(data) {
   const balance = document.getElementById("navbar-balance");
   if (data.status == "success") {
     // udah login
-    btn.innerHTML = `<a href="/profile"><button class="btn btn-login">Profile</button></a>
+    btn.innerHTML = `<a href="/profile"><button class="btn btn-login" id="btn-profile">Profile</button></a>
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
     const logoutBtn = document.getElementById("btn-logout");
     logoutBtn.addEventListener("click", () => {
@@ -37,6 +37,10 @@ function morphAuthBtn(data) {
           }
         }
       );
+    });
+    const profile = document.getElementById("btn-profile");
+    profile.addEventListener("click", () => {
+      router.navigateTo("/profile");
     });
     chart.addEventListener("click", () => {
       router.navigateTo("/cart?buyer_id=" + data.data.id);
