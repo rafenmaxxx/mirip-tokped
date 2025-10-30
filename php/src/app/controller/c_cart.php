@@ -21,10 +21,13 @@ switch ($method) {
         } else if ($buyer_id && $action === 'summary') {
             // ada buyer_id dan action=summary
             $data = $model->getSummary($buyer_id);
+        } else if ($buyer_id && $action === 'price') {
+            // ada buyer_id dan action=price
+            $data = $model->getTotalPrice($buyer_id);
         } else if ($buyer_id) {
             // Jika ada parameter buyer_id
             $data = $model->getByBuyer($buyer_id);
-         } else {
+        } else {
             // Jika tidak ada parameter
             $data = $model->getAll();
         }
