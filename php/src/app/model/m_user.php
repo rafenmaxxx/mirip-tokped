@@ -74,4 +74,11 @@ class User
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
+
+    public function getAddressById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT address FROM users WHERE user_id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
 }
