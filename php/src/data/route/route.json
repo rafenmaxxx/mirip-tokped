@@ -91,7 +91,7 @@
     "js": [
       {
         "path": "./lib/detail-store/detail_store.js",
-        "func": ["LoadDetailStore"]
+        "func": ["InitDetailStore"]
       }
     ],
     "css": ["/css/detail-store/style_detail_store.css", "/css/style.css"],
@@ -103,7 +103,7 @@
     "js": [
       {
         "path": "./lib/cart/cart.js",
-        "func": ["LoadCartPage"]
+        "func": ["InitCartPage"]
       }
     ],
     "css": ["/css/cart/style_cart.css", "/css/style.css"],
