@@ -1,165 +1,306 @@
 import { GET, PUT } from "../../api/api.js";
 
-// --- Ambil data user yang sedang login ---
-// function getLoggedInUser() {
-//     return new Promise((resolve) => {
-//         GET(
-//             "/api/auth",
-//             {},
-//             (response) => {
-//                 if (response.status === "success" && response.data) {
-//                     resolve(response.data);
-//                 } else {
-//                     resolve(null);
-//                 }
-//             },
-//             () => resolve(null)
-//         );
-//     });
-// }
-
+// --- Modal Change Password ---
 function renderPasswordChangeModal() {
-    document.getElementById("modal").innerHTML = `
-    <div class="modal-content">
-        <span class="close-button" id="close-modal">&times;</span>
-        <h2>Ubah Password</h2>
-        <form id="change-password-form">
-            <label for="current-password">Password Saat Ini:</label>
-            <input type="password" id="current-password" name="current-password" required>
-            <label for="new-password">Password Baru:</label>
-            <input type="password" id="new-password" name="new-password" required>
-            <label for="confirm-password">Konfirmasi Password Baru:</label>
-            <input type="password" id="confirm-password" name="confirm-password" required>
-            <button type="submit" class="btn btn-save">Simpan</button>
+    const modal = document.getElementById("modal");
+    modal.innerHTML = `
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal">&times;</span>
+            <h2>Ubah Password</h2>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="current-password">Password Lama:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="current-password" name="current-password" required>
+                        <button type="button" class="toggle-password" data-target="current-password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">Password Baru:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="new-password" name="new-password" required>
+                        <button type="button" class="toggle-password" data-target="new-password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Konfirmasi Password Baru:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="confirm-password" name="confirm-password" required>
+                        <button type="button" class="toggle-password" data-target="confirm-password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="error-message" class="error-message"></div>
+                <button type="submit" class="btn btn-save" id="save-password-btn">Simpan</button>
+            </form>
+        </div>
+    </div>
+    `;
+    
+    modal.style.display = "block";
+    
+    // Toggle password visibility
+    const toggleButtons = modal.querySelectorAll(".toggle-password");
+    toggleButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            const input = document.getElementById(targetId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.textContent = "🙈";
+            } else {
+                input.type = "password";
+                btn.textContent = "👁️";
+            }
+        });
+    });
+    
+    const submitBtn = document.getElementById("save-password-btn");
+    const errorDiv = document.getElementById("error-message");
+    
+    submitBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        errorDiv.textContent = "";
+        
+        const currentPassword = document.getElementById("current-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+
+        // Validasi client-side
+        if (newPassword !== confirmPassword) {
+            errorDiv.textContent = "Password baru dan konfirmasi password tidak cocok.";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Menyimpan...";
+
+        // Verifikasi password lama
+        GET(
+            "/api/user",
+            {},
+            (verifyResult) => {
+                if (verifyResult.status !== "success") {
+                    errorDiv.textContent = "User tidak ditemukan.";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Simpan";
+                    return;
+                }
+                
+                if (verifyResult.data.password !== currentPassword) {
+                    errorDiv.textContent = "Password lama salah.";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Simpan";
+                    return;
+                }
+
+                // Update password baru
+                PUT(
+                    "/api/user",
+                    { password: newPassword },
+                    (updateResult) => {
+                        if (updateResult.status === "success") {
+                            alert("Password berhasil diubah!");
+                            modal.style.display = "none";
+                            location.reload(); 
+                        } else {
+                            errorDiv.textContent = updateResult.message || "Gagal mengubah password.";
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Simpan";
+                    },
+                    () => {}
+                );
+            },
+            () => {}
+        );
+    });
+
+    // Close modal handler
+    document.getElementById("close-modal").addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+    
+    // Close when clicking overlay
+    modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
+        if (e.target.classList.contains("modal-overlay")) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+// --- Modal Konfirmasi Edit Profile ---
+function renderConfirmationModal(nama, alamat, onConfirm) {
+    const modal = document.getElementById("modal");
+    modal.innerHTML = `
+    <div class="modal-overlay">
+        <div class="modal-content modal-confirmation">
+            <h2>Konfirmasi Perubahan</h2>
+            <p>Apakah Anda yakin ingin menyimpan perubahan berikut?</p>
+            <div class="confirmation-details">
+                <p><strong>Nama:</strong> ${nama || '(tidak diubah)'}</p>
+                <p><strong>Alamat:</strong> ${alamat || '(tidak diubah)'}</p>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-edit" id="confirm-save">Ya, Simpan</button>
+                <button class="btn btn-danger" id="cancel-save">Batal</button>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    modal.style.display = "block";
+    
+    document.getElementById("confirm-save").addEventListener("click", () => {
+        modal.style.display = "none";
+        onConfirm();
+    });
+    
+    document.getElementById("cancel-save").addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+    
+    // Close when clicking overlay
+    modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
+        if (e.target.classList.contains("modal-overlay")) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+// --- Render isi profil ke form ---
+function renderProfile(data) {
+    const html = `
+    <div class="profile-card">
+        <h2>Biodata Kamu</h2>
+        <form id="view-profile-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nama">Nama</label>
+                    <input type="text" id="nama" name="nama" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="text" id="password" name="password" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" name="alamat" readonly>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="edit-card">
+        <h2>Edit Profil</h2>
+        <form id="edit-profile-form">
+            <div class="form-group editable">
+                <label for="nama-edit">Nama</label>
+                <input type="text" id="nama-edit" name="nama">
+            </div>
+
+            <div class="form-group editable">
+                <label for="alamat-edit">Alamat</label>
+                <input type="text" id="alamat-edit" name="alamat">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" id="edit-profile-btn" class="btn btn-edit">Edit Profil</button>
+                <button type="button" id="change-password-btn" class="btn btn-password">Ubah Password</button>
+            </div>
         </form>
     </div>
     `;
-    // alert("Fungsi Ubah Password belum diimplementasikan.");
-}
-// --- Render isi profil ke form ---
-function renderProfile(data) {
+
+    document.getElementById("profile-content").innerHTML = html;
+
+    console.log("Rendering profile data:", data);
     document.getElementById("nama").value = data.name || "";
     document.getElementById("email").value = data.email || "";
     document.getElementById("alamat").value = data.address || "";
     document.getElementById("password").value = data.password || "";
+    
+    // Isi form edit juga
+    document.getElementById("nama-edit").value = data.name || "";
+    document.getElementById("alamat-edit").value = data.address || "";
 }
-
-// --- Aktif / nonaktifkan mode edit ---
-// function toggleEditMode(isEditing) {
-//     const editableElements = [
-//         document.getElementById("name"),
-//         document.getElementById("address"),
-//     ];
-//     const editBtn = document.getElementById("edit-profile-btn");
-//     const saveBtn = document.getElementById("save-profile-btn");
-//     const cancelBtn = document.getElementById("cancel-edit-btn");
-
-//     editableElements.forEach((el) => {
-//         if (el) {
-//             el.readOnly = !isEditing;
-//             el.style.backgroundColor = isEditing ? "#fff" : "#eee";
-//         }
-//     });
-
-//     editBtn.style.display = isEditing ? "none" : "inline-block";
-//     saveBtn.style.display = isEditing ? "inline-block" : "none";
-//     cancelBtn.style.display = isEditing ? "inline-block" : "none";
-// }
 
 // --- Setup event listener tombol edit/simpan/batal ---
 function setupEditHandlers(userId) {
-    const profileForm = document.getElementById("profile-form");
     const editBtn = document.getElementById("edit-profile-btn");
-    const cancelBtn = document.getElementById("cancel-edit-btn");
     const changePasswordBtn = document.getElementById("change-password-btn");
 
-    let originalFormData = {};
-
     // --- Tombol Edit ---
-    editBtn.addEventListener("click", () => {
-        const nama = document.getElementById("name").value;
-        const alamat = document.getElementById("address").value;
-        console
-        alert("g");
-        PUT("api/user", {nama: nama, alamat: alamat}, (response) => {console.log("new:" , response), editErr});
+    editBtn.addEventListener("click", (e) => {
+        e.preventDefault();
         
-        // GET("/api/user", {}, () => {}, () => {});
+        const nama = document.getElementById("nama-edit").value.trim() || null;
+        const alamat = document.getElementById("alamat-edit").value.trim() || null;
+        
+        if (!nama && !alamat) {
+            alert("Tidak ada perubahan yang dilakukan.");
+            return;
+        }
+        
+        // Tampilkan modal konfirmasi
+        renderConfirmationModal(nama, alamat, () => {
+            console.log("Submitting edit:", nama, alamat);
+            
+            PUT(
+                "/api/user", 
+                { nama: nama, alamat: alamat }, 
+                (response) => {
+                    if (response.status === "success") {
+                        alert("Profil berhasil diperbarui!");
+                        location.reload();
+                    } else {
+                        alert("Gagal memperbarui profil: " + (response.message || ""));
+                    }
+                },
+                () => {}
+            );
+        });
     });
-
-    // --- Tombol Batal ---
-    // cancelBtn.addEventListener("click", () => {
-    //     for (const key in originalFormData) {
-    //         const el = document.getElementById(key);
-    //         if (el) el.value = originalFormData[key];
-    //     }
-    //     toggleEditMode(false);
-    // });
-
-    // --- Submit form (Simpan perubahan) ---
-    // profileForm.addEventListener("submit", (e) => {
-    //     e.preventDefault();
-
-    //     const name = document.getElementById("name").value.trim();
-    //     const address = document.getElementById("address").value.trim();
-
-    //     PUT(
-    //         `/api/user?id=${userId}`,
-    //         { name, address },
-    //         (response) => {
-    //             if (response.status === "success") {
-    //                 alert("Profil berhasil diperbarui!");
-    //                 toggleEditMode(false);
-    //             } else {
-    //                 alert(`Gagal menyimpan profil: ${response.message}`);
-    //             }
-    //         },
-    //         () => {
-    //             alert("Terjadi kesalahan koneksi saat menyimpan perubahan.");
-    //         }
-    //     );
-    // });
 
     // --- Ubah Password ---
     changePasswordBtn.addEventListener("click", () => {
         renderPasswordChangeModal();
     });
-
-    // toggleEditMode(false);
 }
-
-function editErr(err) {
-    if (err) {
-    alert("Error updating profile");
-    console.error(err);
-  }
-}
-
-
 
 // --- Fungsi utama halaman Profile ---
 export function InitProfilePage() {
-    const loadingIndicator = document.getElementById("loading-indicator");
     const profileContent = document.getElementById("profile-content");
-
-    // tampilkan loading
-    // loadingIndicator.style.display = "block";
-    // profileContent.style.display = "none";
 
     GET(
         "/api/user",
         {},
         (response) => {
-            // loadingIndicator.style.display = "none";
-
             if (response.status === "success" && response.data) {
-                console.log("Data profil:", response.data);
+                console.log("Data profil:", response);
+                // const test = document.getElementById("nama");
+                // console.log("Test nama element:", test);
                 renderProfile(response.data);
-                profileContent.style.display = "block";
-                setupEditHandlers(response.data.id);
+                setupEditHandlers(response.data.user_id);
             } else {
                 profileContent.innerHTML = `<p class="error-message">Gagal memuat data profil.</p>`;
             }
         },
-        () => {}
+        () => {
+            profileContent.innerHTML = `<p class="error-message">Terjadi kesalahan saat memuat profil.</p>`;
+        }
     );
 }
