@@ -109,5 +109,17 @@
     "css": ["/css/cart/style_cart.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["BUYER"]
+  },
+  "/checkout": {
+    "html": "/pages/checkout.html",
+    "js": [
+      {
+        "path": "./lib/checkout/checkout.js",
+        "func": ["InitCheckoutPage"]
+      }
+    ],
+    "css": ["/css/checkout/style_checkout.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
   }
 }
