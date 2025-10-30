@@ -448,23 +448,9 @@ function LoadSummary(data) {
     container.innerHTML = html;
 
     const checkout = document.getElementById("checkout-btn");
-    if (checkout) {
-      GET(
-        "/api/auth",
-        {},
-        (res) => {
-          //console.log(res);
-          if (res.status) {
-            checkout.addEventListener("click", () => {
-              router.navigateTo("/checkout");
-            });
-          }
-        },
-        () => {}
-      );
-    }
-  } else {
-    container.innerHTML = data.message || "No data available";
+    checkout.addEventListener("click", () => {
+      router.navigateTo("/checkout");
+    });
   }
 }
 
