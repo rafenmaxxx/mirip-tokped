@@ -1,0 +1,50 @@
+<div id="profile-container">
+    <h2 class="profil_header">Profil</h2>
+    <div class="modal" id="modal"></div>
+    <div id="profile-content">
+        <div class="profile-card">
+            <h2>Biodata Kamu</h2>
+            <form id="view-profile-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nama">Nama</label>
+                        <input type="text" id="nama" name="nama" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="text" id="password" name="password" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="alamat">Alamat</label>
+                        <input type="text" id="alamat" name="alamat" readonly>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="edit-card">
+            <h2>Edit Profil</h2>
+            <form id="edit-profile-form">
+                <div class="form-group editable">
+                    <label for="nama_edit">Nama</label>
+                    <input type="text" id="nama_edit" name="nama">
+                </div>
+
+                <div class="form-group editable">
+                    <label for="alamat_edit">Alamat</label>
+                    <input type="text" id="alamat_edit" name="alamat">
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" id="edit-profile-btn" class="btn btn-edit">Edit Profil</button>
+                    <button type="button" id="change-password-btn" class="btn btn-password">Ubah Password</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
