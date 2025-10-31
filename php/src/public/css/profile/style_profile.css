@@ -1,4 +1,4 @@
-/* ===== Container Utama ===== */
+/* Container Utama */
 #profile-container {
     max-width: 1000px;
     margin: 40px auto;
@@ -10,7 +10,7 @@
     margin-top: 6rem;
 }
 
-/* ===== Header ===== */
+/* Header */
 .profil_header {
     text-align: left;
     margin-bottom: 10px;
@@ -19,7 +19,7 @@
     color: #333;
 }
 
-/* ===== Layout Dua Kartu ===== */
+/* Layout Dua Kartu */
 #profile-content {
     display: flex;
     justify-content: space-between;
@@ -28,7 +28,7 @@
     flex-wrap: wrap;
 }
 
-/* ===== Kartu Profil (Utama) ===== */
+/* Kartu Profil (Utama) */
 .profile-card {
     flex: 0 0 60%;
     background-color: #fff;
@@ -44,7 +44,7 @@
     transform: translateY(-3px);
 }
 
-/* ===== Kartu Edit (Lebih Kecil di Sisi Kanan) ===== */
+/* Kartu Edit (Lebih Kecil di Sisi Kanan) */
 .edit-card {
     flex: 0 0 35%;
     background-color: #fff;
@@ -60,7 +60,7 @@
     transform: translateY(-2px);
 }
 
-/* ===== Judul di Dalam Card ===== */
+/* Judul di Dalam Card */
 .profile-card h2,
 .edit-card h2 {
     margin-top: 0;
@@ -69,14 +69,14 @@
     color: #222;
 }
 
-/* ===== Grid untuk Field Biodata ===== */
+/* Grid untuk Field Biodata */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 30px;
 }
 
-/* ===== Setiap Field ===== */
+/* Setiap Field */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -89,7 +89,7 @@
     color: #444;
 }
 
-/* ===== Input & Textarea ===== */
+/* Input & Textarea */
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group textarea {
@@ -117,7 +117,7 @@
     border-color: #007bff;
 }
 
-/* ===== Tombol ===== */
+/* Tombol */
 .btn {
     display: inline-block;
     padding: 10px 18px;
@@ -157,7 +157,7 @@
     color: white;
 }
 
-/* ===== Tombol di Edit Card ===== */
+/* Tombol di Edit Card */
 .edit-card form {
     display: flex;
     flex-direction: column;
@@ -170,7 +170,7 @@
     margin-top: 10px;
 }
 
-/* ===== Modal Overlay ===== */
+/* Modal Overlay */
 .modal {
     display: none;
     position: fixed;
@@ -199,7 +199,7 @@
     to { opacity: 1; }
 }
 
-/* ===== Modal Content ===== */
+/* Modal Content */
 .modal-content {
     background-color: #fff;
     padding: 30px;
@@ -226,7 +226,7 @@
     max-width: 400px;
 }
 
-/* ===== Close Button ===== */
+/* Close Button */
 .close-button {
     position: absolute;
     top: 15px;
@@ -242,7 +242,7 @@
     color: #000;
 }
 
-/* ===== Modal Form ===== */
+/* Modal Form */
 .modal-content h2 {
     margin-top: 0;
     margin-bottom: 20px;
@@ -260,7 +260,7 @@
     color: #444;
 }
 
-/* ===== Password Input Wrapper ===== */
+/* Password Input Wrapper */
 .password-input-wrapper {
     position: relative;
     display: flex;
@@ -297,7 +297,7 @@
     transform: scale(1.1);
 }
 
-/* ===== Error Message ===== */
+/* Error Message */
 .error-message {
     color: #dc3545;
     font-size: 14px;
@@ -305,7 +305,7 @@
     margin-bottom: 10px;
 }
 
-/* ===== Confirmation Details ===== */
+/* Confirmation Details */
 .confirmation-details {
     background-color: #f8f9fa;
     padding: 15px;
@@ -318,7 +318,7 @@
     color: #555;
 }
 
-/* ===== Button Save ===== */
+/* Button Save */
 .btn-save {
     width: 100%;
     padding: 12px;
@@ -342,7 +342,7 @@
     cursor: not-allowed;
 }
 
-/* ===== Button Group dalam Modal ===== */
+/* Button Group dalam Modal */
 .modal-confirmation .button-group {
     display: flex;
     gap: 10px;
@@ -353,7 +353,7 @@
     flex: 1;
 }
 
-/* ===== Responsive ===== */
+/* Responsive */
 @media (max-width: 600px) {
     .modal-content {
         padding: 20px;
@@ -365,7 +365,7 @@
     }
 }
 
-/* ===== Responsif ===== */
+/* Responsif */
 @media (max-width: 900px) {
     #profile-content {
         flex-direction: column;
@@ -384,5 +384,111 @@
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+    }
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    font-size: 15px;
+    min-width: 300px;
+    max-width: 500px;
+    transition: all 0.3s ease;
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Toast Animation */
+.toast-show {
+    animation: slideInRight 0.3s ease;
+}
+
+.toast-hide {
+    animation: slideOutRight 0.3s ease;
+    opacity: 0;
+    transform: translateX(400px);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Toast Icon */
+.toast-icon {
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+/* Toast Message */
+.toast-message {
+    flex: 1;
+}
+
+/* Toast Types */
+.toast-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-left: 4px solid #1e7e34;
+}
+
+.toast-error {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-left: 4px solid #bd2130;
+}
+
+.toast-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    color: #333;
+    border-left: 4px solid #e0a800;
+}
+
+.toast-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border-left: 4px solid #117a8b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .toast {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
     }
 }

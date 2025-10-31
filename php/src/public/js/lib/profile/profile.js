@@ -111,7 +111,7 @@ function renderPasswordChangeModal() {
                         if (updateResult.status === "success") {
                             alert("Password berhasil diubah!");
                             modal.style.display = "none";
-                            location.reload(); 
+                            // location.reload(); 
                         } else {
                             errorDiv.textContent = updateResult.message || "Gagal mengubah password.";
                         }
@@ -176,6 +176,41 @@ function renderConfirmationModal(nama, alamat, onConfirm) {
         }
     });
 }
+
+// --- Toast Notification ---
+function renderToast(message, type = "success") {
+    // Remove existing toast if any
+    const existingToast = document.querySelector(".toast");
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type} toast-show`;
+    
+    // Icon berdasarkan type
+    const icons = {
+        success: "✓",
+        error: "✕",
+        warning: "⚠",
+        info: "ℹ"
+    };
+    
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.success}</span>
+        <span class="toast-message">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove("toast-show");
+        toast.classList.add("toast-hide");
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 
 // --- Render isi profil ke form ---
 function renderProfile(data) {
@@ -251,7 +286,7 @@ function setupEditHandlers(userId) {
         const alamat = document.getElementById("alamat-edit").value.trim() || null;
         
         if (!nama && !alamat) {
-            alert("Tidak ada perubahan yang dilakukan.");
+            renderToast("Tidak ada perubahan yang dilakukan.", "warning");
             return;
         }
         
@@ -264,13 +299,19 @@ function setupEditHandlers(userId) {
                 { nama: nama, alamat: alamat }, 
                 (response) => {
                     if (response.status === "success") {
-                        alert("Profil berhasil diperbarui!");
-                        location.reload();
+                        renderToast("Profil berhasil diperbarui!", "success");
+                        
+                        // Reload setelah toast muncul (delay 1 detik)
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
                     } else {
-                        alert("Gagal memperbarui profil: " + (response.message || ""));
+                        renderToast("Gagal memperbarui profil: " + (response.message || ""), "error");
                     }
                 },
-                () => {}
+                (error) => {
+                    renderToast("Terjadi kesalahan saat memperbarui profil.", "error");
+                }
             );
         });
     });
