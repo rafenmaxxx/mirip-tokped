@@ -5,11 +5,15 @@ $model = new Order();
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    
     case 'GET':
         $id = $_GET['id'] ?? null;
+        $user_id = $_SESSION['user']['id'] ?? null;
         
         if ($id) {
             $data = $model->getById($id);
+        } else if ($user_id) {
+            $data = $model->getByUserId($user_id);
         } else {
             $data = $model->getAll();
         }
