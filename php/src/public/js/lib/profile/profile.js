@@ -1,0 +1,347 @@
+import { GET, PUT } from "../../api/api.js";
+
+// --- Modal Change Password ---
+function renderPasswordChangeModal() {
+    const modal = document.getElementById("modal");
+    modal.innerHTML = `
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal">&times;</span>
+            <h2>Ubah Password</h2>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="current-password">Password Lama:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="current-password" name="current-password" required>
+                        <button type="button" class="toggle-password" data-target="current-password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">Password Baru:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="new-password" name="new-password" required>
+                        <button type="button" class="toggle-password" data-target="new-password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Konfirmasi Password Baru:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="confirm-password" name="confirm-password" required>
+                        <button type="button" class="toggle-password" data-target="confirm-password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="error-message" class="error-message"></div>
+                <button type="submit" class="btn btn-save" id="save-password-btn">Simpan</button>
+            </form>
+        </div>
+    </div>
+    `;
+    
+    modal.style.display = "block";
+    
+    // Toggle password visibility
+    const toggleButtons = modal.querySelectorAll(".toggle-password");
+    toggleButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            const input = document.getElementById(targetId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.textContent = "🙈";
+            } else {
+                input.type = "password";
+                btn.textContent = "👁️";
+            }
+        });
+    });
+    
+    const submitBtn = document.getElementById("save-password-btn");
+    const errorDiv = document.getElementById("error-message");
+    
+    submitBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        errorDiv.textContent = "";
+        
+        const currentPassword = document.getElementById("current-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+
+        // Validasi client-side
+        if (newPassword !== confirmPassword) {
+            errorDiv.textContent = "Password baru dan konfirmasi password tidak cocok.";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Menyimpan...";
+
+        // Verifikasi password lama
+        GET(
+            "/api/user",
+            {},
+            (verifyResult) => {
+                if (verifyResult.status !== "success") {
+                    errorDiv.textContent = "User tidak ditemukan.";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Simpan";
+                    return;
+                }
+                
+                if (verifyResult.data.password !== currentPassword) {
+                    errorDiv.textContent = "Password lama salah.";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Simpan";
+                    return;
+                }
+
+                // Update password baru
+                PUT(
+                    "/api/user",
+                    { password: newPassword },
+                    (updateResult) => {
+                        if (updateResult.status === "success") {
+                            alert("Password berhasil diubah!");
+                            modal.style.display = "none";
+                            // location.reload(); 
+                        } else {
+                            errorDiv.textContent = updateResult.message || "Gagal mengubah password.";
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Simpan";
+                    },
+                    () => {}
+                );
+            },
+            () => {}
+        );
+    });
+
+    // Close modal handler
+    document.getElementById("close-modal").addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+    
+    // Close when clicking overlay
+    modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
+        if (e.target.classList.contains("modal-overlay")) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+// --- Modal Konfirmasi Edit Profile ---
+function renderConfirmationModal(nama, alamat, onConfirm) {
+    const modal = document.getElementById("modal");
+    modal.innerHTML = `
+    <div class="modal-overlay">
+        <div class="modal-content modal-confirmation">
+            <h2>Konfirmasi Perubahan</h2>
+            <p>Apakah Anda yakin ingin menyimpan perubahan berikut?</p>
+            <div class="confirmation-details">
+                <p><strong>Nama:</strong> ${nama || '(tidak diubah)'}</p>
+                <p><strong>Alamat:</strong> ${alamat || '(tidak diubah)'}</p>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-edit" id="confirm-save">Ya, Simpan</button>
+                <button class="btn btn-danger" id="cancel-save">Batal</button>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    modal.style.display = "block";
+    
+    document.getElementById("confirm-save").addEventListener("click", () => {
+        modal.style.display = "none";
+        onConfirm();
+    });
+    
+    document.getElementById("cancel-save").addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+    
+    // Close when clicking overlay
+    modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
+        if (e.target.classList.contains("modal-overlay")) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+// --- Toast Notification ---
+function renderToast(message, type = "success") {
+    // Remove existing toast if any
+    const existingToast = document.querySelector(".toast");
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type} toast-show`;
+    
+    // Icon berdasarkan type
+    const icons = {
+        success: "✓",
+        error: "✕",
+        warning: "⚠",
+        info: "ℹ"
+    };
+    
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.success}</span>
+        <span class="toast-message">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove("toast-show");
+        toast.classList.add("toast-hide");
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+
+// --- Render isi profil ke form ---
+function renderProfile(data) {
+    const html = `
+    <div class="profile-card">
+        <h2>Biodata Kamu</h2>
+        <form id="view-profile-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nama">Nama</label>
+                    <input type="text" id="nama" name="nama" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="text" id="password" name="password" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" name="alamat" readonly>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="edit-card">
+        <h2>Edit Profil</h2>
+        <form id="edit-profile-form">
+            <div class="form-group editable">
+                <label for="nama-edit">Nama</label>
+                <input type="text" id="nama-edit" name="nama">
+            </div>
+
+            <div class="form-group editable">
+                <label for="alamat-edit">Alamat</label>
+                <input type="text" id="alamat-edit" name="alamat">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" id="edit-profile-btn" class="btn btn-edit">Edit Profil</button>
+                <button type="button" id="change-password-btn" class="btn btn-password">Ubah Password</button>
+            </div>
+        </form>
+    </div>
+    `;
+
+    document.getElementById("profile-content").innerHTML = html;
+
+    console.log("Rendering profile data:", data);
+    document.getElementById("nama").value = data.name || "";
+    document.getElementById("email").value = data.email || "";
+    document.getElementById("alamat").value = data.address || "";
+    document.getElementById("password").value = data.password || "";
+    
+    // Isi form edit juga
+    document.getElementById("nama-edit").value = data.name || "";
+    document.getElementById("alamat-edit").value = data.address || "";
+}
+
+// --- Setup event listener tombol edit/simpan/batal ---
+function setupEditHandlers(userId) {
+    const editBtn = document.getElementById("edit-profile-btn");
+    const changePasswordBtn = document.getElementById("change-password-btn");
+
+    // --- Tombol Edit ---
+    editBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        
+        const nama = document.getElementById("nama-edit").value.trim() || null;
+        const alamat = document.getElementById("alamat-edit").value.trim() || null;
+        
+        if (!nama && !alamat) {
+            renderToast("Tidak ada perubahan yang dilakukan.", "warning");
+            return;
+        }
+        
+        // Tampilkan modal konfirmasi
+        renderConfirmationModal(nama, alamat, () => {
+            console.log("Submitting edit:", nama, alamat);
+            
+            PUT(
+                "/api/user", 
+                { nama: nama, alamat: alamat }, 
+                (response) => {
+                    if (response.status === "success") {
+                        renderToast("Profil berhasil diperbarui!", "success");
+                        
+                        // Reload setelah toast muncul (delay 1 detik)
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        renderToast("Gagal memperbarui profil: " + (response.message || ""), "error");
+                    }
+                },
+                (error) => {
+                    renderToast("Terjadi kesalahan saat memperbarui profil.", "error");
+                }
+            );
+        });
+    });
+
+    // --- Ubah Password ---
+    changePasswordBtn.addEventListener("click", () => {
+        renderPasswordChangeModal();
+    });
+}
+
+// --- Fungsi utama halaman Profile ---
+export function InitProfilePage() {
+    const profileContent = document.getElementById("profile-content");
+
+    GET(
+        "/api/user",
+        {},
+        (response) => {
+            if (response.status === "success" && response.data) {
+                console.log("Data profil:", response);
+                // const test = document.getElementById("nama");
+                // console.log("Test nama element:", test);
+                renderProfile(response.data);
+                setupEditHandlers(response.data.user_id);
+            } else {
+                profileContent.innerHTML = `<p class="error-message">Gagal memuat data profil.</p>`;
+            }
+        },
+        () => {
+            profileContent.innerHTML = `<p class="error-message">Terjadi kesalahan saat memuat profil.</p>`;
+        }
+    );
+}

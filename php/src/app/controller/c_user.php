@@ -9,8 +9,10 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         $action = $_GET['action'] ?? null;
+        $id = $_SESSION['user']['id'] ?? null;
 
-        switch ($action):
+        if ($action) {
+            switch ($action):
             case 'balance':
                 if (!isset($_SESSION['user'])) {
                     echo "<script>
@@ -65,6 +67,20 @@ switch ($method) {
                 echo json_encode(['status' => 'error', 'message' => 'Action not allowed']);
                 break;
         endswitch;
+        } else if ($id) {
+            $data = $model->getById($id);
+            if ($data) {
+                http_response_code(200);
+                echo json_encode(['status' => 'success', 'data' => $data]);
+            } else {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'User not found']);
+            }
+        } else {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+        }
+        
         break;
 
     case 'POST':
@@ -125,6 +141,72 @@ switch ($method) {
                 window.location.href = '/register/$roleLower';
             </script>";
         }
+        break;
+        
+    case 'PUT':
+        parse_str(file_get_contents("php://input"), $_PUT);
+        $id = $_SESSION['user']['id'] ?? null;
+        
+        // Helper function untuk normalisasi input
+        function normalizeInput($value) {
+            // Jika tidak ada, kosong, atau string "null", return null
+            if (empty($value) || $value === 'null' || $value === 'undefined') {
+                return null;
+            }
+            // Trim whitespace
+            return trim($value);
+        }
+        
+        $new_name = normalizeInput($_PUT['nama'] ?? null);
+        $new_address = normalizeInput($_PUT['alamat'] ?? null);
+        $new_password = normalizeInput($_PUT['password'] ?? null);
+
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'User tidak ditemukan']);
+            break;
+        }
+
+        // Jika tidak ada data yang akan diubah
+        if (!$new_name && !$new_address && !$new_password) {
+            echo json_encode(['status' => 'error', 'message' => 'Tidak ada data yang diubah']);
+            break;
+        }
+
+        $data = $model->updateUser($id, $new_name, $new_address, $new_password);
+        echo json_encode(['status' => 'success', 'data' => $data]);
+        break;
+
+    case 'PUT':
+        parse_str(file_get_contents("php://input"), $_PUT);
+        $id = $_SESSION['user']['id'] ?? null;
+        
+        // Helper function untuk normalisasi input
+        function normalizeInput($value) {
+            // Jika tidak ada, kosong, atau string "null", return null
+            if (empty($value) || $value === 'null' || $value === 'undefined') {
+                return null;
+            }
+            // Trim whitespace
+            return trim($value);
+        }
+        
+        $new_name = normalizeInput($_PUT['nama'] ?? null);
+        $new_address = normalizeInput($_PUT['alamat'] ?? null);
+        $new_password = normalizeInput($_PUT['password'] ?? null);
+
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'User tidak ditemukan']);
+            break;
+        }
+
+        // Jika tidak ada data yang akan diubah
+        if (!$new_name && !$new_address && !$new_password) {
+            echo json_encode(['status' => 'error', 'message' => 'Tidak ada data yang diubah']);
+            break;
+        }
+
+        $data = $model->updateUser($id, $new_name, $new_address, $new_password);
+        echo json_encode(['status' => 'success', 'data' => $data]);
         break;
 
     default:

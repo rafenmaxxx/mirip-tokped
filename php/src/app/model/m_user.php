@@ -81,4 +81,37 @@ class User
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
+
+    public function updateUser($id, $new_name = null, $new_address = null, $new_password = null)
+    {
+        $fields = [];
+        $params = [':id' => $id];
+
+        // Mapping field yang akan diupdate
+        $updates = [
+            'name' => $new_name,
+            'address' => $new_address,
+            'password' => $new_password
+        ];
+
+        // Hanya tambahkan field yang tidak null dan tidak kosong
+        foreach ($updates as $field => $value) {
+            if (!is_null($value) && $value !== '') {
+                $fields[] = "$field = :$field";
+                $params[":$field"] = $value;
+            }
+        }
+
+        // Jika tidak ada field yang diubah, return data lama
+        if (empty($fields)) {
+            return $this->getById($id);
+        }
+
+        $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE user_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+
+        return $this->getById($id);
+    }
+
 }

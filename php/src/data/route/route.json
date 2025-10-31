@@ -190,5 +190,29 @@
     "css": ["/css/checkout/style_checkout.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["BUYER"]
+  },
+  "/profile": {
+    "html": "/pages/profile.html",
+    "js": [
+      {
+        "path": "./lib/profile/profile.js",
+        "func": ["InitProfilePage"]
+      }
+    ],
+    "css": ["/css/profile/style_profile.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
+  },
+  "/order-history": {
+    "html": "/pages/order_history.html",
+    "js": [
+      {
+        "path": "./lib/order-history/order-history.js",
+        "func": ["InitOrderHistoryPage"]
+      }
+    ],
+    "css": ["/css/order-history/style_order_history.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
   }
 }
