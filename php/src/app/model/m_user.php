@@ -47,6 +47,20 @@ class User
         }
     }
 
+    public function addBalance($user_id, $value)
+    {
+        $stmt = $this->conn->prepare("UPDATE users SET balance = balance + :val WHERE user_id = :id");
+        $stmt->execute([":id" => $user_id, ":val" => $value]);
+        return $stmt->fetchAll();
+    }
+
+    public function getBalance($user_id)
+    {
+        $stmt = $this->conn->prepare("SELECT balance FROM users WHERE user_id = :id");
+        $stmt->execute([":id" => $user_id]);
+        return $stmt->fetch();
+    }
+
     public function getAll()
     {
         $stmt = $this->conn->prepare("SELECT * FROM users");
@@ -60,4 +74,44 @@ class User
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
+
+    public function getAddressById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT address FROM users WHERE user_id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
+
+    public function updateUser($id, $new_name = null, $new_address = null, $new_password = null)
+    {
+        $fields = [];
+        $params = [':id' => $id];
+
+        // Mapping field yang akan diupdate
+        $updates = [
+            'name' => $new_name,
+            'address' => $new_address,
+            'password' => $new_password
+        ];
+
+        // Hanya tambahkan field yang tidak null dan tidak kosong
+        foreach ($updates as $field => $value) {
+            if (!is_null($value) && $value !== '') {
+                $fields[] = "$field = :$field";
+                $params[":$field"] = $value;
+            }
+        }
+
+        // Jika tidak ada field yang diubah, return data lama
+        if (empty($fields)) {
+            return $this->getById($id);
+        }
+
+        $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE user_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+
+        return $this->getById($id);
+    }
+
 }

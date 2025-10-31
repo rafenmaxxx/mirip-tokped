@@ -4,17 +4,17 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        // ambil parameter file
-        $image = $_GET['file'] ?? '';   // <<< ini yang hilang
+
+        $image = $_GET['file'] ?? '';
         if ($image === '') {
             http_response_code(400);
             exit('No file specified');
         }
 
-        // hapus slash awal agar path relatif
+
         $image = ltrim($image, '/');
 
-        // path file di server
+
         $imagePath = __DIR__ . '/../../' . $image;
 
         if (!file_exists($imagePath)) {
@@ -22,7 +22,7 @@ switch ($method) {
             exit('Image not found');
         }
 
-        // set header content type sesuai file extension
+
         $ext = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
         switch ($ext) {
             case 'jpg':
@@ -40,6 +40,54 @@ switch ($method) {
         }
 
         readfile($imagePath);
+        exit;
+
+    case 'POST':
+        if (!isset($_FILES['image'])) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'No image uploaded']);
+            exit;
+        }
+
+        $file = $_FILES['image'];
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Upload failed']);
+            exit;
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid file type']);
+            exit;
+        }
+
+
+        $uploadDir = __DIR__ . '/../../uploads/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $newName = uniqid('img_', true) . '.' . $ext;
+        $uploadPath = $uploadDir . $newName;
+
+
+        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+
+            $relativePath = 'uploads/' . $newName;
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Image uploaded successfully',
+                'path' => $relativePath
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to save file']);
+        }
         exit;
 
     default:

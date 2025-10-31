@@ -1,11 +1,16 @@
 import { router } from "../../../app.js";
-import { GET } from "../../api/api.js";
+import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 
 function LoadDetail(data) {
   const res = data.data;
+  const price = res.price.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
   ChangeInnerHtmlById("p-name", res.product_name);
-  ChangeInnerHtmlById("p-price", "Rp." + res.price);
+  ChangeInnerHtmlById("p-price", price);
   ChangeInnerHtmlById("p-desc", res.description);
   ChangeInnerHtmlById(
     "p-stock",
@@ -24,7 +29,48 @@ function LoadDetail(data) {
     `<img src="${s_img_url}" alt="${res.store_name} Logo" class="seller-avatar">`
   );
   const storeBtn = document.getElementById("v-store");
-  storeBtn.setAttribute("href", "/store?store_id=" + res.store_id);
+  storeBtn.addEventListener("click", () => {
+    router.navigateTo("/store?store_id=" + res.store_id);
+  });
+}
+
+function LoadAddCartBtn(id) {
+  GET(
+    "/api/auth",
+    {},
+    (data) => {
+      if (data.status == "success") {
+        const res = data.data;
+        if (res.role == "BUYER") {
+          ChangeInnerHtmlById(
+            "add-cart",
+            `<button class="visit-store-btn" id="cartBtn">Add To Cart</button>`
+          );
+          const cartBtn = document.getElementById("cartBtn");
+          cartBtn.addEventListener("click", (e) => {
+            const product_id = id;
+            console.log("Adding to cart:", product_id, data.data.id);
+            e.stopPropagation();
+            POST(
+              "/api/cart",
+              { action: "add", product_id: product_id, buyer_id: data.data.id },
+              (response) => {
+                if (response.status === "success") {
+                  alert("Added to cart!");
+                } else {
+                  alert("Failed to add to cart.");
+                }
+              },
+              () => {}
+            );
+          });
+        }
+      }
+      {
+      }
+    },
+    () => {}
+  );
 }
 
 function IsErr(err) {}
@@ -37,4 +83,5 @@ export function InitProductDetail() {
   backBtn.addEventListener("click", () => {
     router.navigateTo("/");
   });
+  LoadAddCartBtn(param_id);
 }

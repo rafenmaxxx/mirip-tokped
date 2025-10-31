@@ -8,14 +8,20 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         $store_id = $_GET['store_id'] ?? null;
-        
+
         if ($store_id) {
-            // Jika ada parameter store_id
             $data = $model->getByStoreId($store_id);
         } else {
-            // Jika tidak ada parameter store_id
-            $store_id = 1; // default store_id
-            $data = $model->getByStoreId($store_id);
+            if (!isset($_SESSION['user'])) {
+                echo "<script>
+                alert('Login dulu Bos !');
+                window.location.href = '/login';
+            </script>";
+                exit;
+            }
+            $id = $_SESSION['user']['id'];
+
+            $data = $model->getStoreByUserId($id);
         }
 
         echo json_encode(['status' => 'success', 'data' => $data]);

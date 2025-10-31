@@ -7,10 +7,12 @@
     ],
     "css": [
       "/css/general/style_navbar.css",
+      "/css/general/style_balance.css",
       "/css/style.css",
       "/css/home/style_sliding_card.css",
       "/css/home/style_home.css",
-      "/css/home/style_filter.css"
+      "/css/home/style_filter.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
@@ -23,8 +25,10 @@
     ],
     "css": [
       "/css/home/style_sliding_card.css",
+      "/css/general/style_balance.css",
       "/css/home/style_home.css",
-      "/css/home/style_filter.css"
+      "/css/home/style_filter.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
@@ -39,7 +43,7 @@
     ],
     "css": ["css/product-detail/style_product_detail.css", "/css/style.css"],
     "useNavbar": true,
-    "access": ["BUYER"]
+    "access": ["BUYER", "GUEST"]
   },
   "/login": {
     "html": "/pages/login.html",
@@ -74,7 +78,12 @@
   },
   "/register/seller": {
     "html": "/pages/register_seller.html",
-    "js": [],
+    "js": [
+      {
+        "path": "./lib/general/quill.js",
+        "func": ["InitQuill"]
+      }
+    ],
     "css": ["/css/register/style_register.css", "/css/style.css"],
     "useNavbar": false,
     "access": ["GUEST"]
@@ -85,6 +94,66 @@
     "css": [],
     "useNavbar": false,
     "access": ["GUEST", "BUYER", "SELLER"]
+  },
+  "/seller": {
+    "html": "/pages/seller_dashboard.html",
+    "js": [
+      {
+        "path": "./lib/seller/home/seller_home.js",
+        "func": ["InitSeller"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_dashboard.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products": {
+    "html": "/pages/seller_product.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product.js",
+        "func": ["InitSellerProduct"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products/add": {
+    "html": "/pages/seller_product_info.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product_add.js",
+        "func": ["InitSellerProductAdd"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/products/edit": {
+    "html": "/pages/seller_product_info.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_product_add.js",
+        "func": ["InitSellerProductAdd"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
+  },
+  "/seller/orders": {
+    "html": "/pages/seller_order_management.html",
+    "js": [
+      {
+        "path": "./lib/seller/seller_order_management.js",
+        "func": ["InitSellerOrderManagement"]
+      }
+    ],
+    "css": ["/css/seller/style_seller_order_management.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["SELLER"]
   },
   "/store": {
     "html": "/pages/detail_store.html",
@@ -119,6 +188,18 @@
       }
     ],
     "css": ["/css/checkout/style_checkout.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
+  },
+  "/profile": {
+    "html": "/pages/profile.html",
+    "js": [
+      {
+        "path": "./lib/profile/profile.js",
+        "func": ["InitProfilePage"]
+      }
+    ],
+    "css": ["/css/profile/style_profile.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["BUYER"]
   },

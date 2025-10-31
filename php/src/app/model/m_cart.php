@@ -76,7 +76,7 @@ class Cart
 
             $grouped[$store_id]['subtotal'] += (float)$row['total_item'];
         }
-        
+
         return [
             'buyer_id' => (int)$buyer_id,
             'stores' => array_values($grouped)
@@ -112,7 +112,7 @@ class Cart
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($rows)) {
-            return null; 
+            return null;
         }
 
         // info toko dari row pertama
@@ -227,7 +227,7 @@ class Cart
                 WHERE store_id = :store_id
             )
         ");
-        $result= $stmt->execute([
+        $result = $stmt->execute([
             ':buyer_id' => $buyer_id,
             ':store_id' => $store_id
         ]);
@@ -242,16 +242,16 @@ class Cart
         $stmt = $this->conn->prepare("DELETE FROM cart_items WHERE buyer_id = :buyer_id");
         return $stmt->execute([':buyer_id' => $buyer_id]);
     }
-    
-    
+
+
 
     public function increamentQuantity($cart_item_id, $amount)
     {
         $amount = (int)$amount;
         if ($amount <= 0) {
-            return false; 
+            return false;
         }
-        
+
         $stmt = $this->conn->prepare("UPDATE cart_items SET quantity = quantity + :amount WHERE cart_item_id = :cart_item_id");
         return $stmt->execute([
             ':amount' => $amount,
@@ -266,12 +266,12 @@ class Cart
         $result = $stmt->fetch();
         return $result ? (int)$result['quantity'] : 0;
     }
-    
+
     public function decreamentQuantity($cart_item_id, $amount)
-    {   
+    {
         $amount = (int)$amount;
         if ($amount <= 0) {
-            return false; 
+            return false;
         }
 
         $total = $this->getQuantity($cart_item_id);
@@ -285,7 +285,7 @@ class Cart
             ':amount' => $amount,
             ':cart_item_id' => $cart_item_id
         ]);
-    }  
+    }
 
     public function getQuantityByBuyer($buyer_id)
     {
@@ -306,7 +306,7 @@ class Cart
         $stmt->execute([':buyer_id' => $buyer_id]);
         $result = $stmt->fetch();
         return $result ? (float)$result['total_price'] : 0.0;
-    }  
+    }
 
     public function getSummary($buyer_id)
     {
@@ -329,5 +329,122 @@ class Cart
             'total_quantity' => $total_quantity,
             'subtotal' => $subtotal_result
         ];
+    }
+
+    public function checkout($buyer_id, $shipping_address)
+    {
+        try {
+            // Mulai transaksi
+            $this->conn->beginTransaction();
+
+            // 1. Ambil cart buyer
+            $cart = $this->getByBuyer($buyer_id);
+            if (empty($cart['stores'])) {
+                throw new Exception("Cart kosong");
+            }
+
+            // 2. Hitung total harga semua store
+            $total_price = 0;
+            foreach ($cart['stores'] as $store) {
+                $total_price += $store['subtotal'];
+            }
+
+            // 3. Cek saldo buyer
+            $stmt = $this->conn->prepare("SELECT balance FROM users WHERE user_id = :buyer_id FOR UPDATE");
+            $stmt->execute([':buyer_id' => $buyer_id]);
+            $balance = $stmt->fetchColumn();
+            if ($balance < $total_price) {
+                throw new Exception("Saldo tidak cukup");
+            }
+
+            // 4. Cek stok tiap item
+            foreach ($cart['stores'] as $store) {
+                foreach ($store['items'] as $item) {
+                    $stmt = $this->conn->prepare("SELECT stock FROM products WHERE product_id = :product_id FOR UPDATE");
+                    $stmt->execute([':product_id' => $item['product_id']]);
+                    $stock = $stmt->fetchColumn();
+                    if ($stock < $item['quantity']) {
+                        throw new Exception("Stok tidak cukup untuk produk: " . $item['product_name']);
+                    }
+                }
+            }
+
+            // 5. Kurangi stok tiap item
+            foreach ($cart['stores'] as $store) {
+                foreach ($store['items'] as $item) {
+                    $stmt = $this->conn->prepare("
+                    UPDATE products 
+                    SET stock = stock - :quantity 
+                    WHERE product_id = :product_id
+                ");
+                    $stmt->execute([
+                        ':quantity' => $item['quantity'],
+                        ':product_id' => $item['product_id']
+                    ]);
+                }
+            }
+
+            // 6. Buat order per store
+            foreach ($cart['stores'] as $store) {
+                $stmt = $this->conn->prepare("
+                INSERT INTO orders (buyer_id, store_id, total_price, shipping_address, status, created_at)
+                VALUES (:buyer_id, :store_id, :total_price, :shipping_address, 'waiting_approval', NOW())
+                RETURNING order_id
+            ");
+                $stmt->execute([
+                    ':buyer_id' => $buyer_id,
+                    ':store_id' => $store['store_id'],
+                    ':total_price' => $store['subtotal'],
+                    ':shipping_address' => $shipping_address
+                ]);
+                $order_id = $stmt->fetchColumn();
+
+                // 7. Masukkan order_items dengan subtotal
+                foreach ($store['items'] as $item) {
+                    $subtotal_item = $item['quantity'] * $item['price'];
+                    $stmt = $this->conn->prepare("
+                    INSERT INTO order_items (order_id, product_id, quantity, price_at_order, subtotal)
+                    VALUES (:order_id, :product_id, :quantity, :price, :subtotal)
+                ");
+                    $stmt->execute([
+                        ':order_id' => $order_id,
+                        ':product_id' => $item['product_id'],
+                        ':quantity' => $item['quantity'],
+                        ':price' => $item['price'],
+                        ':subtotal' => $subtotal_item
+                    ]);
+                }
+            }
+
+            // 8. Kurangi saldo buyer
+            $stmt = $this->conn->prepare("
+            UPDATE users 
+            SET balance = balance - :total_price 
+            WHERE user_id = :buyer_id
+        ");
+            $stmt->execute([
+                ':total_price' => $total_price,
+                ':buyer_id' => $buyer_id
+            ]);
+
+            // 9. Hapus semua cart buyer
+            $this->clearBuyerCart($buyer_id);
+
+            // Commit transaksi
+            $this->conn->commit();
+
+            return [
+                'status' => 'success',
+                'message' => 'Checkout berhasil',
+                'redirect' => '/order-history'
+            ];
+        } catch (Exception $e) {
+            // Rollback jika error
+            $this->conn->rollBack();
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
     }
 }
