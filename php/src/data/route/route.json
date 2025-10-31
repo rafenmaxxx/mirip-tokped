@@ -190,5 +190,17 @@
     "css": ["/css/checkout/style_checkout.css", "/css/style.css"],
     "useNavbar": true,
     "access": ["BUYER"]
+  },
+  "/profile": {
+    "html": "/pages/profile.html",
+    "js": [
+      {
+        "path": "./lib/profile/profile.js",
+        "func": ["InitProfilePage"]
+      }
+    ],
+    "css": ["/css/profile/style_profile.css", "/css/style.css"],
+    "useNavbar": true,
+    "access": ["BUYER"]
   }
 }
