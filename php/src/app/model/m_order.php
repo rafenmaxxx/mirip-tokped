@@ -30,7 +30,7 @@ class Order
         $sql = "
             SELECT 
                 o.*, 
-                s.store_name, p.product_name, oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+                s.store_name, p.product_name, p.main_image_path, oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
             FROM orders o
             LEFT JOIN order_items oi ON o.order_id = oi.order_id
             JOIN stores s ON o.store_id = s.store_id
@@ -71,6 +71,7 @@ class Order
                     'order_item_id' => $row['order_item_id'],
                     'product_id' => $row['product_id'],
                     'product_name' => $row['product_name'],
+                    'main_image_path' => $row['main_image_path'],
                     'quantity' => $row['quantity'],
                     'price_at_order' => $row['price_at_order'],
                     'subtotal' => $row['subtotal']
