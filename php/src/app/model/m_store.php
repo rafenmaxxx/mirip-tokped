@@ -53,8 +53,39 @@ class Store
 
     public function getStoreByUserId($seller_id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM stores WHERE user_id=:id");
+        $sql = "
+        SELECT 
+            s.*,
+            -- Total produk unik milik toko ini
+            (SELECT COUNT(*) 
+             FROM products p 
+             WHERE p.store_id = s.store_id) AS total_products,
+
+            -- Pending orders (belum selesai)
+            (SELECT COUNT(*) 
+             FROM orders o 
+             WHERE o.store_id = s.store_id 
+               AND o.status IN ('waiting_approval')) AS pending_orders,
+
+            -- Produk stok menipis (stok di bawah 5, ubah jika kamu punya kolom stok)
+            (SELECT COUNT(*) 
+             FROM products p 
+             WHERE p.store_id = s.store_id 
+               AND p.stock < 5) AS low_stock_products,
+
+            -- Total pendapatan dari semua pesanan yang sudah diterima
+            (SELECT COALESCE(SUM(o.total_price), 0)
+             FROM orders o 
+             WHERE o.store_id = s.store_id 
+               AND o.status = 'received') AS total_revenue
+
+        FROM stores s
+        WHERE s.user_id = :id
+        LIMIT 1;
+    ";
+
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute([':id' => $seller_id]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
