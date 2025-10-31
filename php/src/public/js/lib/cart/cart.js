@@ -172,7 +172,7 @@ function LoadCartItems(data) {
         return `
         <div class="cart_item_card" data-store-card-id="${item.store_id}">
             <div class="cart_store_heading">
-              <h3 class="cart_store_name">${item.store_name}</h3>
+              <h3 class="cart_store_name" data-store-id="${item.store_id}">${item.store_name}</h3>
               <button class="btn btn-remove-store" data-store-id="${
                 item.store_id
               }" ">Hapus</button>
@@ -192,6 +192,8 @@ function LoadCartItems(data) {
       })
       .join("");
 
+    
+
     container.innerHTML = `
           <h2 id="cart-label" class="cart_title">Cart</h2>
           <div class="modal" id="confirm-modal">
@@ -205,6 +207,14 @@ function LoadCartItems(data) {
           </div>
           ${html}
     `;
+
+    const storeNames = container.querySelectorAll(".cart_store_name");
+    storeNames.forEach((el) => {
+      el.addEventListener("click", () => {
+        const storeId = el.getAttribute("data-store-id");
+        router.navigateTo(`/store?store_id=${parseInt(storeId)}`);
+      });
+    });
 
     if (html == "") {
       const emptyCart = `
