@@ -1,8 +1,8 @@
 .product-filter {
     margin-top: 6rem;
-  width: 80%; /* Ikut lebar parent, misal .home_page */
+  width: 80%; 
   display: flex;
-  flex-wrap: wrap;       /* Bisa pindah ke row baru jika sempit */
+  flex-wrap: wrap;       
   gap: 1rem;
   background: #fff;
   padding: 1rem 1.5rem;
@@ -16,7 +16,7 @@
 }
 
 .filter-group {
-  flex: 1 1 200px;      /* Min 200px, fleksibel */
+  flex: 1 1 200px;      
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -81,16 +81,30 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
-  align-self: flex-start; /* Supaya tombol tidak melebar */
+  align-self: flex-start;
 }
 
 .filter-btn:hover {
   background-color: #02940c;
 }
 
+.filter-container {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  padding: 0 1rem;
+}
+
+.filter-container.active {
+  max-height: 500px;
+  opacity: 1;
+  padding: 1rem;
+}
+
 @media (max-width: 768px) {
   .product-filter {
-    flex-direction: column; /* Susun vertikal saat layar kecil */
+    flex-direction: column;
     gap: 1rem;
   }
 
