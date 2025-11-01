@@ -6,6 +6,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'POST':
+        guard(["GUEST"]);
         $email = $_POST['email'] ?? null;
         $password = $_POST['password'] ?? null;
         header('Content-Type: text/html; charset=utf-8');

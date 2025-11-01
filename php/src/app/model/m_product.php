@@ -79,4 +79,32 @@ class Product
         $stmt->execute([':store_id' => $store_id]);
         return $stmt->fetchAll();
     }
+
+    public function createProduct($store_id, $product_name, $description, $price, $stock, $main_image_path = null)
+    {
+        try {
+            $stmt = $this->conn->prepare("
+            INSERT INTO products (
+                store_id, product_name, description, price, stock, main_image_path, created_at, updated_at
+            ) VALUES (
+                :store_id, :product_name, :description, :price, :stock, :main_image_path, NOW(), NOW()
+            )
+            RETURNING product_id
+        ");
+
+            $stmt->execute([
+                ':store_id' => $store_id,
+                ':product_name' => $product_name,
+                ':description' => $description,
+                ':price' => $price,
+                ':stock' => $stock,
+                ':main_image_path' => $main_image_path
+            ]);
+
+            return $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Error saat membuat produk: " . $e->getMessage());
+            return false;
+        }
+    }
 }
