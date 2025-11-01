@@ -49,6 +49,30 @@ switch ($method) {
                 break;
         }
         break;
+    case 'PUT':
+        parse_str(file_get_contents("php://input"), $PUT);
+        $action = $PUT['action'] ?? null;
+
+        switch ($action) {
+            case 'update_status':
+                $id = $PUT['order_id'] ?? null;
+                $status = $PUT['status'] ?? null;
+
+                if ($id && $status) {
+                    $result = $model->updateOrderStatus($id, $status);
+                    echo json_encode(['status' => 'success', 'data' => $result]);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Order ID and status are required']);
+                }
+                break;
+
+            default:
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
+                break;
+        }
+        break;
 
     case 'DELETE':
         $id = $_GET['id'] ?? null;

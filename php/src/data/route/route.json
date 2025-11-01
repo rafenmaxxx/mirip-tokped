@@ -233,7 +233,11 @@
         "func": ["InitOrderHistoryPage"]
       }
     ],
-    "css": ["/css/order-history/style_order_history.css", "/css/style.css"],
+    "css": [
+      "/css/order-history/style_order_history.css", 
+      "/css/style.css", 
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": true,
     "access": ["BUYER"]
   }
