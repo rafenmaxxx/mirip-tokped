@@ -1,13 +1,33 @@
 import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
-import { LoadComponent, RemoveComponent } from "../../util/component_loader.js";
+import {
+  ChangeInnerHtmlById,
+  LoadComponent,
+  RemoveComponent,
+} from "../../util/component_loader.js";
 import { showModalConfirmation } from "./modal.js";
+import { renderToast } from "./toast.js";
 
 let debounceTimer = null;
 let filterActive = false;
 
 function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
+}
+
+function InitCountCart() {
+  GET(
+    "/api/cart",
+    { action: "get_count" },
+    (data) => {
+      const res = data.data;
+      ChangeInnerHtmlById(
+        "userCart",
+        `<span class="badge">${res.total_cart}</span>`
+      );
+    },
+    () => {}
+  );
 }
 
 function InitBalance() {
@@ -34,10 +54,10 @@ function HandleTopUp(value) {
     { value: value },
     (data) => {
       if (data.status == "success") {
-        alert("Top Up Berhasil");
+        renderToast("Sukses Top Up", "success");
         InitBalance();
       } else {
-        alert("Top Up Gagal");
+        renderToast("Gagal Top Up", "error");
       }
     },
     () => {}
@@ -63,11 +83,11 @@ function morphAuthBtn(data) {
             {},
             (data) => {
               if (data.status) {
-                router.navigateTo("/login");
-                // ubah navbar
+                renderToast("Berhasil Log Out", "success");
                 morphAuthBtn({ status: "error" });
+                router.navigateTo("/login");
               } else {
-                alert("Logout gagal: " + data.message);
+                renderToast("Berhasil Log Out", "success");
               }
             },
             () => {}
@@ -77,6 +97,7 @@ function morphAuthBtn(data) {
       );
     });
     InitBalance();
+    InitCountCart();
     const profile = document.getElementById("btn-profile");
     profile.addEventListener("click", () => {
       router.navigateTo("/profile");
@@ -230,7 +251,7 @@ export function InitNavbar() {
           const amount = parseFloat(topupInput.value);
           if (!amount || amount <= 0) {
             e.preventDefault();
-            alert("Masukkan nominal top up yang valid!");
+            renderToast("Masukkan nominal Top Up yang valid!", "error");
             return;
           } else {
             HandleTopUp(amount);
