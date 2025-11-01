@@ -3,6 +3,7 @@ import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { showModalConfirmation } from "../general/modal.js";
 import { renderToast } from "../general/toast.js";
+import { Loading } from "../general/loading.js";
 
 let total_price = 0;
 
@@ -205,7 +206,7 @@ function handleCheckout(balance) {
           { address: shippingAddress },
           () => {
             renderToast("Sukses Checkout", "success");
-            router.navigateTo("/");
+            router.navigateTo("/order-history");
           },
           () => {
             renderToast("Gagal Checkout", "error");
