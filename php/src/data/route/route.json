@@ -221,7 +221,10 @@
         "func": ["InitProfilePage"]
       }
     ],
-    "css": ["/css/profile/style_profile.css", "/css/style.css"],
+    "css": [
+      "/css/profile/style_profile.css", 
+      "/css/style.css", 
+      "/css/general/style_loading.css"],
     "useNavbar": true,
     "access": ["BUYER", "SELLER"]
   },
