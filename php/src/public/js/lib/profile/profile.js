@@ -1,5 +1,6 @@
 import { GET, PUT } from "../../api/api.js";
 import { renderToast } from "../general/toast.js";
+import { Loading } from "../general/loading.js";
 
 // --- Modal Change Password ---
 function renderPasswordChangeModal() {
@@ -83,10 +84,16 @@ function renderPasswordChangeModal() {
       return;
     }
 
+    if (newPassword.length < 8) {
+      errorDiv.textContent = "Password baru harus minimal 8 karakter.";
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Menyimpan...";
 
     // Verifikasi password lama
+
     GET(
       "/api/user",
       {},
@@ -106,6 +113,7 @@ function renderPasswordChangeModal() {
         }
 
         // Update password baru
+        Loading.show("Mengubah password...");
         PUT(
           "/api/user",
           { password: newPassword },
@@ -113,8 +121,10 @@ function renderPasswordChangeModal() {
             if (updateResult.status === "success") {
               renderToast("Password berhasil diubah", "success");
               modal.style.display = "none";
-              // location.reload();
+              Loading.hide();
+              location.reload();
             } else {
+              Loading.hide();
               errorDiv.textContent =
                 updateResult.message || "Gagal mengubah password.";
             }
@@ -197,7 +207,7 @@ function renderProfile(data) {
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="text" id="password" name="password" readonly>
+                    <input type="password" id="password" name="password" readonly>
                 </div>
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
@@ -261,19 +271,17 @@ function setupEditHandlers(userId) {
     // Tampilkan modal konfirmasi
     renderConfirmationModal(nama, alamat, () => {
       console.log("Submitting edit:", nama, alamat);
-
+      Loading.show("Menyimpan perubahan...");
       PUT(
         "/api/user",
         { nama: nama, alamat: alamat },
         (response) => {
           if (response.status === "success") {
-            renderToast("Profil berhasil diperbarui!", "success");
-
-            // Reload setelah toast muncul (delay 1 detik)
-            setTimeout(() => {
-              location.reload();
-            }, 1000);
+            Loading.hide();
+            renderToast("Profil berhasil diperbarui!", "success");          
+            location.reload();
           } else {
+            Loading.hide();
             renderToast(
               "Gagal memperbarui profil: " + (response.message || ""),
               "error"
