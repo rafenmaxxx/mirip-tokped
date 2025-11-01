@@ -73,6 +73,36 @@ class Product
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getFilterProductByStore($store_id, $categories = [], $minPrice = null, $maxPrice = null)
+    {
+        $query = "SELECT DISTINCT p.* 
+              FROM products p
+              LEFT JOIN category_items ci ON p.product_id = ci.product_id
+              LEFT JOIN categories c ON ci.category_id = c.category_id
+              WHERE p.store_id = ?";
+        $params = [$store_id];
+
+        if (!empty($categories)) {
+            $placeholders = implode(',', array_fill(0, count($categories), '?'));
+            $query .= " AND c.name IN ($placeholders)";
+            $params = array_merge($params, $categories);
+        }
+
+        if ($minPrice !== null) {
+            $query .= " AND p.price >= ?";
+            $params[] = $minPrice;
+        }
+
+        if ($maxPrice !== null) {
+            $query .= " AND p.price <= ?";
+            $params[] = $maxPrice;
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getByStoreId($store_id)
     {
         $stmt = $this->conn->prepare("SELECT * FROM products WHERE store_id=:store_id");

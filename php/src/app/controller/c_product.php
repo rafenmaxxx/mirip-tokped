@@ -8,7 +8,7 @@ switch ($method) {
     case 'GET':
         $search = $_GET['search'] ?? null;
         $id = $_GET['id'] ?? null;
-        $store_id = $_GET['store_id'] ?? null;
+        $store_id = $_SESSION['user']['store_id'] ?? null;
         $filter = $_GET['filter'] ?? null;
         $title = $_GET['title'] ?? null;
 
@@ -21,6 +21,14 @@ switch ($method) {
         } else if ($title) {
             // ada title -> return list of title buat autocomplete
             $data = $model->getTitle($title);
+        } else if ($filter && $store_id) {
+            // ada filter dan store_id -> filter product by store_id
+            $filterData = json_decode($filter, true);
+            $categories = $filterData['categories'] ?? [];
+            $minPrice = $filterData['minPrice'] ?? null;
+            $maxPrice = $filterData['maxPrice'] ?? null;
+
+            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
         } else if ($filter) {
             // ada filter -> filter product
             $filterData = json_decode($filter, true);
