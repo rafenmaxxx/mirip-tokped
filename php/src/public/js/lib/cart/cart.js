@@ -2,7 +2,9 @@ import { GET } from "../../api/api.js";
 import { PUT } from "../../api/api.js";
 import { DELETE } from "../../api/api.js";
 import { router } from "../../../app.js";
-import { ChangeInnerHtmlById } from "../../util/component_loader.js";
+import { Loading } from "../general/loading.js";
+import { renderToast } from "../general/toast.js";
+import { InitCountCart } from "../general/navbar.js";
 
 function reloadCartPage() {
   GET(
@@ -172,7 +174,9 @@ function LoadCartItems(data) {
         return `
         <div class="cart_item_card" data-store-card-id="${item.store_id}">
             <div class="cart_store_heading">
-              <h3 class="cart_store_name" data-store-id="${item.store_id}">${item.store_name}</h3>
+              <h3 class="cart_store_name" data-store-id="${item.store_id}">${
+          item.store_name
+        }</h3>
               <button class="btn btn-remove-store" data-store-id="${
                 item.store_id
               }" ">Hapus</button>
@@ -191,8 +195,6 @@ function LoadCartItems(data) {
       `;
       })
       .join("");
-
-    
 
     container.innerHTML = `
           <h2 id="cart-label" class="cart_title">Cart</h2>
@@ -298,14 +300,8 @@ function closeModal() {
 }
 
 function confirmDelete() {
-  // //console.log("confirmDelete called with:", {
-  //   deleteType,
-  //   currentDeleteCartItemId,
-  //   currentDeleteStoreId,
-  //   currentDeleteBuyerId,
-  // });
-
   if (deleteType === "store" && currentDeleteStoreId) {
+    Loading.show("Menghapus toko...");
     DELETE(
       "/api/cart",
       {
@@ -313,23 +309,22 @@ function confirmDelete() {
         store_id: currentDeleteStoreId,
       },
       (response) => {
-        //console.log("Store delete response:", response);
-
         if (response.status === "success") {
-          //console.log("Store removed successfully");
+          Loading.hide();
           closeModal();
-
           reloadCartPage();
         } else {
+          Loading.hide();
           closeModal();
-          alert("Gagal menghapus store: " + (response.message || ""));
+          renderToast(
+            "Gagal menghapus store: " + (response.message || ""),
+            "error"
+          );
         }
       },
       () => {}
     );
   } else if (deleteType === "item" && currentDeleteCartItemId) {
-    //console.log("Deleting item with buyer_id:");
-
     DELETE(
       "/api/cart",
       {
@@ -337,25 +332,24 @@ function confirmDelete() {
         action: "remove_item",
       },
       (response) => {
-        //console.log("Item delete response:", response);
-
         if (response.status === "success") {
-          //console.log("Item removed successfully");
-          //console.log("Calling reloadCartPage with buyer_id:");
           closeModal();
-
           reloadCartPage();
         } else {
           closeModal();
-          alert("Gagal menghapus item: " + (response.message || ""));
+          renderToast(
+            "Gagal menghapus item: " + (response.message || ""),
+            "error"
+          );
         }
       },
       () => {}
     );
   } else {
     closeModal();
-    alert("Data tidak lengkap untuk menghapus");
+    renderToast("Data tidak lengkap untuk menghapus", "error");
   }
+  InitCountCart();
 }
 
 function LoadSummary(data) {
@@ -403,18 +397,18 @@ function LoadSummary(data) {
         </div>
     `;
     container.innerHTML = html;
-
-    const checkout = document.getElementById("checkout-btn");
-    checkout.addEventListener("click", () => {
-      router.navigateTo("/checkout");
-    });
+    if (summary.total_price !== 0) {
+      const checkout = document.getElementById("checkout-btn");
+      checkout.addEventListener("click", () => {
+        router.navigateTo("/checkout");
+      });
+    }
   }
 }
 
 function Increamenterr(err) {
   if (err) {
-    alert("Error updating quantity");
-    //console.error(err);
+    renderToast("Error updating quantity", "error");
   }
 }
 
@@ -423,7 +417,6 @@ function CartItemsErr(err) {
     const cartItemsContainer = document.getElementById("cart-data");
     if (!cartItemsContainer) return;
     cartItemsContainer.innerHTML = "Cart Items Fetch Error";
-    //console.error(err);
   }
 }
 
@@ -432,7 +425,6 @@ function SummaryErr(err) {
     const container = document.getElementById("cart-summary");
     if (!container) return;
     container.innerHTML = "Summary Fetch Error";
-    //console.error(err);
   }
 }
 

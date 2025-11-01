@@ -215,3 +215,42 @@ textarea {
 .form-group:last-child {
   margin-bottom: 0;
 }
+
+
+/* Kelompok Checkbox Kategori */
+.filter-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.filter-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.9rem;
+}
+
+.filter-checkboxes label:hover {
+  background-color: #f0f0f0;
+  border-color: #ccc;
+}
+
+.filter-checkboxes input[type="checkbox"] {
+  accent-color: #2e7d32; /* hijau elegan */
+  transform: scale(1.1);
+}
+
+/* Responsive agar rapi di mobile */
+@media (max-width: 768px) {
+  .filter-checkboxes {
+    flex-direction: column;
+  }
+}

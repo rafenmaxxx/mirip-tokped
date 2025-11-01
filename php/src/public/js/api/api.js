@@ -1,3 +1,5 @@
+import { Loading } from "../lib/general/loading.js";
+
 export function GET(url, params = {}, callback, err) {
   const query = Object.keys(params)
     .map(
@@ -10,6 +12,7 @@ export function GET(url, params = {}, callback, err) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", req_url, true);
   xhr.withCredentials = true;
+  Loading.show("Loading");
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -24,6 +27,7 @@ export function GET(url, params = {}, callback, err) {
       console.error("Request failed. Status:", xhr.status);
       err(true);
     }
+    Loading.hide();
   };
 
   xhr.onerror = function () {
@@ -45,6 +49,7 @@ export function GETMODULE(url, params = {}, callback, err) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", req_url, true);
   xhr.withCredentials = true;
+  Loading.show("Loading");
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -59,6 +64,7 @@ export function GETMODULE(url, params = {}, callback, err) {
       console.error("Request failed. Status:", xhr.status);
       err(true);
     }
+    Loading.hide();
   };
 
   xhr.onerror = function () {
@@ -79,6 +85,7 @@ export function POST(url, params = {}, callback, err) {
   xhr.open("POST", url, true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.withCredentials = true;
+  Loading.show("Loading");
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -92,6 +99,7 @@ export function POST(url, params = {}, callback, err) {
       console.error("Request failed. Status:", xhr.status);
       err(true);
     }
+    Loading.hide();
   };
 
   xhr.onerror = function () {
@@ -112,6 +120,7 @@ export function PUT(url, params = {}, callback, err) {
   xhr.open("PUT", url, true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.withCredentials = true;
+  Loading.show();
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -126,6 +135,7 @@ export function PUT(url, params = {}, callback, err) {
       console.error("Request failed. Status:", xhr.status);
       err(true);
     }
+    Loading.hide();
   };
 
   xhr.onerror = function () {
@@ -148,6 +158,7 @@ export function DELETE(url, params = {}, callback, err) {
   xhr.open("DELETE", req_url, true);
   xhr.setRequestHeader("Content-Type", "application/json");
   xhr.withCredentials = true;
+  Loading.show();
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -162,6 +173,7 @@ export function DELETE(url, params = {}, callback, err) {
       console.error("Request failed. Status:", xhr.status);
       err(true);
     }
+    Loading.hide();
   };
 
   xhr.onerror = function () {

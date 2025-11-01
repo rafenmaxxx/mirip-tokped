@@ -110,9 +110,12 @@ class Product
         return $stmt->fetchAll();
     }
 
-    public function createProduct($store_id, $product_name, $description, $price, $stock, $main_image_path = null)
+    public function createProduct($store_id, $product_name, $description, $price, $stock, $main_image_path = null, $categories = [])
     {
         try {
+            $this->conn->beginTransaction();
+
+            // Insert ke tabel products
             $stmt = $this->conn->prepare("
             INSERT INTO products (
                 store_id, product_name, description, price, stock, main_image_path, created_at, updated_at
@@ -121,7 +124,6 @@ class Product
             )
             RETURNING product_id
         ");
-
             $stmt->execute([
                 ':store_id' => $store_id,
                 ':product_name' => $product_name,
@@ -131,8 +133,27 @@ class Product
                 ':main_image_path' => $main_image_path
             ]);
 
-            return $stmt->fetchColumn();
+            $product_id = $stmt->fetchColumn();
+
+            // Insert ke category_items jika ada kategori
+            if (!empty($categories)) {
+                $catStmt = $this->conn->prepare("
+                INSERT INTO category_items (category_id, product_id)
+                VALUES (:category_id, :product_id)
+            ");
+
+                foreach ($categories as $cat_id) {
+                    $catStmt->execute([
+                        ':category_id' => $cat_id,
+                        ':product_id' => $product_id
+                    ]);
+                }
+            }
+
+            $this->conn->commit();
+            return $product_id;
         } catch (PDOException $e) {
+            $this->conn->rollBack();
             error_log("Error saat membuat produk: " . $e->getMessage());
             return false;
         }

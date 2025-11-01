@@ -15,7 +15,7 @@ function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
 }
 
-function InitCountCart() {
+export function InitCountCart() {
   GET(
     "/api/cart",
     { action: "get_count" },
