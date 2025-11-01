@@ -8,10 +8,10 @@ class LoadingIndicator {
 
   init() {
     // Create loading overlay if it doesn't exist
-    if (!document.getElementById('global-loading-overlay')) {
-      const overlay = document.createElement('div');
-      overlay.id = 'global-loading-overlay';
-      overlay.className = 'loading-overlay';
+    if (!document.getElementById("global-loading-overlay")) {
+      const overlay = document.createElement("div");
+      overlay.id = "global-loading-overlay";
+      overlay.className = "loading-overlay";
       overlay.innerHTML = `
         <div class="loading-spinner-container">
           <div class="loading-spinner">
@@ -26,33 +26,33 @@ class LoadingIndicator {
       document.body.appendChild(overlay);
       this.loadingElement = overlay;
     } else {
-      this.loadingElement = document.getElementById('global-loading-overlay');
+      this.loadingElement = document.getElementById("global-loading-overlay");
     }
   }
 
-  show(message = 'Loading...') {
+  show(message = "Loading...") {
     this.loadingCount++;
-    
+
     if (this.loadingElement) {
-      const textElement = document.getElementById('loading-text');
+      const textElement = document.getElementById("loading-text");
       if (textElement) {
         textElement.textContent = message;
       }
-      this.loadingElement.classList.add('active');
-      document.body.style.overflow = 'hidden'; // Prevent scrolling
+      this.loadingElement.classList.add("active");
+      document.body.style.overflow = "hidden"; // Prevent scrolling
     }
   }
 
   hide() {
     this.loadingCount--;
-    
+
     // Only hide if no other loading operations are active
     if (this.loadingCount <= 0) {
       this.loadingCount = 0;
-      
+
       if (this.loadingElement) {
-        this.loadingElement.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scrolling
+        this.loadingElement.classList.remove("active");
+        document.body.style.overflow = ""; // Restore scrolling
       }
     }
   }
@@ -61,15 +61,15 @@ class LoadingIndicator {
   forceHide() {
     this.loadingCount = 0;
     if (this.loadingElement) {
-      this.loadingElement.classList.remove('active');
-      document.body.style.overflow = '';
+      this.loadingElement.classList.remove("active");
+      document.body.style.overflow = "";
     }
   }
 
   // Update loading message while showing
   updateMessage(message) {
     if (this.loadingElement) {
-      const textElement = document.getElementById('loading-text');
+      const textElement = document.getElementById("loading-text");
       if (textElement) {
         textElement.textContent = message;
       }

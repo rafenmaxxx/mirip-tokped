@@ -2,6 +2,7 @@ import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { renderToast } from "../general/toast.js";
+import { InitCountCart } from "../general/navbar.js";
 
 function LoadDetail(data) {
   const res = data.data;
@@ -61,6 +62,7 @@ function LoadAddCartBtn(id) {
                     "Berhasil menambahkan produk kedalam cart",
                     "success"
                   );
+                  InitCountCart();
                 } else {
                   renderToast(
                     "Gagal menambahkan produk kedalam cart",

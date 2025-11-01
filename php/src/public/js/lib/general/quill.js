@@ -9,7 +9,7 @@ function setupQuill() {
 
   const quill = new Quill(descContainer, {
     theme: "snow",
-    placeholder: "Masukkan Deskripsi Toko...",
+    placeholder: "Masukkan Teks...",
     modules: {
       toolbar: [
         [{ header: [1, 2, false] }],
