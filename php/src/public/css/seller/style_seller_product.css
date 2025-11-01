@@ -315,6 +315,58 @@
     background-color: white;
 }
 
+/* empty state */
+.no-products-container {
+  grid-column: 1 / -1; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px; 
+  text-align: center;
+  height: 100%;
+  min-height: 400px;
+}
+
+.no-products-image-circle {
+  width: 180px;
+  height: 180px;
+  background-color: #EAEAEA;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.no-products-image-circle img {
+  width: 120px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.no-products-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #555; 
+  margin: 0;
+  margin-bottom: 30px;
+}
+
+.btn-add-first {
+  background-color: #00AA5B; 
+  color: white;
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-add-first:hover {
+  background-color: #008C4A;
+}
 
 /* responsive */
 @media (max-width: 1200px) {
