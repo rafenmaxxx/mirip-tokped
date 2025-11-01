@@ -1,4 +1,5 @@
 import { ValidatePassword } from "../../util/password_validation.js";
+import { renderToast } from "../general/toast.js";
 
 export function SendBuyerRegisterForm(e) {
   const _password = document.getElementById("password").value;
@@ -6,13 +7,13 @@ export function SendBuyerRegisterForm(e) {
   if (_password != _confirm) {
     // tolak
     e.preventDefault();
-    alert("Password tidak sama!");
+    renderToast("Password tidak sama", "error");
     return;
   }
 
   if (!ValidatePassword(_password)) {
     e.preventDefault();
-    alert("Password tidak valid!");
+    renderToast("Password tidak valid", "error");
     return;
   }
 }

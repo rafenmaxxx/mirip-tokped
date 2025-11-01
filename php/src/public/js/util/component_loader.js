@@ -34,3 +34,12 @@ export function ChangeInnerHtmlById(tag, data) {
   }
   el.innerHTML = data;
 }
+
+export function ChangeValuerById(tag, data) {
+  const el = document.getElementById(tag);
+  if (!el) {
+    console.error("Element not found:", tag);
+    return;
+  }
+  el.value = data;
+}

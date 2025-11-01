@@ -1,4 +1,5 @@
 import { router } from "../../../app.js";
+import { renderToast } from "../general/toast.js";
 
 let selectedType = null;
 
@@ -18,7 +19,7 @@ export function initRegisterChoice() {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!selectedType) {
-      alert("Silakan pilih salah satu jenis akun terlebih dahulu.");
+      renderToast("Pilih salah satu (seller/buyer)", "error");
       return;
     }
 

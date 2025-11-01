@@ -1,6 +1,7 @@
 import { GET } from "../../api/api.js";
 import { POST } from "../../api/api.js";
 import { router } from "../../../app.js";
+import { renderToast } from "../general/toast.js";
 
 function morphProductBtn(data) {
   if (data.status == "success" && data.data.role == "BUYER") {
@@ -30,14 +31,18 @@ function morphProductBtn(data) {
         e.stopPropagation();
         POST(
           "/api/cart",
-          { action: "add", product_id: product_id, buyer_id: data.data.id},
+          { action: "add", product_id: product_id, buyer_id: data.data.id },
           (response) => {
             if (response.status === "success") {
-              alert("Added to cart!");
+              renderToast(
+                "Berhasil menambahkan produk ke dalam cart",
+                "success"
+              );
             } else {
-              alert("Failed to add to cart.");
+              renderToast("Gagal menambahkan produk ke dalam cart", "success");
             }
-          },() => {}
+          },
+          () => {}
         );
       });
     });
@@ -103,12 +108,12 @@ function LoadProfileStore(data) {
 
   if (data.status === "success" && data.data) {
     const store = data.data;
-  
-    const imageUrl = store.store_logo_path && store.store_logo_path !== ""
-      ? `/api/image?file=${store.store_logo_path}`
-      : `https://picsum.photos/200/200?random=${index + 1}`;
 
-      
+    const imageUrl =
+      store.store_logo_path && store.store_logo_path !== ""
+        ? `/api/image?file=${store.store_logo_path}`
+        : `https://picsum.photos/200/200?random=${index + 1}`;
+
     const html = `
           <div class="store_card">
             <div class="store_image">
@@ -120,11 +125,11 @@ function LoadProfileStore(data) {
             </div>
           </div>
       `;
-    
+
     container.innerHTML = html;
   } else {
     container.innerHTML = data.message || "No data available";
-  };
+  }
 }
 
 function ProfileErr(err) {
@@ -149,10 +154,13 @@ export async function InitDetailStore() {
 
   if (!param_id) {
     router.navigateTo("/unauthorized");
-  }else {
-    GET("/api/detail_store", { store_id: param_id }, LoadProfileStore, ProfileErr);
+  } else {
+    GET(
+      "/api/detail_store",
+      { store_id: param_id },
+      LoadProfileStore,
+      ProfileErr
+    );
     GET("/api/product", { store_id: param_id }, LoadProduct, ProductErr);
-    
   }
 }
-

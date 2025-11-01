@@ -447,4 +447,12 @@ class Cart
             ];
         }
     }
+
+    public function getCountCart($user_id)
+    {
+        $stmt = $this->conn->prepare("select count(*) as total_cart from cart_items where buyer_id = :id;");
+        $stmt->execute([':id' => $user_id]);
+        $result = $stmt->fetch();
+        return $result;
+    }
 }

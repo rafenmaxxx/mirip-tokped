@@ -2,8 +2,6 @@ import { LoadComponent } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { router } from "../../../app.js";
 
-
-
 function LoadProduct(data) {
   const container = document.getElementById("product-data");
   if (!container) return;
@@ -69,9 +67,15 @@ function ChangeCatalogLabel(label) {
 
 export function LoadHome() {
   let param = new URLSearchParams(window.location.search);
-  
+
   if (!param.toString()) {
     LoadComponent("slider", "/components/home/sliding_card.html");
+    if (!document.getElementById("slider-id")) {
+      LoadComponent("slider", "/components/home/sliding_card.html");
+    }
+    if (!document.getElementById("slider-id")) {
+      LoadComponent("slider", "/components/home/sliding_card.html");
+    }
     if (!document.getElementById("slider-id")) {
       LoadComponent("slider", "/components/home/sliding_card.html");
     }

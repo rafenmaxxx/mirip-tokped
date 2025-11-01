@@ -31,10 +31,29 @@ class Auth
             }
 
 
+            $store_id = null;
+
+
+            if (strtolower($user['role']) === 'seller') {
+                $stmtStore = $this->conn->prepare(query: "
+                SELECT store_id 
+                FROM stores 
+                WHERE user_id = :user_id
+                LIMIT 1
+            ");
+                $stmtStore->execute(['user_id' => $user['user_id']]);
+                $store = $stmtStore->fetch(PDO::FETCH_ASSOC);
+
+                if ($store) {
+                    $store_id = $store['store_id'];
+                }
+            }
+
             $_SESSION['user'] = [
                 'id' => $user['user_id'],
                 'email' => $user['email'],
-                'role' => $user['role']
+                'role' => $user['role'],
+                'store_id' => $store_id
             ];
 
             return [
@@ -42,13 +61,15 @@ class Auth
                 "user" => [
                     "id" => $user['user_id'],
                     "email" => $user['email'],
-                    "role" => $user['role']
+                    "role" => $user['role'],
+                    "store_id" => $store_id
                 ]
             ];
         } catch (PDOException $e) {
             return ["status" => false, "message" => $e->getMessage()];
         }
     }
+
 
 
     public function logout()

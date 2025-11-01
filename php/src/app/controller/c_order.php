@@ -5,12 +5,20 @@ $model = new Order();
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
-    
+
     case 'GET':
+        $action = $_GET['action'] ?? null;
         $id = $_GET['id'] ?? null;
         $user_id = $_SESSION['user']['id'] ?? null;
-        
-        if ($id) {
+        $store_id = $_SESSION['user']['store_id'] ?? null;
+        if ($action == "count_buyer_order") {
+            $data = $model;
+            echo json_encode(['status' => 'success', 'data' => $data]);
+            break;
+        }
+        if ($store_id) {
+            $data = $model->getOrderByStore($store_id);
+        } else if ($id) {
             $data = $model->getById($id);
         } else if ($user_id) {
             $data = $model->getByUserId($user_id);
@@ -23,7 +31,7 @@ switch ($method) {
 
     case 'POST':
         $action = $_POST['action'] ?? null;
-       
+
         switch ($action) {
             case 'create':
                 $buyer_id = $_POST['buyer_id'] ?? null;
@@ -32,7 +40,6 @@ switch ($method) {
                 $shipping_address = $_POST['shipping_address'] ?? null;
 
                 $result = $model->createOrder($buyer_id, $store_id, $total_price, $shipping_address);
-                
                 echo json_encode(['status' => 'success', 'data' => $result]);
                 break;
 
@@ -42,7 +49,7 @@ switch ($method) {
                 break;
         }
         break;
-    
+
     case 'DELETE':
         $id = $_GET['id'] ?? null;
         if ($id) {

@@ -19,8 +19,9 @@ switch ($method) {
         $store_id = $_GET['store_id'] ?? null;
         $action = $_GET['action'] ?? null;
 
-
-        if ($id) {
+        if ($action == "get_count") {
+            $data = $model->getCountCart($buyer_id);
+        } else if ($id) {
             // ada id
             $data = $model->getById($id);
         } else if ($buyer_id && $store_id && !$action) {
