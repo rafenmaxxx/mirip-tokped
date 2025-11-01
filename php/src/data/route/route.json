@@ -12,7 +12,8 @@
       "/css/home/style_sliding_card.css",
       "/css/home/style_home.css",
       "/css/home/style_filter.css",
-      "/css/general/style_modal_confirmation.css"
+      "/css/general/style_modal_confirmation.css",
+      "/css/general/style_toast.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
@@ -28,7 +29,8 @@
       "/css/general/style_balance.css",
       "/css/home/style_home.css",
       "/css/home/style_filter.css",
-      "/css/general/style_modal_confirmation.css"
+      "/css/general/style_modal_confirmation.css",
+      "/css/general/style_toast.css"
     ],
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
@@ -41,14 +43,22 @@
         "func": ["InitProductDetail"]
       }
     ],
-    "css": ["css/product-detail/style_product_detail.css", "/css/style.css"],
+    "css": [
+      "css/product-detail/style_product_detail.css",
+      "/css/style.css",
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": true,
     "access": ["BUYER", "GUEST"]
   },
   "/login": {
     "html": "/pages/login.html",
     "js": [],
-    "css": ["/css/login/style_login.css", "/css/style.css"],
+    "css": [
+      "/css/login/style_login.css",
+      "/css/style.css",
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": false,
     "access": ["GUEST"]
   },
@@ -60,7 +70,11 @@
         "func": ["initRegisterChoice"]
       }
     ],
-    "css": ["/css/register/style_register_choice.css", "/css/style.css"],
+    "css": [
+      "/css/register/style_register_choice.css",
+      "/css/style.css",
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": false,
     "access": ["GUEST"]
   },
@@ -103,7 +117,12 @@
         "func": ["InitSeller"]
       }
     ],
-    "css": ["/css/seller/style_seller_dashboard.css", "/css/style.css"],
+    "css": [
+      "/css/seller/style_seller_dashboard.css",
+      "/css/style.css",
+      "/css/general/style_modal_confirmation.css",
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": true,
     "access": ["SELLER"]
   },
@@ -127,7 +146,11 @@
         "func": ["InitSellerProductAdd"]
       }
     ],
-    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "css": [
+      "/css/seller/style_seller_product_info.css",
+      "/css/style.css",
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": true,
     "access": ["SELLER"]
   },
@@ -139,7 +162,11 @@
         "func": ["InitSellerProductAdd"]
       }
     ],
-    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "css": [
+      "/css/seller/style_seller_product_info.css",
+      "/css/style.css",
+      "/css/general/style_toast.css"
+    ],
     "useNavbar": true,
     "access": ["SELLER"]
   },
