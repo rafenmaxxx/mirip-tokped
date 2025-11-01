@@ -1,5 +1,7 @@
 import { GET } from "../../api/api.js";
+import { PUT } from "../../api/api.js";
 import { router } from "../../../app.js";
+import { renderToast } from "../general/toast.js";
 
 let allOrders = [];
 let currentFilter = "all"; // Current active filter
@@ -108,6 +110,30 @@ function renderOrderCard(order, container) {
   else if (order.status === "received") statusClass = "status-received";
   else if (order.status === "rejected") statusClass = "status-rejected";
 
+  // Reject info HTML (if rejected)
+  const rejectInfoHtml = order.status === "rejected" ? `
+    <div class="order_reject_info">
+      <div class="refund-amount">
+        <span class="refund-label">Refunded:</span>
+        <span class="refund-value">Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</span>
+      </div>
+      
+      <div class="reject-reason-preview">
+        <span class="reason-label">Seller's note:</span>
+        <span class="reason-text">${order.reject_reason ? order.reject_reason : "-"}</span>
+      </div>
+      
+    </div>
+  ` : '';
+
+  // On delivery action button
+  const deliveryActionHtml = order.status === "on_delivery" ? `
+    <button class="confirm_received_btn" 
+            data-order-id="${order.order_id}">
+      Konfirmasi Diterima
+    </button>
+  ` : '';
+
   const orderElement = document.createElement("div");
   orderElement.classList.add("order");
   orderElement.innerHTML = `
@@ -124,12 +150,17 @@ function renderOrderCard(order, container) {
     <div class="order_items">
       ${itemsHtml}
     </div>
+    ${rejectInfoHtml}
     <div class="order_footer">
       <p class="total-price">Total: <strong>Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</strong></p>
-      <button class="view_details_btn" 
-              data-order-id="${order.order_id}">
-        View Details
-      </button>
+      <div class="order_actions">
+        ${deliveryActionHtml}
+        <button class="view_details_btn" 
+                data-order-id="${order.order_id}">
+          View Details
+        </button>
+        
+      </div>
     </div>
   `;
 
@@ -137,10 +168,19 @@ function renderOrderCard(order, container) {
   storeNameElem.addEventListener("click", () => {
     router.navigateTo("/store?store_id=" + order.store_id);
   });
+  
   const viewBtn = orderElement.querySelector(".view_details_btn");
   viewBtn.addEventListener("click", () => {
     renderOrderDetailModal(order);
   });
+
+  // Add event listener for confirm received button
+  const confirmBtn = orderElement.querySelector(".confirm_received_btn");
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", () => {
+      handleConfirmReceived(order.order_id);
+    });
+  }
 
   container.appendChild(orderElement);
 }
@@ -288,6 +328,25 @@ function LoadOrderHistoryData(data) {
     // Render all orders initially
     renderFilteredOrders(currentFilter);
   }
+}
+
+function handleConfirmReceived(orderId) {
+  // Here you would typically make an API call to confirm receipt
+  PUT(`/api/order`, { action: 'update_status', order_id: orderId, status: 'received' }, (response) => {
+    if (response.status === 'success') {
+      console.log(`Order ID ${orderId} confirmed as received.`);
+      renderToast('success', 'Order confirmed as received.');
+
+      // Update local order status
+      const orderIndex = allOrders.findIndex(order => order.order_id === orderId);
+      if (orderIndex !== -1) {
+        allOrders[orderIndex].status = 'received';
+        renderFilteredOrders(currentFilter);
+      }
+    } else {
+      console.error(`Failed to confirm order ID ${orderId}: ${response.message}`);
+    }
+  }, () => {});
 }
 
 // --- Error Handler ---
