@@ -197,7 +197,12 @@
         "func": ["InitCartPage"]
       }
     ],
-    "css": ["/css/cart/style_cart.css", "/css/style.css"],
+    "css": [
+      "/css/cart/style_cart.css", 
+      "/css/style.css",
+      "/css/general/style_toast.css",
+      "/css/general/style_loading.css"
+    ],
     "useNavbar": true,
     "access": ["BUYER"]
   },
