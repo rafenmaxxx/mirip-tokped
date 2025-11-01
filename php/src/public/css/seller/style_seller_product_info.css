@@ -16,6 +16,7 @@
     display: flex;
     gap: 30px;
     flex-grow: 1;
+
 }
 
 .form-image-column {
@@ -158,4 +159,59 @@ textarea {
 
 .btn-edit:hover {
     background-color: #008C4A;
+}
+
+
+#quill-desc {
+  width: 100%;
+  min-height: 200px;
+  border: 1px solid #BDBDBD;
+  border-radius: 6px;
+  background-color: #FFFFFF; 
+  overflow: hidden;
+}
+
+
+
+
+#quill-desc {
+  width: 100%;
+  max-width: 100%;
+  min-height: 200px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+
+.ql-container {
+  height: auto !important;
+  max-height: 250px;
+  border: 1px solid #BDBDBD;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  overflow-y: auto;
+  background-color: #FFFFFF;
+}
+
+
+.ql-toolbar.ql-snow {
+  border: 1px solid #BDBDBD;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background-color: #FAFAFA;
+}
+
+
+.ql-editor {
+  min-height: 180px;
+  padding: 12px;
+  line-height: 1.5;
+  font-size: 14px;
+  color: #333;
+  background-color: #FFFFFF;
+}
+
+
+.form-group:last-child {
+  margin-bottom: 0;
 }

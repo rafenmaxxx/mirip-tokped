@@ -140,12 +140,7 @@
   },
   "/seller/products/add": {
     "html": "/pages/seller_product_info.html",
-    "js": [
-      {
-        "path": "./lib/seller/seller_product_add.js",
-        "func": ["InitSellerProductAdd"]
-      }
-    ],
+    "js": [{ "path": "./lib/general/quill.js", "func": ["InitQuill"] }],
     "css": [
       "/css/seller/style_seller_product_info.css",
       "/css/style.css",

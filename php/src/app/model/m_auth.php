@@ -1,6 +1,43 @@
 <?php
 require_once __DIR__ . '/../db/db.php';
 
+function guard(array $allowed)
+{
+    $isGuestAllowed = in_array("GUEST", $allowed);
+
+    if (!isset($_SESSION['user'])) {
+        if ($isGuestAllowed) {
+
+            return;
+        } else {
+
+            echo "<script>
+                    alert('Login dulu Bos!');
+                    window.location.href = '/login';
+                  </script>";
+            exit;
+        }
+    }
+
+    if ($isGuestAllowed) {
+        echo "<script>
+                alert('Kamu sudah login Bos!');
+                window.location.href = '/';
+              </script>";
+        exit;
+    }
+
+    $role = $_SESSION['user']['role'] ?? null;
+    if (!in_array($role, $allowed)) {
+        echo "<script>
+                alert('Kamu tidak punya akses ke API ini!');
+                window.location.href = '/login';
+              </script>";
+        exit;
+    }
+}
+
+
 class Auth
 {
     private $conn;
