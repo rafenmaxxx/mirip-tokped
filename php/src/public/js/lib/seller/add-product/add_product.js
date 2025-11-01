@@ -9,6 +9,9 @@ export function InitAddProduct() {
   document.getElementById("stok").addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/[^0-9]/g, "");
   });
+  document.querySelector(".btn-ganti-foto").addEventListener("click", () => {
+    document.getElementById("product-img").click();
+  });
 
   const batalBtn = document.getElementById("batalBtn");
   batalBtn.addEventListener("click", () => {
