@@ -220,6 +220,10 @@ INSERT INTO categories (name) VALUES
 INSERT INTO products (store_id, product_name, description, price, stock, main_image_path) VALUES
     (1, 'Smartphone X1', 'Gadget terbaru', 3000000, 15, '/data/products/smartphone_x1.png'),
     (1, 'Headphone Pro', 'Headphone wireless', 500000, 30, '/data/products/headphone.png'),
+    (1, 'Smartphone X2', 'Gadget terbaru', 3000000, 15, '/data/products/smartphone_x1.png'),
+    (1, 'Headphone Pro1', 'Headphone wireless', 500000, 30, '/data/products/headphone.png'),
+    (1, 'Smartphone X3', 'Gadget terbaru', 3000000, 15, '/data/products/smartphone_x1.png'),
+    (1, 'Headphone Pro2', 'Headphone wireless', 500000, 30, '/data/products/headphone.png'),
 
     (2, 'Kaos Trendy', 'Kaos modis untuk anak muda', 75000, 100, '/data/products/kaos.png'),
     (2, 'Celana Jeans', 'Jeans slim fit', 150000, 80, '/data/products/jeans.png'),
