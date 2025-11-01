@@ -48,9 +48,10 @@ function morphAuthBtn(data) {
   const btn = document.getElementById("navbar-auth-btn");
   const chart = document.getElementById("navbar-chart");
   const balance = document.getElementById("balance-btn");
+  const orderHist = document.getElementById("order-hist");
   if (data.status == "success") {
     // udah login
-    btn.innerHTML = `<a href="/profile"><button class="btn btn-login" id="btn-profile">Profile</button></a>
+    btn.innerHTML = `<button class="btn btn-login" id="btn-profile">Profile</button>
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
     const logoutBtn = document.getElementById("btn-logout");
     logoutBtn.addEventListener("click", () => {
@@ -62,7 +63,7 @@ function morphAuthBtn(data) {
             {},
             (data) => {
               if (data.status) {
-                router.navigateTo("/");
+                router.navigateTo("/login");
                 // ubah navbar
                 morphAuthBtn({ status: "error" });
               } else {
@@ -83,12 +84,16 @@ function morphAuthBtn(data) {
     chart.addEventListener("click", () => {
       router.navigateTo("/cart");
     });
+    orderHist.addEventListener("click", () => {
+      router.navigateTo("/order-history");
+    });
   } else {
     // blom login
     btn.innerHTML = ` <a href="/login"><button class="btn btn-login">Login</button></a>
         <a href="/register "><button class="btn btn-register">Register</button></a>`;
     chart.innerHTML = "";
     balance.innerHTML = "";
+    orderHist.innerHTML = "";
   }
 }
 

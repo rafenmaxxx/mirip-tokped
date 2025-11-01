@@ -147,8 +147,8 @@
     "html": "/pages/seller_order_management.html",
     "js": [
       {
-        "path": "./lib/seller/seller_order_management.js",
-        "func": ["InitSellerOrderManagement"]
+        "path": "./lib/seller/order/order_management.js",
+        "func": ["InitOrderSeller"]
       }
     ],
     "css": ["/css/seller/style_seller_order_management.css", "/css/style.css"],
@@ -201,7 +201,7 @@
     ],
     "css": ["/css/profile/style_profile.css", "/css/style.css"],
     "useNavbar": true,
-    "access": ["BUYER"]
+    "access": ["BUYER", "SELLER"]
   },
   "/order-history": {
     "html": "/pages/order_history.html",

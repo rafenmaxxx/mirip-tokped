@@ -123,5 +123,61 @@ class Order
         return $stmt;
     }
 
-   
+    public function getOrderByStore($store_id)
+    {
+        $sql = "
+        SELECT 
+            o.*, 
+            u.name AS buyer_name,
+            p.product_name, p.main_image_path, 
+            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+        FROM orders o
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.product_id
+        LEFT JOIN users u ON o.buyer_id = u.user_id
+        WHERE o.store_id = :store_id
+        ORDER BY o.created_at DESC
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':store_id' => $store_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $orders = [];
+        foreach ($rows as $row) {
+            $order_id = $row['order_id'];
+
+            if (!isset($orders[$order_id])) {
+                $orders[$order_id] = [
+                    'order_id' => $row['order_id'],
+                    'buyer_id' => $row['buyer_id'],
+                    'buyer_name' => $row['buyer_name'],
+                    'store_id' => $row['store_id'],
+                    'total_price' => $row['total_price'],
+                    'shipping_address' => $row['shipping_address'],
+                    'status' => $row['status'],
+                    'reject_reason' => $row['reject_reason'],
+                    'confirmed_at' => $row['confirmed_at'],
+                    'delivery_time' => $row['delivery_time'],
+                    'received_at' => $row['received_at'],
+                    'created_at' => $row['created_at'],
+                    'items' => []
+                ];
+            }
+
+            if ($row['order_item_id']) {
+                $orders[$order_id]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'product_name' => $row['product_name'],
+                    'main_image_path' => $row['main_image_path'],
+                    'quantity' => $row['quantity'],
+                    'price_at_order' => $row['price_at_order'],
+                    'subtotal' => $row['subtotal']
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
 }

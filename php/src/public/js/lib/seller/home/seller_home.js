@@ -39,14 +39,14 @@ export function InitSeller() {
   });
 
   kelolaBtn.addEventListener("click", () => {
-    router.navigateTo("");
+    router.navigateTo("/seller/products");
   });
 
   orderBtn.addEventListener("click", () => {
-    router.navigateTo("");
+    router.navigateTo("/seller/orders");
   });
 
   addProdBtn.addEventListener("click", () => {
-    router.navigateTo("");
+    router.navigateTo("/seller/products/add");
   });
 }
