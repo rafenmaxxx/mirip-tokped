@@ -1,6 +1,7 @@
 import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
+import { renderToast } from "../general/toast.js";
 
 function LoadDetail(data) {
   const res = data.data;
@@ -56,9 +57,15 @@ function LoadAddCartBtn(id) {
               { action: "add", product_id: product_id, buyer_id: data.data.id },
               (response) => {
                 if (response.status === "success") {
-                  alert("Added to cart!");
+                  renderToast(
+                    "Berhasil menambahkan produk kedalam cart",
+                    "success"
+                  );
                 } else {
-                  alert("Failed to add to cart.");
+                  renderToast(
+                    "Gagal menambahkan produk kedalam cart",
+                    "success"
+                  );
                 }
               },
               () => {}
