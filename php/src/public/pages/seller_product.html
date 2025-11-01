@@ -1,199 +1,60 @@
 <div class="main-container">
     <header class="page-header">
-        <div class="filters">
+        <div class="order-filter">
             <div class="search-bar">
                 <input type="text" placeholder="search products">
                 <button class="search-btn">
                     <img src="/img/seller/search.png" alt="Search Icon">
                 </button>
             </div>
-            <select name="category" class="filter-select">
-                <option value="">category</option>
-                <option value="bagus">Bagus</option>
-                <option value="murah">Murah</option>
-            </select>
-            <select name="sort" class="filter-select">
-                <option value="">sort</option>
-                <option value="harga-terendah">Harga Terendah</option>
-                <option value="harga-tertinggi">Harga Tertinggi</option>
-            </select>
+            <div class="custom-select">
+                <select name="category" class="filter-select" id="category-filter">
+                </select>
+                <div class="select-arrow">▼</div>
+            </div>
+            <div class="custom-select">
+                <select name="sort" class="filter-select" id="sort-filter">
+                    <option value="">Not Sorted</option>
+                    <option value="nama-asc">nama (A-Z)</option>
+                    <option value="nama-desc">nama (Z-A)</option>
+                    <option value="harga-asc">harga (min-max)</option>
+                    <option value="harga-desc">harga (max-min)</option>
+                    <option value="stok-asc">stok (min-max)</option>
+                    <option value="stok-desc">stok (max-min)</option>
+                </select>
+                <div class="select-arrow">▼</div>
+            </div>
         </div>
-        <button class="btn-add">tambah +</button>
+        <a class="btn-add" href="/seller/products/add">tambah +</a>
     </header>
-
-    <main class="product-grid">
-        
-        <article class="product-card">
-            <div class="card-contents">
-                
-                <div class="card-image">
-                    <img src="/img/seller/profile.png" alt="Produk">
-                </div>
-
-                <div class="card-description">
-                    <h2 class="product-name">nama produk</h2>
-                    <p class="product-info">stok: 10</p>
-                    <p class="product-info">harga: Rp. 50.000</p>
-                    <div class="product-categories">
-                        <span>kategori:</span>
-                        <span class="tag">bagus</span>
-                        <span class="tag">murah</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-actions">
-                <button class="btn-delete">delete</button>
-                <button class="btn-edit">edit</button>
-            </div>
-        </article>
-
-        <article class="product-card">
-            <div class="card-contents">
-                
-                <div class="card-image">
-                    <img src="/img/seller/profile.png" alt="Produk">
-                </div>
-
-                <div class="card-description">
-                    <h2 class="product-name">nama produk</h2>
-                    <p class="product-info">stok: 10</p>
-                    <p class="product-info">harga: Rp. 50.000</p>
-                    <div class="product-categories">
-                        <span>kategori:</span>
-                        <span class="tag">bagus</span>
-                        <span class="tag">murah</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-actions">
-                <button class="btn-delete">delete</button>
-                <button class="btn-edit">edit</button>
-            </div>
-        </article>
-
-        <article class="product-card">
-            <div class="card-contents">
-                
-                <div class="card-image">
-                    <img src="/img/seller/profile.png" alt="Produk">
-                </div>
-
-                <div class="card-description">
-                    <h2 class="product-name">nama produk</h2>
-                    <p class="product-info">stok: 10</p>
-                    <p class="product-info">harga: Rp. 50.000</p>
-                    <div class="product-categories">
-                        <span>kategori:</span>
-                        <span class="tag">bagus</span>
-                        <span class="tag">murah</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-actions">
-                <button class="btn-delete">delete</button>
-                <button class="btn-edit">edit</button>
-            </div>
-        </article>
-
-        <article class="product-card">
-            <div class="card-contents">
-                
-                <div class="card-image">
-                    <img src="/img/seller/profile.png" alt="Produk">
-                </div>
-
-                <div class="card-description">
-                    <h2 class="product-name">nama produk</h2>
-                    <p class="product-info">stok: 10</p>
-                    <p class="product-info">harga: Rp. 50.000</p>
-                    <div class="product-categories">
-                        <span>kategori:</span>
-                        <span class="tag">bagus</span>
-                        <span class="tag">murah</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-actions">
-                <button class="btn-delete">delete</button>
-                <button class="btn-edit">edit</button>
-            </div>
-        </article>
-
-        <article class="product-card">
-            <div class="card-contents">
-                
-                <div class="card-image">
-                    <img src="/img/seller/profile.png" alt="Produk">
-                </div>
-
-                <div class="card-description">
-                    <h2 class="product-name">nama produk</h2>
-                    <p class="product-info">stok: 10</p>
-                    <p class="product-info">harga: Rp. 50.000</p>
-                    <div class="product-categories">
-                        <span>kategori:</span>
-                        <span class="tag">bagus</span>
-                        <span class="tag">murah</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-actions">
-                <button class="btn-delete">delete</button>
-                <button class="btn-edit">edit</button>
-            </div>
-        </article>
-
-        <article class="product-card">
-            <div class="card-contents">
-                
-                <div class="card-image">
-                    <img src="/img/seller/profile.png" alt="Produk">
-                </div>
-
-                <div class="card-description">
-                    <h2 class="product-name">nama produk</h2>
-                    <p class="product-info">stok: 10</p>
-                    <p class="product-info">harga: Rp. 50.000</p>
-                    <div class="product-categories">
-                        <span>kategori:</span>
-                        <span class="tag">bagus</span>
-                        <span class="tag">murah</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="card-actions">
-                <button class="btn-delete">delete</button>
-                <button class="btn-edit">edit</button>
-            </div>
-        </article>
-
-    </main>
+    <main class="product-grid" id="pg1"></main>
 
     <footer class="pagination-footer">
-        <span class="pagination-info">menampilkan 6 dari 20 product</span>
-        <nav class="pagination-nav">
-            <a href="#" class="active">1</a>
-            <a href="#">2</a>
-            <a href="#">3</a>
-            <span>...</span>
-            <a href="#">6</a>
-        </nav>
-        <select name="items-per-page" class="items-per-page">
+        <span class="pagination-info"></span>
+        <nav class="pagination-nav" id="pagination-nav-buttons"></nav>
+        <select name="items-per-page" class="items-per-page" id="items-per-page-select">
+            <option value="1">1</option>
+            <option value="4">4</option>
             <option value="6">6</option>
-            <option value="12">12</option>
-            <option value="20">20</option>
         </select>
     </footer>
 </div>
+
+    <!-- <div class="filter-dropdown-container">
+      <label for="order-status-filter" class="filter-label">
+        Filter by Status:
+      </label>
+      <div class="custom-select">
+        <select id="order-status-filter" class="filter-select">
+          ${statuses.map(status => `
+            <option value="${status.value}" ${status.value === currentFilter ? 'selected' : ''}>
+               ${status.label}
+            </option>
+          `).join('')}
+        </select>
+        <div class="select-arrow">▼</div>
+      </div>
+      <div class="order-count" id="order-count">
+        Loading...
+      </div>
+    </div> -->
