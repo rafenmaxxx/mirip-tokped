@@ -24,10 +24,33 @@ class Product
 
     public function getDetailById($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM products p JOIN stores s ON p.store_id = s.store_id WHERE p.product_id=:id");
+        $sql = "
+        SELECT 
+            p.*,
+            s.store_name,
+            s.store_description,
+            s.store_logo_path,
+            COALESCE(JSON_AGG(c.name) FILTER (WHERE c.name IS NOT NULL), '[]') AS categories
+        FROM products p
+        JOIN stores s ON p.store_id = s.store_id
+        LEFT JOIN category_items ci ON p.product_id = ci.product_id
+        LEFT JOIN categories c ON ci.category_id = c.category_id
+        WHERE p.product_id = :id
+        GROUP BY p.product_id, s.store_id
+    ";
+
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute([':id' => $id]);
-        return $stmt->fetch();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // ubah hasil JSON jadi array PHP
+        if ($row && isset($row['categories'])) {
+            $row['categories'] = json_decode($row['categories'], true);
+        }
+
+        return $row;
     }
+
 
     public function getByName($name)
     {

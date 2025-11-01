@@ -1,3 +1,7 @@
+let quill = null;
+let quillReady = false;
+let quillReadyCallbacks = [];
+
 function setupQuill() {
   const descContainer = document.getElementById("quill-desc");
   const hiddenInput = document.getElementById("quill-desc-input");
@@ -7,7 +11,7 @@ function setupQuill() {
     return;
   }
 
-  const quill = new Quill(descContainer, {
+  quill = new Quill(descContainer, {
     theme: "snow",
     placeholder: "Masukkan Teks...",
     modules: {
@@ -31,6 +35,10 @@ function setupQuill() {
       hiddenInput.value = quill.root.innerHTML;
     });
   }
+
+  quillReady = true;
+  quillReadyCallbacks.forEach((cb) => cb());
+  quillReadyCallbacks = [];
 }
 
 export function InitQuill() {
@@ -47,4 +55,16 @@ export function InitQuill() {
   } else {
     setupQuill();
   }
+}
+
+export function onQuillReady(callback) {
+  if (quillReady) callback();
+  else quillReadyCallbacks.push(callback);
+}
+
+export function changePlaceHolder(text) {
+  onQuillReady(() => {
+    quill.clipboard.dangerouslyPasteHTML(text || "");
+    document.getElementById("quill-desc-input").value = text || "";
+  });
 }

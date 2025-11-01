@@ -178,8 +178,8 @@
     "html": "/pages/seller_product_info.html",
     "js": [
       {
-        "path": "./lib/seller/seller_product_add.js",
-        "func": ["InitSellerProductAdd"]
+        "path": "./lib/seller/edit-product/edit_product.js",
+        "func": ["InitEditProduct"]
       }
     ],
     "css": [
