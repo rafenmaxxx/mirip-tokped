@@ -1,4 +1,4 @@
-/* ===== Navbar Container ===== */
+
 .navbar {
   display: flex;
   align-items: center;
@@ -16,7 +16,7 @@
   z-index: 1000; 
 }
 
-/* ===== Logo ===== */
+
 .navbar__logo {
   font-weight: 700;
   font-size: 1.5rem;
@@ -24,7 +24,7 @@
   cursor: pointer;
 }
 
-/* ===== Search Bar ===== */
+
 .navbar__search {
   flex: 1;
   display: flex;
@@ -58,7 +58,7 @@
   background-color: #009042;
 }
 
-/* ===== Filter Dropdown ===== */
+
 .navbar__filter select {
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -73,7 +73,7 @@
   border-color: #00a14b;
 }
 
-/* ===== Auth Buttons ===== */
+
 .navbar__auth {
   display: flex;
   gap: 0.5rem;
@@ -131,7 +131,19 @@
   background-color: #f3f3f3;
 }
 
-/* ===== Responsive ===== */
+.badge {
+  background-color: #e02424;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  line-height: 1;
+}
+
+
+
 @media (max-width: 768px) {
   .navbar {
     flex-wrap: wrap;
