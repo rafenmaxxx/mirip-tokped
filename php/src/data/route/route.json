@@ -116,8 +116,8 @@
   "/unauthorized": {
     "html": "/pages/unauthorized.html",
     "js": [],
-    "css": [],
-    "useNavbar": false,
+    "css": ["/css/general/style_unauthorized.css", "/css/style.css"],
+    "useNavbar": true,
     "access": ["GUEST", "BUYER", "SELLER"]
   },
   "/seller": {
@@ -142,8 +142,8 @@
     "html": "/pages/seller_product.html",
     "js": [
       {
-        "path": "./lib/seller/seller_product.js",
-        "func": ["InitSellerProduct"]
+        "path": "./lib/seller/product/seller_product.js",
+        "func": ["InitSellerProductPage"]
       }
     ],
     "css": [
