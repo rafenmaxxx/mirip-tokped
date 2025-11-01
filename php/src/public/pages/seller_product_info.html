@@ -1,54 +1,55 @@
 <div class="form-container">
-    <form class="product-form">
-
+    <form method="POST" action="/api/product" class="product-form" enctype="multipart/form-data">
         <div class="form-image-column">
             <div class="form-image-upload">
                 <div class="plus-icon">+</div>
                 <p>add photo</p>
             </div>
 
-            <button type="button" class="btn-ganti-foto">ganti foto</button>
+            <button type="button" class="btn-ganti-foto">Ganti Foto</button>
+            <input type="file" id="product-img" name="product-img" accept="image/*" hidden>
         </div>
 
         <div class="form-fields">
 
             <div class="form-group">
                 <label for="nama-produk">nama produk</label>
-                <input type="text" id="nama-produk">
+                <input type="text" id="nama-produk" name="nama_produk">
             </div>
 
             <div class="form-group">
                 <label for="store-desc">Deskripsi Product</label>
                 <div id="quill-desc"></div>
-                <input type="hidden" name="store-desc" id="quill-desc-input">
+                <input type="hidden" name="deskripsi" id="quill-desc-input">
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="harga">harga</label>
-                    <input type="text" id="harga">
+                    <input type="text" id="harga" name="harga">
                 </div>
                 <div class="form-group">
                     <label for="stok">stok</label>
-                    <input type="text" id="stok">
+                    <input type="text" id="stok" name="stok">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Kategori</label>
                 <div class="filter-checkboxes">
-                    <label><input type="checkbox" value="Elektronik"> Elektronik</label>
-                    <label><input type="checkbox" value="Fashion"> Fashion</label>
-                    <label><input type="checkbox" value="Buku & Alat Tulis"> Buku & Alat Tulis</label>
-                    <label><input type="checkbox" value="Olahraga"> Olahraga</label>
-                    <label><input type="checkbox" value="Rumah Tangga"> Rumah Tangga</label>
+                    <label><input type="checkbox" name="categories[]" value="1"> Elektronik</label>
+                    <label><input type="checkbox" name="categories[]" value="2"> Fashion</label>
+                    <label><input type="checkbox" name="categories[]" value="3"> Buku & Alat Tulis</label>
+                    <label><input type="checkbox" name="categories[]" value="4"> Olahraga</label>
+                    <label><input type="checkbox" name="categories[]" value="5"> Rumah Tangga</label>
                 </div>
+            </div>
+            <div class="action-buttons-right">
+                <button type="button" class="btn-cancel" id="batalBtn">batal</button>
+                <button type="submit" class="btn-save">simpan</button>
             </div>
         </div>
 
     </form>
-    <div class="action-buttons-right">
-        <button type="button" class="btn-cancel" id="batalBtn">batal</button>
-        <button type="submit" class="btn-save">simpan</button>
-    </div>
+
 </div>
