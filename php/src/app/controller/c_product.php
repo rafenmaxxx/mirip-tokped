@@ -15,20 +15,31 @@ switch ($method) {
         if ($search) {
 
             $data = $model->getByName($search);
+        } else if ($store_id && $filter && $title) {
+            
+            $filterData = json_decode($filter, true);
+            $categories = $filterData['categories'] ?? [];
+            $minPrice = $filterData['minPrice'] ?? null;
+            $maxPrice = $filterData['maxPrice'] ?? null;
+            
+            $data = $model->getFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
+        } else if ($store_id && $filter) {
+            
+            $filterData = json_decode($filter, true);
+            $categories = $filterData['categories'] ?? [];
+            $minPrice = $filterData['minPrice'] ?? null;
+            $maxPrice = $filterData['maxPrice'] ?? null;
+            
+            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
+        } else if ($store_id && $title) {
+            
+            $data = $model->getProductByStoreAndName($store_id, $title);
         } else if ($id) {
 
             $data = $model->getDetailById($id);
         } else if ($title) {
 
             $data = $model->getTitle($title);
-        } else if ($filter && $store_id) {
-            // ada filter dan store_id -> filter product by store_id
-            $filterData = json_decode($filter, true);
-            $categories = $filterData['categories'] ?? [];
-            $minPrice = $filterData['minPrice'] ?? null;
-            $maxPrice = $filterData['maxPrice'] ?? null;
-
-            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
         } else if ($filter) {
 
             $filterData = json_decode($filter, true);

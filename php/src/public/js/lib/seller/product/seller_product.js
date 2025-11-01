@@ -6,6 +6,8 @@ let currentPage = 1;
 let itemsPerPage = 2;
 let currentCategory = "";
 let currentSort = "none";
+let currentSearch = "";
+let debounceTimer;
 
 function renderFilterDropdown(data) {
   const filterContainer = document.getElementById("category-filter");
@@ -85,7 +87,7 @@ function renderFilteredProducts() {
 
   const paginationInfo = document.querySelector(".pagination-info");
     if (paginationInfo) {
-        paginationInfo.textContent = `Menampilkan ${paginatedProducts.length} dari ${allProducts.length} product`;
+        paginationInfo.textContent = `Menampilkan ${paginatedProducts.length} dari ${filteredProducts.length} product`;
     }
 
 }
@@ -256,6 +258,10 @@ function fetchProducts() {
      params.filter = JSON.stringify(filters);
    }
 
+   if (currentSearch) {
+      params.title = currentSearch;
+   }
+
    console.log("Fetching products with params:", params); 
 
    GET("/api/product", params, LoadSellerProductData, SellerProductErr);
@@ -265,6 +271,7 @@ export async function InitSellerProductPage() {
   // Reset filter
   currentCategory = "";
   allProducts = [];
+  currentSearch = "";
 
   fetchProducts();
   GET('/api/category', {}, renderFilterDropdown, CategoryProductErr);
@@ -289,12 +296,28 @@ export async function InitSellerProductPage() {
   }
 
   const categorySelect = document.getElementById("category-filter");
-    if (categorySelect) {
-        categorySelect.addEventListener("change", (e) => {
-            currentCategory = e.target.value;
-            console.log("Category filter changed to:", currentCategory);
-            currentPage = 1;
-            fetchProducts();
+  if (categorySelect) {
+      categorySelect.addEventListener("change", (e) => {
+          currentCategory = e.target.value;
+          console.log("Category filter changed to:", currentCategory);
+          currentPage = 1;
+          fetchProducts();
+      });
+  }
+
+  const searchInput = document.getElementById("search-input"); 
+  if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(() => {
+                console.log("Debounce selesai, mencari:", e.target.value);
+                
+                currentSearch = e.target.value;
+                currentPage = 1;
+                fetchProducts();
+                
+            }, 400);
         });
     }
 }
