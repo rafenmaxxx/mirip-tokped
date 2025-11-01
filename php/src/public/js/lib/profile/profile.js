@@ -1,6 +1,7 @@
 import { GET, PUT } from "../../api/api.js";
 import { renderToast } from "../general/toast.js";
 import { Loading } from "../general/loading.js";
+import { ValidatePassword } from "../../util/password_validation.js";
 
 // --- Modal Change Password ---
 function renderPasswordChangeModal() {
@@ -84,8 +85,9 @@ function renderPasswordChangeModal() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      errorDiv.textContent = "Password baru harus minimal 8 karakter.";
+    if (!ValidatePassword(newPassword)) {
+      errorDiv.textContent =
+        "Password baru tidak valid.";
       return;
     }
 
