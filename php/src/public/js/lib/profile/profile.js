@@ -86,7 +86,8 @@ function renderPasswordChangeModal() {
     }
 
     if (!ValidatePassword(newPassword)) {
-      renderToast("Password tidak valid", "error");
+      errorDiv.textContent =
+        "Password baru tidak valid.";
       return;
     }
 
