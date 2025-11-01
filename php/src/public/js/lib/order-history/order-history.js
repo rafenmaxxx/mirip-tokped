@@ -1,5 +1,5 @@
 import { GET } from "../../api/api.js";
-
+import { router } from "../../../app.js";
 
 let allOrders = [];
 let currentFilter = "all"; // Current active filter
@@ -133,6 +133,10 @@ function renderOrderCard(order, container) {
     </div>
   `;
 
+  const storeNameElem = orderElement.querySelector(".store-name");
+  storeNameElem.addEventListener("click", () => {
+    router.navigateTo("/store?store_id=" + order.store_id);
+  });
   const viewBtn = orderElement.querySelector(".view_details_btn");
   viewBtn.addEventListener("click", () => {
     renderOrderDetailModal(order);

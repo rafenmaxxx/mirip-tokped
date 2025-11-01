@@ -45,9 +45,9 @@ function LoadCheckoutItems(data) {
         });
         return `
           <div class="checkout_item_card" data-store-card-id="${item.store_id}">
-              
-            <h3 class="checkout_store_name">${item.store_name}</h3>
-              
+
+            <h3 class="checkout_store_name" data-store-id="${item.store_id}">${item.store_name}</h3>
+
             <div class="checkout_item_details">
             ${details.join("")}
             </div>
@@ -91,6 +91,15 @@ function LoadCheckoutItems(data) {
                       </div>
                   </div>
             `;
+        
+        const storeNames = container.querySelectorAll(".checkout_store_name");
+
+        storeNames.forEach((el) => {
+          el.addEventListener("click", () => {
+            const storeId = el.getAttribute("data-store-id");
+            router.navigateTo(`/store?store_id=${parseInt(storeId)}`);
+          });
+        });
         GET("/api/user", { action: "balance" }, LoadBalance, BalanceErr);
       },
       () => {}
