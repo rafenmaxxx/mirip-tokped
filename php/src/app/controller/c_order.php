@@ -7,10 +7,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
 
     case 'GET':
+        $action = $_GET['action'] ?? null;
         $id = $_GET['id'] ?? null;
         $user_id = $_SESSION['user']['id'] ?? null;
         $store_id = $_SESSION['user']['store_id'] ?? null;
-
+        if ($action == "count_buyer_order") {
+            $data = $model;
+            echo json_encode(['status' => 'success', 'data' => $data]);
+            break;
+        }
         if ($store_id) {
             $data = $model->getOrderByStore($store_id);
         } else if ($id) {
