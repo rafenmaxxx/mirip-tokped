@@ -2,6 +2,7 @@ import { router } from "../../../app.js";
 import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { showModalConfirmation } from "../general/modal.js";
+import { renderToast } from "../general/toast.js";
 
 let total_price = 0;
 
@@ -46,7 +47,9 @@ function LoadCheckoutItems(data) {
         return `
           <div class="checkout_item_card" data-store-card-id="${item.store_id}">
 
-            <h3 class="checkout_store_name" data-store-id="${item.store_id}">${item.store_name}</h3>
+            <h3 class="checkout_store_name" data-store-id="${item.store_id}">${
+          item.store_name
+        }</h3>
 
             <div class="checkout_item_details">
             ${details.join("")}
@@ -91,7 +94,7 @@ function LoadCheckoutItems(data) {
                       </div>
                   </div>
             `;
-        
+
         const storeNames = container.querySelectorAll(".checkout_store_name");
 
         storeNames.forEach((el) => {
@@ -194,18 +197,18 @@ function handleCheckout(balance) {
     "Yakin Ingin Check Out?",
     () => {
       if (balance < total_price) {
-        alert("kurang duit");
+        renderToast("Kurang Duit", "error");
       } else {
         alert("bisa checkout");
         POST(
           "/api/checkout",
           { address: shippingAddress },
           () => {
-            alert("Sukses Checkout");
+            renderToast("Sukses Checkout", "success");
             router.navigateTo("/");
           },
           () => {
-            alert("Gagal Checkout");
+            renderToast("Gagal Checkout", "error");
           }
         );
       }
