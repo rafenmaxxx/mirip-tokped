@@ -2,9 +2,9 @@ import { GET } from "../../api/api.js";
 import { PUT } from "../../api/api.js";
 import { DELETE } from "../../api/api.js";
 import { router } from "../../../app.js";
-import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { Loading } from "../general/loading.js";
 import { renderToast } from "../general/toast.js";
+import { InitCountCart } from "../general/navbar.js";
 
 function reloadCartPage() {
   GET(
@@ -174,7 +174,9 @@ function LoadCartItems(data) {
         return `
         <div class="cart_item_card" data-store-card-id="${item.store_id}">
             <div class="cart_store_heading">
-              <h3 class="cart_store_name" data-store-id="${item.store_id}">${item.store_name}</h3>
+              <h3 class="cart_store_name" data-store-id="${item.store_id}">${
+          item.store_name
+        }</h3>
               <button class="btn btn-remove-store" data-store-id="${
                 item.store_id
               }" ">Hapus</button>
@@ -193,8 +195,6 @@ function LoadCartItems(data) {
       `;
       })
       .join("");
-
-    
 
     container.innerHTML = `
           <h2 id="cart-label" class="cart_title">Cart</h2>
@@ -300,7 +300,6 @@ function closeModal() {
 }
 
 function confirmDelete() {
-
   if (deleteType === "store" && currentDeleteStoreId) {
     Loading.show("Menghapus toko...");
     DELETE(
@@ -310,7 +309,6 @@ function confirmDelete() {
         store_id: currentDeleteStoreId,
       },
       (response) => {
-
         if (response.status === "success") {
           Loading.hide();
           closeModal();
@@ -318,13 +316,15 @@ function confirmDelete() {
         } else {
           Loading.hide();
           closeModal();
-          renderToast("Gagal menghapus store: " + (response.message || ""), "error");
+          renderToast(
+            "Gagal menghapus store: " + (response.message || ""),
+            "error"
+          );
         }
       },
       () => {}
     );
   } else if (deleteType === "item" && currentDeleteCartItemId) {
-
     DELETE(
       "/api/cart",
       {
@@ -332,13 +332,15 @@ function confirmDelete() {
         action: "remove_item",
       },
       (response) => {
-
         if (response.status === "success") {
           closeModal();
           reloadCartPage();
         } else {
           closeModal();
-          renderToast("Gagal menghapus item: " + (response.message || ""), "error");
+          renderToast(
+            "Gagal menghapus item: " + (response.message || ""),
+            "error"
+          );
         }
       },
       () => {}
@@ -347,6 +349,7 @@ function confirmDelete() {
     closeModal();
     renderToast("Data tidak lengkap untuk menghapus", "error");
   }
+  InitCountCart();
 }
 
 function LoadSummary(data) {
