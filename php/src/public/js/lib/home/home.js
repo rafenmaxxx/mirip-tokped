@@ -1,6 +1,7 @@
 import { LoadComponent } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { router } from "../../../app.js";
+import { initHeroSlider } from "../slider.js";
 
 function LoadProduct(data) {
   const container = document.getElementById("product-data");
@@ -60,28 +61,24 @@ function ProductErr(err) {
   }
 }
 
-function ChangeCatalogLabel(label) {
-  let elmt = document.getElementById("product-label");
-  elmt.innerHTML = label;
+function ChangeCatalogLabel() {
+  const el = document.getElementById("catalog-label");
+  if (!el) {
+    console.warn("catalog-label tidak ditemukan!");
+    return;
+  }
+  el.innerHTML = "Produk Terbaru";
 }
 
 export function LoadHome() {
   let param = new URLSearchParams(window.location.search);
 
   if (!param.toString()) {
-    LoadComponent("slider", "/components/home/sliding_card.html");
-    if (!document.getElementById("slider-id")) {
-      LoadComponent("slider", "/components/home/sliding_card.html");
-    }
-    if (!document.getElementById("slider-id")) {
-      LoadComponent("slider", "/components/home/sliding_card.html");
-    }
-    if (!document.getElementById("slider-id")) {
-      LoadComponent("slider", "/components/home/sliding_card.html");
-    }
     GET("/api/product", {}, LoadProduct, ProductErr);
     ChangeCatalogLabel("Product You Might Want");
   } else {
+    const banner = document.getElementById("slider");
+    banner.innerHTML = "";
     GET(`/api/product?${param}`, {}, LoadProduct, ProductErr);
     ChangeCatalogLabel("Product Result");
   }

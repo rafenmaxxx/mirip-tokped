@@ -11,14 +11,16 @@
             <label for="email">Email</label>
             <input type="email" id="email" name="email" required placeholder="Masukkan email">
         </div>
-        <div class="form-group">
+        <div class="form-group password-field">
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required placeholder="Masukkan password">
+            <button type="button" class="toggle-password" data-target="password">show</button>
         </div>
-        <div class="form-group">
+        <div class="form-group password-field">
             <label for="confirm-password">Confirm Password</label>
             <input type="password" id="confirm-password" name="confirm-password" required
                 placeholder="Konfirmasi password">
+            <button type="button" class="toggle-password" data-target="confirm-password">show</button>
         </div>
         <div class="form-group">
             <label for="store-name">Nama Toko</label>
@@ -37,7 +39,7 @@
         <input type="hidden" name="role" value="SELLER">
         <input type="hidden" name="balance" value="0">
 
-        <button type="submit">Daftar</button>
+        <button type="submit" id="regSellerBtn">Daftar</button>
         <div class="register-link">
             Sudah punya akun? <a href="/login">Masuk Sekarang!</a>
         </div>

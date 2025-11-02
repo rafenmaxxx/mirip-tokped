@@ -1,7 +1,9 @@
+import { renderToast } from "./toast.js";
+
 let quill = null;
 let quillReady = false;
 let quillReadyCallbacks = [];
-
+let count;
 function setupQuill() {
   const descContainer = document.getElementById("quill-desc");
   const hiddenInput = document.getElementById("quill-desc-input");
@@ -25,8 +27,30 @@ function setupQuill() {
     },
   });
 
-  quill.on("text-change", () => {
+  const MAX_LENGTH = 1000;
+  quill.on("text-change", (delta, oldDelta, source) => {
     hiddenInput.value = quill.root.innerHTML;
+    let len = quill.getLength() - 1;
+    console.log(len);
+    if (len > MAX_LENGTH) {
+      let isInsert = delta.ops.some((op) => op.insert);
+      if (isInsert) {
+        const excess = len - MAX_LENGTH;
+        if (excess > 0) {
+          quill.deleteText(MAX_LENGTH, excess);
+
+          len = MAX_LENGTH;
+
+          renderToast(
+            `Maksimal ${MAX_LENGTH} karakter telah tercapai!`,
+            "error"
+          );
+        }
+      }
+      renderToast("Maksimal 1000 Karakter", "error");
+    } else {
+      quill.enable(true);
+    }
   });
 
   const form = descContainer.closest("form");
@@ -42,6 +66,7 @@ function setupQuill() {
 }
 
 export function InitQuill() {
+  count = 0;
   if (!window.Quill) {
     const link = document.createElement("link");
     link.href = "https://cdn.quilljs.com/1.3.6/quill.snow.css";

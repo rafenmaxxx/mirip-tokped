@@ -34,6 +34,11 @@ function LoadDetail(data) {
   storeBtn.addEventListener("click", () => {
     router.navigateTo("/store?store_id=" + res.store_id);
   });
+  if (Array.isArray(res.categories) && res.categories.length > 0) {
+    ChangeInnerHtmlById("p-category", res.categories.join(", "));
+  } else {
+    ChangeInnerHtmlById("p-category", "-");
+  }
 }
 
 function LoadAddCartBtn(id) {
@@ -87,10 +92,7 @@ function IsErr(err) {}
 export function InitProductDetail() {
   const params = new URLSearchParams(window.location.search);
   const param_id = params.get("id");
+
   GET("/api/product", { id: param_id }, LoadDetail, IsErr);
-  const backBtn = document.getElementById("back-btn");
-  backBtn.addEventListener("click", () => {
-    router.navigateTo("/");
-  });
   LoadAddCartBtn(param_id);
 }

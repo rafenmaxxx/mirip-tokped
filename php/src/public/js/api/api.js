@@ -185,9 +185,9 @@ export function DELETE(url, params = {}, callback, err) {
 
 export function POST_FORMDATA(url, formData, callback, err) {
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);  
+  xhr.open("POST", url, true);
   xhr.withCredentials = true;
-  
+
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -208,5 +208,5 @@ export function POST_FORMDATA(url, formData, callback, err) {
     err(true);
   };
 
-  xhr.send(formData); 
+  xhr.send(formData);
 }
