@@ -67,7 +67,7 @@
 /* Kolom kanan (Toko Penjual) */
 .product-right {
   display: flex;
-  align-items: center;
+  align-items: top;
   justify-content: center;
 }
 
@@ -79,6 +79,7 @@
   background-color: #f9fdf9;
   width: 100%;
   max-width: 260px;
+  max-height: fit-content;
 }
 
 .seller-avatar {
