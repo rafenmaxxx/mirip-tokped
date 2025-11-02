@@ -57,9 +57,10 @@ switch ($method) {
             case 'update_status':
                 $id = $PUT['order_id'] ?? null;
                 $status = $PUT['status'] ?? null;
-
+                $msg = $PUT['msg'] ?? null;
+                $durasi = $PUT['durasi'] ?? null;
                 if ($id && $status) {
-                    $result = $model->updateOrderStatus($id, $status);
+                    $result = $model->updateStatus($id, $status, $msg, $durasi);
                     echo json_encode(['status' => 'success', 'data' => $result]);
                 } else {
                     http_response_code(400);

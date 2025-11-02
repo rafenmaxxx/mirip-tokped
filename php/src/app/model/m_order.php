@@ -96,15 +96,41 @@ class Order
         return $stmt;
     }
 
-    public function updateOrderStatus($order_id, $status)
+    public function updateOrderStatus($order_id, $status, $durasi = null)
     {
-        $stmt = $this->conn->prepare("UPDATE orders SET status=:status WHERE order_id=:order_id");
+
+        $timeColumn = match ($status) {
+            'approved'     => 'confirmed_at',
+            'on_delivery'  => 'delivery_time',
+            'received'     => 'received_at',
+            default        => null,
+        };
+
+
+        $query = "UPDATE orders SET status = :status";
+
+
+        if ($timeColumn) {
+            if ($status === 'on_delivery' && $durasi !== null) {
+
+                $query .= ", {$timeColumn} = NOW() + INTERVAL '{$durasi} day'";
+            } else {
+                $query .= ", {$timeColumn} = NOW()";
+            }
+        }
+
+        $query .= " WHERE order_id = :order_id";
+
+
+        $stmt = $this->conn->prepare($query);
         $stmt->execute([
             ':status' => $status,
             ':order_id' => $order_id
         ]);
-        return $stmt;
+
+        return $stmt->rowCount();
     }
+
 
     public function updateOrderRejectReason($order_id, $reject_reason)
     {
@@ -179,5 +205,69 @@ class Order
         }
 
         return array_values($orders);
+    }
+
+    public function updateStatus($order_id, $status, $msg = null, $durasi = null)
+    {
+        // ambil status sekarang
+        $stmt = $this->conn->prepare("SELECT status FROM orders WHERE order_id=:id");
+        $stmt->execute([':id' => $order_id]);
+        $res = $stmt->fetch();
+        $isValid = false;
+        $curr_stats = $res['status'];
+
+        switch ($curr_stats) {
+            case 'waiting_approval':
+                switch ($status) {
+                    case 'approved':
+                        $isValid = true;
+                        break;
+                    case 'rejected':
+                        $isValid = true;
+                        $this->updateOrderRejectReason($order_id, $msg);
+                        break;
+                    default:
+                        $isValid = false;
+                        break;
+                }
+                break;
+            case 'approved':
+                switch ($status) {
+                    case 'on_delivery':
+                        $isValid = true;
+                        break;
+
+                    default:
+                        $isValid = false;
+                        break;
+                }
+                break;
+            case 'rejected':
+                $isValid = false;
+                break;
+            case 'on_delivery':
+                switch ($status) {
+                    case 'received':
+                        $isValid = true;
+                        break;
+
+                    default:
+                        $isValid = false;
+                        break;
+                }
+                break;
+            case 'received':
+                $isValid = false;
+                break;
+            default:
+                $isValid = false;
+                break;
+        }
+        if ($isValid) {
+            $data = $this->updateOrderStatus($order_id, $status, $durasi);
+        } else {
+            $data = null;
+        }
+        return $data;
     }
 }

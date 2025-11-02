@@ -266,4 +266,6 @@ class Product
         $stmt->execute([':id' => $product_id]);
         return $stmt->fetchAll();
     }
+
+
 }
