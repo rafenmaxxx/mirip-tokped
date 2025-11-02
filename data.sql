@@ -1,7 +1,7 @@
 -- 1. ENUM TYPE
 DROP TYPE IF EXISTS user_role CASCADE;
 CREATE TYPE user_role AS ENUM ('BUYER', 'SELLER');
-
+SET TIMEZONE = 'Asia/Jakarta';
 DROP TYPE IF EXISTS order_status CASCADE;
 CREATE TYPE order_status AS ENUM ('waiting_approval', 'approved', 'rejected', 'on_delivery', 'received');
 

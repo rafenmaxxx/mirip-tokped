@@ -28,20 +28,20 @@ switch ($method) {
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
             $maxPrice = $filterData['maxPrice'] ?? null;
-            
+
             $count = $model->countFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
-            $data = $model->getFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice, $page, $limit);
+            $data = $model->getFilterProductByStoreAndName($store_id, $title, $page, $limit, $minPrice, $maxPrice, $categories);
         } else if ($store_id && $filter) {
 
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
             $maxPrice = $filterData['maxPrice'] ?? null;
-            
+
             $count = $model->countFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
             $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice, $page, $limit);
         } else if ($store_id && $title) {
-            
+
             $count = $model->countProductByStoreAndName($store_id, $title);
             $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit);
         } else if ($id) {

@@ -61,7 +61,13 @@
 .product_name {
   font-weight: 600;
   margin-top: 0.5rem;
-  text-align: center;
+  text-align: left;
+}
+
+.product_stock {
+  font-weight: 300;
+  font-size: 0.85rem;
+  text-align: left;
 }
 
 
