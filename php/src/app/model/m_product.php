@@ -170,7 +170,7 @@ class Product
         return $result ? (int)$result['total'] : 0;
     }
 
-    public function getFilterProductByStore($store_id, $categories = [], $minPrice = null, $maxPrice = null, $page, $limit)
+    public function getFilterProductByStore($store_id, $categories = [], $minPrice = null, $maxPrice = null, $page, $limit, $sort)
     {
         $query = "SELECT DISTINCT p.* 
               FROM products p
@@ -193,6 +193,11 @@ class Product
         if ($maxPrice !== null) {
             $query .= " AND p.price <= ?";
             $params[] = $maxPrice;
+        }
+        
+        $sortquery = $this->translateSortOption($sort);
+        if ($sortquery) {
+            $query .= " ORDER BY " . $sortquery;
         }
 
         if ($page !== null && $limit !== null) {
@@ -238,7 +243,7 @@ class Product
         return $result ? (int)$result['total'] : 0;
     }
 
-    public function getFilterProductByStoreAndName($store_id, $name,  $page, $limit, $minPrice = null, $maxPrice = null, $categories = [])
+    public function getFilterProductByStoreAndName($store_id, $name,  $page, $limit, $minPrice = null, $maxPrice = null, $categories = [], $sort)
     {
         $query = "SELECT DISTINCT p.* 
               FROM products p
@@ -261,6 +266,11 @@ class Product
         if ($maxPrice !== null) {
             $query .= " AND p.price <= ?";
             $params[] = $maxPrice;
+        }
+
+        $sortquery = $this->translateSortOption($sort);
+        if ($sortquery) {
+            $query .= " ORDER BY " . $sortquery;
         }
 
         if ($page !== null && $limit !== null) {
@@ -306,10 +316,15 @@ class Product
         return $result ? (int)$result['total'] : 0;
     }
 
-    public function getProductByStoreAndName($store_id, $name, $page, $limit)
+    public function getProductByStoreAndName($store_id, $name, $page, $limit, $sort)
     {
         $query = "SELECT * FROM products p WHERE p.store_id = ? AND p.product_name ILIKE ?";
         $params = [$store_id, "%$name%"];
+
+        $sortquery = $this->translateSortOption($sort);
+        if ($sortquery) {
+            $query .= " ORDER BY " . $sortquery;
+        }
 
         if ($page !== null && $limit !== null) {
             $offset = ($page - 1) * $limit;
@@ -334,10 +349,15 @@ class Product
         return $result ? (int)$result['total'] : 0;
     }
 
-    public function getByStoreId($store_id, $page, $limit)
+    public function getByStoreId($store_id,  $page, $limit, $sort)
     {
-        $query = "SELECT * FROM products WHERE store_id = ? AND deleted_at IS NULL";
+        $query = "SELECT * FROM products p WHERE p.store_id = ? AND p.deleted_at IS NULL";
         $params = [$store_id];
+
+        $sortquery = $this->translateSortOption($sort);
+        if ($sortquery) {
+            $query .= " ORDER BY " . $sortquery;
+        }
 
         if ($page !== null && $limit !== null) {
             $offset = ($page - 1) * $limit;
@@ -360,6 +380,26 @@ class Product
         $stmt->execute($params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? (int)$result['total'] : 0;
+    }
+
+    public function translateSortOption($sortOption)
+    {
+        switch ($sortOption) {
+            case '1':
+                return 'p.product_name ASC';
+            case '2':
+                return 'p.product_name DESC';
+            case '3':
+                return 'p.price ASC';
+            case '4':
+                return 'p.price DESC';
+            case '5':
+                return 'p.stock ASC';
+            case '6':
+                return 'p.stock DESC';
+            default:
+                return null;
+        }
     }
 
     public function createProduct($store_id, $product_name, $description, $price, $stock, $main_image_path = null, $categories = [])

@@ -18,6 +18,7 @@ switch ($method) {
         $title = $_GET['title'] ?? null;
         $page = $_GET['page'] ?? null;
         $limit = $_GET['limit'] ?? null;
+        $sort = $_GET['sort'] ?? null;
 
         if ($search) {
             $count = $model->countByName($search);
@@ -29,7 +30,8 @@ switch ($method) {
             $maxPrice = $filterData['maxPrice'] ?? null;
 
             $count = $model->countFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
-            $data = $model->getFilterProductByStoreAndName($store_id, $title, $page, $limit, $minPrice, $maxPrice, $categories);
+            $data = $model->getFilterProductByStoreAndName($store_id, $title, $page, $limit, $minPrice, $maxPrice, $categories, $sort);
+
         } else if ($store_id && $filter) {
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
@@ -37,10 +39,12 @@ switch ($method) {
             $maxPrice = $filterData['maxPrice'] ?? null;
 
             $count = $model->countFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
-            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice, $page, $limit);
+            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice, $page, $limit, $sort);
+
         } else if ($store_id && $title) {
             $count = $model->countProductByStoreAndName($store_id, $title);
-            $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit);
+            $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit, $sort);
+
         } else if ($id) {
             $data = $model->getDetailById($id);
         } else if ($title) {
@@ -52,10 +56,12 @@ switch ($method) {
             $maxPrice = $filterData['maxPrice'] ?? null;
 
             $count = $model->countFilterProduct($categories, $minPrice, $maxPrice);
-            $data = $model->getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit);
+            $data = $model->getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit, $sort);
+
         } else if ($store_id) {
             $count = $model->countByStoreId($store_id);
-            $data = $model->getByStoreId($store_id, $page, $limit);
+            $data = $model->getByStoreId($store_id, $page, $limit, $sort);
+    
         } else {
             $count = $model->countAll();
             $data = $model->getAll($page, $limit);

@@ -9,7 +9,7 @@ let productCategory = [];
 let currentPage = 1;
 let itemsPerPage = 2;
 let currentCategory = "";
-let currentSort = "none";
+let currentSort = 0;
 let currentSearch = "";
 let debounceTimer;
 
@@ -50,33 +50,6 @@ function renderFilteredProducts() {
   if (!container) return;
 
   const filteredProducts = allProducts;
-
-  switch (currentSort) {
-    case "harga-asc":
-      filteredProducts.sort((a, b) => a.price - b.price);
-      console.log("Sorted Products by harga-asc:", filteredProducts);
-      break;
-    case "harga-desc":
-      filteredProducts.sort((a, b) => b.price - a.price);
-      break;
-    case "nama-asc":
-      filteredProducts.sort((a, b) =>
-        a.product_name.localeCompare(b.product_name)
-      );
-      break;
-    case "nama-desc":
-      filteredProducts.sort((a, b) =>
-        b.product_name.localeCompare(a.product_name)
-      );
-      break;
-    case "stok-asc":
-      filteredProducts.sort((a, b) => a.stock - b.stock);
-      break;
-    case "stok-desc":
-      filteredProducts.sort((a, b) => b.stock - a.stock);
-      break;
-  }
-
   const totalPages = Math.ceil(productCounts / itemsPerPage);
   renderPaginationButtons(totalPages);
 
@@ -331,6 +304,10 @@ function fetchProducts() {
     params.limit = itemsPerPage;
   }
 
+  if (currentSort) {
+    params.sort = currentSort;
+  }
+
   console.log("Fetching products with params:", params);
 
   GET("/api/product", params, LoadSellerProductData, SellerProductErr);
@@ -362,7 +339,7 @@ export async function InitSellerProductPage() {
     sortSelect.addEventListener("change", (e) => {
       currentSort = e.target.value;
       currentPage = 1;
-      renderFilteredProducts();
+      fetchProducts();
     });
   }
 
