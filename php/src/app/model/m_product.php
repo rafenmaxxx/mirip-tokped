@@ -187,25 +187,43 @@ class Product
         try {
             $this->conn->beginTransaction();
 
-
-            $stmt = $this->conn->prepare("
-            UPDATE products
-            SET product_name = :product_name,
-                description = :description,
-                price = :price,
-                stock = :stock,
-                main_image_path = :main_image_path,
-                updated_at = NOW()
-            WHERE product_id = :product_id
-        ");
-            $stmt->execute([
-                ':product_name' => $product_name,
-                ':description' => $description,
-                ':price' => $price,
-                ':stock' => $stock,
-                ':main_image_path' => $main_image_path,
-                ':product_id' => $product_id
-            ]);
+            if ($main_image_path === null) {
+                $stmt = $this->conn->prepare("
+                UPDATE products
+                SET product_name = :product_name,
+                    description = :description,
+                    price = :price,
+                    stock = :stock,
+                    updated_at = NOW()
+                WHERE product_id = :product_id
+            ");
+                $stmt->execute([
+                    ':product_name' => $product_name,
+                    ':description' => $description,
+                    ':price' => $price,
+                    ':stock' => $stock,
+                    ':product_id' => $product_id
+                ]);
+            } else {
+                $stmt = $this->conn->prepare("
+                UPDATE products
+                SET product_name = :product_name,
+                    description = :description,
+                    price = :price,
+                    stock = :stock,
+                    main_image_path = :main_image_path,
+                    updated_at = NOW()
+                WHERE product_id = :product_id
+            ");
+                $stmt->execute([
+                    ':product_name' => $product_name,
+                    ':description' => $description,
+                    ':price' => $price,
+                    ':stock' => $stock,
+                    ':main_image_path' => $main_image_path,
+                    ':product_id' => $product_id
+                ]);
+            }
 
 
             $delStmt = $this->conn->prepare("DELETE FROM category_items WHERE product_id = :product_id");
@@ -213,21 +231,15 @@ class Product
 
 
             if (!empty($categories)) {
-
                 $flatCategories = [];
                 foreach ($categories as $cat) {
-                    if (is_array($cat)) {
-                        $flatCategories[] = reset($cat);
-                    } else {
-                        $flatCategories[] = $cat;
-                    }
+                    $flatCategories[] = is_array($cat) ? reset($cat) : $cat;
                 }
 
                 $catStmt = $this->conn->prepare("
                 INSERT INTO category_items (category_id, product_id)
                 VALUES (:category_id, :product_id)
             ");
-
                 foreach ($flatCategories as $cat_id) {
                     $catStmt->execute([
                         ':category_id' => $cat_id,
@@ -244,6 +256,7 @@ class Product
             return false;
         }
     }
+
 
 
 

@@ -59,7 +59,7 @@ class Store
             -- Total produk unik milik toko ini
             (SELECT COUNT(*) 
              FROM products p 
-             WHERE p.store_id = s.store_id) AS total_products,
+             WHERE p.store_id = s.store_id AND p.deleted_at is null) AS total_products,
 
             -- Pending orders (belum selesai)
             (SELECT COUNT(*) 
@@ -71,7 +71,7 @@ class Store
             (SELECT COUNT(*) 
              FROM products p 
              WHERE p.store_id = s.store_id 
-               AND p.stock < 5) AS low_stock_products,
+               AND p.stock < 5 AND p.deleted_at is null) AS low_stock_products,
 
             -- Total pendapatan dari semua pesanan yang sudah diterima
             (SELECT COALESCE(SUM(o.total_price), 0)
