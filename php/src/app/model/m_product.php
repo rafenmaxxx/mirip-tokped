@@ -182,48 +182,37 @@ class Product
         }
     }
 
-    public function updateProduct($product_id, $store_id, $product_name, $description, $price, $stock, $main_image_path = null, $categories = [])
+    public function updateProduct($product_id, $product_name, $description, $price, $stock, $main_image_path = null, $categories = [])
     {
         try {
             $this->conn->beginTransaction();
 
-            // Update data produk
-            $query = "
+
+            $stmt = $this->conn->prepare("
             UPDATE products
-            SET 
-                product_name = :product_name,
+            SET product_name = :product_name,
                 description = :description,
                 price = :price,
                 stock = :stock,
+                main_image_path = :main_image_path,
                 updated_at = NOW()
-                " . ($main_image_path ? ", main_image_path = :main_image_path" : "") . "
-            WHERE product_id = :product_id AND store_id = :store_id
-        ";
-
-            $stmt = $this->conn->prepare($query);
-
-            // Bind parameter
-            $params = [
+            WHERE product_id = :product_id
+        ");
+            $stmt->execute([
                 ':product_name' => $product_name,
                 ':description' => $description,
                 ':price' => $price,
                 ':stock' => $stock,
-                ':product_id' => $product_id,
-                ':store_id' => $store_id
-            ];
+                ':main_image_path' => $main_image_path,
+                ':product_id' => $product_id
+            ]);
 
-            if ($main_image_path) {
-                $params[':main_image_path'] = $main_image_path;
-            }
 
-            $stmt->execute($params);
-
-            // Hapus kategori lama
             $delStmt = $this->conn->prepare("DELETE FROM category_items WHERE product_id = :product_id");
             $delStmt->execute([':product_id' => $product_id]);
 
-            if (!empty($categories)) {
 
+            if (!empty($categories)) {
 
                 $flatCategories = [];
                 foreach ($categories as $cat) {
@@ -235,9 +224,9 @@ class Product
                 }
 
                 $catStmt = $this->conn->prepare("
-                        INSERT INTO category_items (category_id, product_id)
-                        VALUES (:category_id, :product_id)
-                    ");
+                INSERT INTO category_items (category_id, product_id)
+                VALUES (:category_id, :product_id)
+            ");
 
                 foreach ($flatCategories as $cat_id) {
                     $catStmt->execute([
@@ -251,10 +240,11 @@ class Product
             return true;
         } catch (PDOException $e) {
             $this->conn->rollBack();
-            error_log("Error saat mengupdate produk: " . $e->getMessage());
+            error_log("Error saat memperbarui produk: " . $e->getMessage());
             return false;
         }
     }
+
 
 
     public function DeleteById($product_id)
