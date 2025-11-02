@@ -7,30 +7,21 @@ function guard(array $allowed)
 
     if (!isset($_SESSION['user'])) {
         if ($isGuestAllowed) {
-
             return;
         } else {
-
             warn("Login dulu bos", "/login");
             exit;
         }
     }
 
-    if ($isGuestAllowed) {
-        warn("Kamu sudah login Bos!", "/");
-        exit;
-    }
-
     $role = $_SESSION['user']['role'] ?? null;
-    if (!in_array($role, $allowed)) {
-        echo "<script>
-                alert('Kamu tidak punya akses ke API ini!');
-                window.location.href = '/login';
-              </script>";
 
-        warn("Kamu sudah login Bos!", "/");
-        exit;
+    if (in_array($role, $allowed)) {
+        return;
     }
+
+    warn("Kamu tidak punya akses ke halaman ini!", "/");
+    exit;
 }
 
 function warn($message, $href)
