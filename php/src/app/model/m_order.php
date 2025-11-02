@@ -149,7 +149,7 @@ class Order
         return $stmt;
     }
 
-    public function getOrderByStore($store_id)
+    public function getOrderByStore($store_id, $page, $limit)
     {
         $sql = "
         SELECT 
@@ -161,12 +161,21 @@ class Order
         LEFT JOIN order_items oi ON o.order_id = oi.order_id
         LEFT JOIN products p ON oi.product_id = p.product_id
         LEFT JOIN users u ON o.buyer_id = u.user_id
-        WHERE o.store_id = :store_id
+        WHERE o.store_id = ?
         ORDER BY o.created_at DESC
     ";
 
+        $params = [$store_id];
+
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $sql .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':store_id' => $store_id]);
+        $stmt->execute($params);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $orders = [];
@@ -207,6 +216,277 @@ class Order
         return array_values($orders);
     }
 
+    public function countOrderByStore($store_id)
+    {
+        $sql = "
+            SELECT COUNT(order_id) 
+            FROM orders
+            WHERE store_id = :store_id
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':store_id' => $store_id]);
+        
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getOrderByStoreAndStatus($store_id, $status, $page, $limit)
+    {
+        $sql = "
+        SELECT 
+            o.*, 
+            u.name AS buyer_name,
+            p.product_name, p.main_image_path, 
+            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+        FROM orders o
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.product_id
+        LEFT JOIN users u ON o.buyer_id = u.user_id
+        WHERE o.store_id = ? AND o.status = ?
+        ORDER BY o.created_at DESC
+    ";
+
+        $params = [$store_id, $status];
+
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $sql .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $orders = [];
+        foreach ($rows as $row) {
+            $order_id = $row['order_id'];
+
+            if (!isset($orders[$order_id])) {
+                $orders[$order_id] = [
+                    'order_id' => $row['order_id'],
+                    'buyer_id' => $row['buyer_id'],
+                    'buyer_name' => $row['buyer_name'],
+                    'store_id' => $row['store_id'],
+                    'total_price' => $row['total_price'],
+                    'shipping_address' => $row['shipping_address'],
+                    'status' => $row['status'],
+                    'reject_reason' => $row['reject_reason'],
+                    'confirmed_at' => $row['confirmed_at'],
+                    'delivery_time' => $row['delivery_time'],
+                    'received_at' => $row['received_at'],
+                    'created_at' => $row['created_at'],
+                    'items' => []
+                ];
+            }
+
+            if ($row['order_item_id']) {
+                $orders[$order_id]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'product_name' => $row['product_name'],
+                    'main_image_path' => $row['main_image_path'],
+                    'quantity' => $row['quantity'],
+                    'price_at_order' => $row['price_at_order'],
+                    'subtotal' => $row['subtotal']
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
+
+    public function countOrderByStoreAndStatus($store_id, $status)
+    {
+        $sql = "
+            SELECT COUNT(order_id) 
+            FROM orders
+            WHERE store_id = :store_id AND status = :status
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':store_id' => $store_id,
+            ':status' => $status
+        ]);
+        
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getOrderByStoreAndName($store_id, $title, $page, $limit)
+    {
+        $sql = "
+        SELECT 
+            o.*, 
+            u.name AS buyer_name,
+            p.product_name, p.main_image_path, 
+            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+        FROM orders o
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.product_id
+        LEFT JOIN users u ON o.buyer_id = u.user_id
+        WHERE o.store_id = ? AND p.product_name ILIKE ?
+        ORDER BY o.created_at DESC
+    ";
+
+        $params = [$store_id, "%$title%"];
+
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $sql .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $orders = [];
+        foreach ($rows as $row) {
+            $order_id = $row['order_id'];
+
+            if (!isset($orders[$order_id])) {
+                $orders[$order_id] = [
+                    'order_id' => $row['order_id'],
+                    'buyer_id' => $row['buyer_id'],
+                    'buyer_name' => $row['buyer_name'],
+                    'store_id' => $row['store_id'],
+                    'total_price' => $row['total_price'],
+                    'shipping_address' => $row['shipping_address'],
+                    'status' => $row['status'],
+                    'reject_reason' => $row['reject_reason'],
+                    'confirmed_at' => $row['confirmed_at'],
+                    'delivery_time' => $row['delivery_time'],
+                    'received_at' => $row['received_at'],
+                    'created_at' => $row['created_at'],
+                    'items' => []
+                ];
+            }
+
+            if ($row['order_item_id']) {
+                $orders[$order_id]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'product_name' => $row['product_name'],
+                    'main_image_path' => $row['main_image_path'],
+                    'quantity' => $row['quantity'],
+                    'price_at_order' => $row['price_at_order'],
+                    'subtotal' => $row['subtotal']
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
+
+    public function countOrderByStoreAndName($store_id, $title)
+    {
+        $sql = "
+            SELECT COUNT(DISTINCT o.order_id) 
+            FROM orders o
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            WHERE o.store_id = :store_id AND p.product_name ILIKE :title
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':store_id' => $store_id,
+            ':title' => "%$title%"
+        ]);
+        
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getOrderByStoreAndStatusAndName($store_id, $status, $title, $page, $limit)
+    {
+        $sql = "
+        SELECT 
+            o.*, 
+            u.name AS buyer_name,
+            p.product_name, p.main_image_path, 
+            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+        FROM orders o
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.product_id
+        LEFT JOIN users u ON o.buyer_id = u.user_id
+        WHERE o.store_id = ? AND o.status = ? AND p.product_name ILIKE ?
+        ORDER BY o.created_at DESC
+    ";
+
+        $params = [$store_id, $status, "%$title%"];
+
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $sql .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $orders = [];
+        foreach ($rows as $row) {
+            $order_id = $row['order_id'];
+
+            if (!isset($orders[$order_id])) {
+                $orders[$order_id] = [
+                    'order_id' => $row['order_id'],
+                    'buyer_id' => $row['buyer_id'],
+                    'buyer_name' => $row['buyer_name'],
+                    'store_id' => $row['store_id'],
+                    'total_price' => $row['total_price'],
+                    'shipping_address' => $row['shipping_address'],
+                    'status' => $row['status'],
+                    'reject_reason' => $row['reject_reason'],
+                    'confirmed_at' => $row['confirmed_at'],
+                    'delivery_time' => $row['delivery_time'],
+                    'received_at' => $row['received_at'],
+                    'created_at' => $row['created_at'],
+                    'items' => []
+                ];
+            }
+
+            if ($row['order_item_id']) {
+                $orders[$order_id]['items'][] = [
+                    'order_item_id' => $row['order_item_id'],
+                    'product_id' => $row['product_id'],
+                    'product_name' => $row['product_name'],
+                    'main_image_path' => $row['main_image_path'],
+                    'quantity' => $row['quantity'],
+                    'price_at_order' => $row['price_at_order'],
+                    'subtotal' => $row['subtotal']
+                ];
+            }
+        }
+
+        return array_values($orders);
+    }
+
+    public function countOrderByStoreAndStatusAndName($store_id, $status, $title)
+    {
+        $sql = "
+            SELECT COUNT(DISTINCT o.order_id) 
+            FROM orders o
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            WHERE o.store_id = :store_id AND o.status = :status AND p.product_name ILIKE :title
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':store_id' => $store_id,
+            ':status' => $status,
+            ':title' => "%$title%"
+        ]);
+        
+        return (int)$stmt->fetchColumn();
+    }
+    
     public function updateStatus($order_id, $status, $msg = null, $durasi = null)
     {
         // ambil status sekarang

@@ -96,7 +96,7 @@ function renderFilteredProducts() {
 
   const paginationInfo = document.querySelector(".pagination-info");
     if (paginationInfo) {
-        paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} product`;
+        paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} produk`;
     }
 
 }
@@ -308,12 +308,6 @@ function fetchProducts() {
   GET("/api/product", params, LoadSellerProductData, SellerProductErr);
 }
 
-function setProductCounts(data) {
-  if (data.status === "success") {
-    productCounts = data.data.length;
-  }
-}
-
 export async function InitSellerProductPage() {
   // Reset filter
   currentCategory = "";
@@ -346,27 +340,27 @@ export async function InitSellerProductPage() {
 
   const categorySelect = document.getElementById("category-filter");
   if (categorySelect) {
-      categorySelect.addEventListener("change", (e) => {
-          currentCategory = e.target.value;
-          console.log("Category filter changed to:", currentCategory);
-          currentPage = 1;
-          fetchProducts();
-      });
+    categorySelect.addEventListener("change", (e) => {
+        currentCategory = e.target.value;
+        console.log("Category filter changed to:", currentCategory);
+        currentPage = 1;
+        fetchProducts();
+    });
   }
 
   const searchInput = document.getElementById("search-input"); 
   if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
-            clearTimeout(debounceTimer);
+    searchInput.addEventListener("input", (e) => {
+        clearTimeout(debounceTimer);
 
-            debounceTimer = setTimeout(() => {
-                console.log("Debounce selesai, mencari:", e.target.value);
-                
-                currentSearch = e.target.value;
-                currentPage = 1;
-                fetchProducts();
-                
-            }, 400);
-        });
-    }
+        debounceTimer = setTimeout(() => {
+            console.log("Debounce selesai, mencari:", e.target.value);
+            
+            currentSearch = e.target.value;
+            currentPage = 1;
+            fetchProducts();
+            
+        }, 400);
+    });
+  }
 }

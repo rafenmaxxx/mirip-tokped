@@ -1,20 +1,24 @@
 <div class="page-container">
     <header class="page-header">
         <div class="search-bar">
-            <input type="text" placeholder="search products">
+            <input type="text" placeholder="search orders" id="search-input">
             <button class="search-btn">
                 <img src="/img/seller/search.png" alt="Search Icon">
             </button>
         </div>
-        <select name="status" class="status-filter">
-            <option value="">status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-        </select>
+        <div class="custom-select">
+            <select name="status" class="status-filter" id="status-filter">
+                <option value="">status</option>
+                <option value="waiting_approval">Waiting Approval</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="on_delivery">On Delivery</option>
+                <option value="received">Received</option>
+            </select>
+        </div>
     </header>
 
-    <main class="order-grid">
+    <main class="order-grid" id="og1">
 
         <article class="order-card">
             <h3 class="order-title">order id - nama buyer</h3>
@@ -103,19 +107,13 @@
 
     </main>
 
-    <footer class="pagination-footer">
-        <span class="pagination-info">menampilkan 2 dari 11 order</span>
-        <nav class="pagination-nav">
-            <a href="#" class="active">1</a>
-            <a href="#">2</a>
-            <a href="#">3</a>
-            <span>...</span>
-            <a href="#">6</a>
-        </nav>
-        <select name="items-per-page" class="items-per-page">
-            <option value="6">2</option>
-            <option value="12">4</option>
-            <option value="20">6</option>
+    <footer class="pagination-footer" id="pagination-container">
+        <span class="pagination-info"></span>
+        <nav class="pagination-nav" id="pagination-nav-buttons"></nav>
+        <select name="items-per-page" class="items-per-page" id="items-per-page-select">
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="6">6</option>
         </select>
     </footer>
 </div>
