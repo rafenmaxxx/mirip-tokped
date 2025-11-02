@@ -62,13 +62,15 @@ switch ($method) {
         break;
 
     case 'POST':
-        header('Content-Type: application/json');
+        header('Content-Type: text/html; charset=utf-8');
         guard(['SELLER']);
 
         $store_id = $_SESSION['user']['store_id'] ?? null;
         if (!$store_id) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Store ID not found']);
+            echo "<script>
+                alert('Ga ada store Id');
+                window.location.href = '/login';
+            </script>";
             exit;
         }
 
@@ -82,8 +84,10 @@ switch ($method) {
 
 
         if (empty($nama_produk) || $harga < 0 || $stok < 0) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Data tidak valid']);
+            echo "<script>
+                alert('Parameter kurang');
+                window.location.href = '/seller/products/add';
+            </script>";
             exit;
         }
 
@@ -104,8 +108,10 @@ switch ($method) {
             if (move_uploaded_file($_FILES['product-img']['tmp_name'], $destination)) {
                 $main_image_path = "/data/products/" . $filename;
             } else {
-                http_response_code(500);
-                echo json_encode(['status' => 'error', 'message' => 'Gagal upload file']);
+                echo "<script>
+                alert('Gagal Upload foto kurang');
+                window.location.href = '/seller/products/add';
+                </script>";
                 exit;
             }
         }
@@ -122,19 +128,22 @@ switch ($method) {
         );
 
         if ($result) {
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Produk berhasil ditambahkan',
-                'data' => ['product_id' => $result]
-            ]);
+            echo "<script>
+                alert('Berhasil menambahkan Produk');
+                window.location.href = '/seller/products';
+                </script>";
+            exit;
         } else {
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Gagal menambahkan produk']);
+            echo "<script>
+                alert('Gagal Menambahkan Product');
+                window.location.href = '/seller/products/add';
+                </script>";
+            exit;
         }
 
         break;
     case 'PUT':
-        header('Content-Type: application/json');
+        header('Content-Type: text/html; charset=utf-8');
         guard(['SELLER']);
 
         $product_id  = $_POST['product_id'] ?? null;
@@ -145,8 +154,10 @@ switch ($method) {
         $categories  = $_POST['categories'] ?? [];
 
         if (!$product_id) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Product ID tidak ditemukan']);
+            echo "<script>
+                alert('Gaada produk Id');
+                window.location.href = '/seller/products';
+                </script>";
             exit;
         }
 
@@ -166,6 +177,12 @@ switch ($method) {
 
             if (move_uploaded_file($_FILES['product-img']['tmp_name'], $destination)) {
                 $main_image_path = "/data/products/" . $filename;
+            } else {
+                echo "<script>
+                alert('gagal upload image');
+                window.location.href = '/seller/products';
+                </script>";
+                exit;
             }
         }
 
@@ -181,10 +198,17 @@ switch ($method) {
         );
 
         if ($result) {
-            echo json_encode(['status' => 'success', 'message' => 'Produk berhasil diperbarui']);
+            echo "<script>
+                alert('Produk berhasil di update ');
+                window.location.href = '/seller/products';
+                </script>";
+            exit;
         } else {
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui produk']);
+            echo "<script>
+                alert('Produk gagal di update');
+                window.location.href = '/seller/products';
+                </script>";
+            exit;
         }
         break;
     case 'DELETE':

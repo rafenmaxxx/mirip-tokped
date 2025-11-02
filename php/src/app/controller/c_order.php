@@ -57,10 +57,16 @@ switch ($method) {
             case 'update_status':
                 $id = $PUT['order_id'] ?? null;
                 $status = $PUT['status'] ?? null;
-
+                $msg = $PUT['msg'] ?? null;
+                $durasi = $PUT['durasi'] ?? null;
                 if ($id && $status) {
-                    $result = $model->updateOrderStatus($id, $status);
-                    echo json_encode(['status' => 'success', 'data' => $result]);
+                    $result = $model->updateStatus($id, $status, $msg, $durasi);
+                    if ($result) {
+                        echo json_encode(['status' => 'success', 'data' => $result]);
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(['status' => 'error', 'message' => 'Gagal update status']);
+                    }
                 } else {
                     http_response_code(400);
                     echo json_encode(['status' => 'error', 'message' => 'Order ID and status are required']);
