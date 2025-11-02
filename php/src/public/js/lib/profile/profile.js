@@ -208,10 +208,6 @@ function renderProfile(data) {
                     <input type="email" id="email" name="email" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" readonly>
-                </div>
-                <div class="form-group">
                     <label for="alamat">Alamat</label>
                     <input type="text" id="alamat" name="alamat" readonly>
                 </div>
@@ -246,8 +242,7 @@ function renderProfile(data) {
   document.getElementById("nama").value = data.name || "";
   document.getElementById("email").value = data.email || "";
   document.getElementById("alamat").value = data.address || "";
-  document.getElementById("password").value = data.password || "";
-
+ 
   // Isi form edit juga
   document.getElementById("nama-edit").value = data.name || "";
   document.getElementById("alamat-edit").value = data.address || "";

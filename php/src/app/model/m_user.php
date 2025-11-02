@@ -10,17 +10,27 @@ class User
         $this->conn = Database::getInstance()->getConnection();
     }
 
+    /* Hash password menggunakan bcrypt */
+    private function hashPassword($password)
+    {
+        return password_hash($password, PASSWORD_BCRYPT);
+    }
+
+
     public function createUser($name, $email, $password, $address, $role, $balance)
     {
         try {
+            
+            $hashedPassword = $this->hashPassword($password);
+
             $stmt = $this->conn->prepare("
-            INSERT INTO users (email, password, role, name, address, balance)
-            VALUES (:email, :password, :role, :name, :address, :balance)
-        ");
+                INSERT INTO users (email, password, role, name, address, balance)
+                VALUES (:email, :password, :role, :name, :address, :balance)
+            ");
 
             $success = $stmt->execute([
                 "email" => $email,
-                "password" => $password,
+                "password" => $hashedPassword,
                 "role" => $role,
                 "name" => $name,
                 "address" => $address,
@@ -39,7 +49,6 @@ class User
                 ];
             }
         } catch (PDOException $e) {
-
             return [
                 "status" => false,
                 "message" => $e->getMessage()
@@ -125,6 +134,11 @@ class User
 
         foreach ($updates as $field => $value) {
             if (!is_null($value) && $value !== '') {
+                
+                if ($field === 'password') {
+                    $value = $this->hashPassword($value);
+                }
+                
                 $fields[] = "$field = :$field";
                 $params[":$field"] = $value;
             }
