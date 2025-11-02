@@ -61,7 +61,12 @@ switch ($method) {
                 $durasi = $PUT['durasi'] ?? null;
                 if ($id && $status) {
                     $result = $model->updateStatus($id, $status, $msg, $durasi);
-                    echo json_encode(['status' => 'success', 'data' => $result]);
+                    if ($result) {
+                        echo json_encode(['status' => 'success', 'data' => $result]);
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(['status' => 'error', 'message' => 'Gagal update status']);
+                    }
                 } else {
                     http_response_code(400);
                     echo json_encode(['status' => 'error', 'message' => 'Order ID and status are required']);
