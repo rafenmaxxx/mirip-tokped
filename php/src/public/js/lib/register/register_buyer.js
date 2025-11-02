@@ -23,4 +23,19 @@ export function InitRegisterBuyer() {
   submitBtn.addEventListener("click", (e) => {
     SendBuyerRegisterForm(e);
   });
+
+  const toggleButtons = document.querySelectorAll(".toggle-password");
+  toggleButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetId = document.getElementById("confirm-password") === btn.previousElementSibling ? "confirm-password" : "password";
+      const input = document.getElementById(targetId);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
+      } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+      }
+    });
+  });
 }
