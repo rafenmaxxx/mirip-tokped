@@ -146,7 +146,7 @@ function renderPaginationButtons(totalPages) {
         pageButton.addEventListener("click", (e) => {
             e.preventDefault(); 
             currentPage = page;
-            renderFilteredProducts();
+            fetchOrders();
         });
         
         return pageButton;

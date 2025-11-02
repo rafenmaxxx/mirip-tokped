@@ -120,7 +120,7 @@ function renderPaginationButtons(totalPages) {
         pageButton.addEventListener("click", (e) => {
             e.preventDefault(); 
             currentPage = page;
-            renderFilteredProducts();
+            fetchProducts();
         });
         
         return pageButton;
@@ -275,7 +275,6 @@ function LoadSellerProductData(data) {
                 <img src="/img/unauthorized.png" alt="Tidak ada produk">
               </div>
               <p class="no-products-message">Belum terdapat produk pada kategori ini</p>
-              <a href="/seller/products/add" class="btn-add-first">tambah produk pertama +</a>
             </div>
       `;
       footer.style.display = "none";
