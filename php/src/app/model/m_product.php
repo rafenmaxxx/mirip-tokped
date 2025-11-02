@@ -71,7 +71,7 @@ class Product
 
     public function getByName($name, $page, $limit)
     {
-        $query = "SELECT * FROM products p WHERE (p.product_name ILIKE ? OR p.description ILIKE ?) and p.deleted_at is NULL";
+        $query = "SELECT * FROM products p  LEFT JOIN stores s ON p.store_id = s.store_id  WHERE (p.product_name ILIKE ? OR p.description ILIKE ?) and p.deleted_at is NULL";
         $params = ["%$name%", "%$name%"];
 
         if ($page !== null && $limit !== null) {
@@ -79,7 +79,7 @@ class Product
             $query .= " LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
-        }  
+        }
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
@@ -103,11 +103,12 @@ class Product
 
     public function getFilterProduct($categories = [], $minPrice = null, $maxPrice = null, $page, $limit)
     {
-        $query = "SELECT DISTINCT p.* 
-              FROM products p
-              LEFT JOIN category_items ci ON p.product_id = ci.product_id
-              LEFT JOIN categories c ON ci.category_id = c.category_id
-              WHERE p.deleted_at is NULL";
+        $query = "SELECT DISTINCT p.*, s.store_name
+                FROM products p
+                LEFT JOIN stores s ON p.store_id = s.store_id 
+                LEFT JOIN category_items ci ON p.product_id = ci.product_id
+                LEFT JOIN categories c ON ci.category_id = c.category_id
+                WHERE p.deleted_at is NULL";
         $params = [];
 
         if (!empty($categories)) {
