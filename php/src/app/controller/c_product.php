@@ -67,7 +67,7 @@ switch ($method) {
             $data = $model->getAll();
         }
 
-        echo json_encode(['status' => 'success', 'data' => ['products' => $data, 'count' => $count ?? null]]);
+        echo json_encode(['status' => 'success', 'data' => $data, 'count' => $count ?? null]);
         break;
 
     case 'POST':

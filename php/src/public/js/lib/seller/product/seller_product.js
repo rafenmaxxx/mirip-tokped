@@ -235,9 +235,9 @@ function LoadSellerProductData(data) {
 
   console.log("Seller Product Data:", data);
 
-  if (data.status === "success" && Array.isArray(data.data.products)) {
-    allProducts = data.data.products;
-    productCounts = data.data.count;
+  if (data.status === "success" && Array.isArray(data.data)) {
+    allProducts = data.data;
+    productCounts = data.count;
 
     if (productCounts === 0) {
       container.innerHTML = `
