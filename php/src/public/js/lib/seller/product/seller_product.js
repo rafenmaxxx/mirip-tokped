@@ -116,14 +116,14 @@ function renderPaginationButtons(totalPages) {
       pageButton.classList.add("active");
     }
 
-        pageButton.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            currentPage = page;
-            fetchProducts();
-        });
-        
-        return pageButton;
-    };
+    pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = page;
+      fetchProducts();
+    });
+
+    return pageButton;
+  };
 
   const createEllipsis = () => {
     const ellipsis = document.createElement("span");
