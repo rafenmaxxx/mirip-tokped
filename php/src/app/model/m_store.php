@@ -116,12 +116,11 @@ class Store
         }
 
     }
-    
-    public function updateStoreWithLogo($store_id, $store_name, $store_description, $store_logo_path = null)
+
+    public function updateStoreWithLogo($store_id, $store_name, $store_description, $store_logo_path)
     {
         try {
-            if ($store_logo_path) {
-                $stmt = $this->conn->prepare("
+            $stmt = $this->conn->prepare("
                 UPDATE stores 
                 SET store_name = :store_name, 
                     store_description = :store_description, 
@@ -129,76 +128,21 @@ class Store
                 WHERE store_id = :store_id
             ");
 
-                $stmt->execute([
-                    "store_name" => $store_name,
-                    "store_description" => $store_description,
-                    "store_logo_path" => $store_logo_path,
-                    "store_id" => $store_id
-                ]);
-            } else {
-                $stmt = $this->conn->prepare("
-                UPDATE stores 
-                SET store_name = :store_name, 
-                    store_description = :store_description
-                WHERE store_id = :store_id
-            ");
-
-                $stmt->execute([
-                    "store_name" => $store_name,
-                    "store_description" => $store_description,
-                    "store_id" => $store_id
-                ]);
-            }
-
-            return $stmt->fetch();
+            $stmt->execute([
+                "store_name" => $store_name,
+                "store_description" => $store_description,
+                "store_logo_path" => $store_logo_path,
+                "store_id" => $store_id
+            ]);
+            return [
+                "status" => true,
+                "message" => "Store updated successfully"
+            ];
         } catch (PDOException $e) {
-            return false;
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
         }
     }
 }
-
-        // try {
-        //     $this->conn->beginTransaction();
-
-        //     // Insert ke tabel products
-        //     $stmt = $this->conn->prepare("
-        //     INSERT INTO products (
-        //         store_id, product_name, description, price, stock, main_image_path, created_at, updated_at
-        //     ) VALUES (
-        //         :store_id, :product_name, :description, :price, :stock, :main_image_path, NOW(), NOW()
-        //     )
-        //     RETURNING product_id
-        // ");
-        //     $stmt->execute([
-        //         ':store_id' => $store_id,
-        //         ':product_name' => $product_name,
-        //         ':description' => $description,
-        //         ':price' => $price,
-        //         ':stock' => $stock,
-        //         ':main_image_path' => $main_image_path
-        //     ]);
-
-        //     $product_id = $stmt->fetchColumn();
-
-        //     // Insert ke category_items jika ada kategori
-        //     if (!empty($categories)) {
-        //         $catStmt = $this->conn->prepare("
-        //         INSERT INTO category_items (category_id, product_id)
-        //         VALUES (:category_id, :product_id)
-        //     ");
-
-        //         foreach ($categories as $cat_id) {
-        //             $catStmt->execute([
-        //                 ':category_id' => $cat_id,
-        //                 ':product_id' => $product_id
-        //             ]);
-        //         }
-        //     }
-
-        //     $this->conn->commit();
-        //     return $product_id;
-        // } catch (PDOException $e) {
-        //     $this->conn->rollBack();
-        //     error_log("Error saat membuat produk: " . $e->getMessage());
-        //     return false;
-        // }

@@ -182,3 +182,31 @@ export function DELETE(url, params = {}, callback, err) {
 
   xhr.send();
 }
+
+export function POST_FORMDATA(url, formData, callback, err) {
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);  
+  xhr.withCredentials = true;
+  
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        callback(data);
+      } catch (parseErr) {
+        console.error("JSON parse error:", parseErr);
+        err(true);
+      }
+    } else {
+      console.error("Request failed. Status:", xhr.status);
+      err(true);
+    }
+  };
+
+  xhr.onerror = function () {
+    console.error("Network error -> " + url);
+    err(true);
+  };
+
+  xhr.send(formData); 
+}

@@ -27,22 +27,30 @@ switch ($method) {
         echo json_encode(['status' => 'success', 'data' => $data]);
         break;
     
-    case 'PUT':
-        parse_str(file_get_contents("php://input"), $putData);
+    case 'POST':
         $store_id = $_SESSION['user']['store_id'] ?? null;
-        $store_name = $putData['store_name'] ?? null;
-        $store_description = $putData['store_description'] ?? null;
-        $store_logo_path = $putData['store_logo_path'] ?? null;
+        $store_name = $_POST['store_name'] ?? null;
+        $store_description = $_POST['store_description'] ?? null;
+        
+        if (isset($_FILES['gambar_toko']) && $_FILES['gambar_toko']['error'] == 0) {
+            
+            $file_name = uniqid() . '-' . basename($_FILES['gambar_toko']['name']);
+            $path_to_save_in_db = "/data/store/" . $file_name;
+            $target_directory = dirname(dirname(__DIR__)) . "/data/store/";
+            $file_system_path = $target_directory . $file_name;
 
-        if ($store_id && $store_name && $store_description && $store_logo_path) {
-            $result = $model->updateStoreWithLogo($store_id, $store_name, $store_description, $store_logo_path);
-            echo json_encode(['status' => 'success', 'message' => 'Store updated successfully']);
-        }
+            if (!move_uploaded_file($_FILES['gambar_toko']['tmp_name'], $file_system_path)) {
+                echo json_encode(['status' => 'error', 'message' => 'Gagal meng-upload gambar.']);
+                exit;
+            }
+            
+            $result = $model->updateStoreWithLogo($store_id, $store_name, $store_description, $path_to_save_in_db);
+        } else {
 
-        if ($store_id && $store_name && $store_description) {
             $result = $model->updateStore($store_id, $store_name, $store_description);
-            echo json_encode(['status' => 'success', 'message' => 'Store updated successfully']);
         }
+
+        echo json_encode(['status' => 'success', 'message' => 'Store updated successfully']);
         break;
     
     default:

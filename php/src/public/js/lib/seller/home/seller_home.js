@@ -1,4 +1,4 @@
-import { GET, PUT } from "../../../api/api.js";
+import { GET, POST_FORMDATA } from "../../../api/api.js";
 import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
 import { router } from "../../../../app.js";
 import { renderToast } from "../../general/toast.js";
@@ -96,12 +96,20 @@ export function showEditStoreModal(currentName, currentDescription) {
     console.log("Menyimpan data baru:");
     console.log("Nama:", newName);
     console.log("Deskripsi:", newDesc);
-    console.log("File Gambar:", newImageFile); // Ini perlu di-handle dengan FormData
+    console.log("File Gambar:", newImageFile);
 
-    Loading.show("Menyimpan perubahan...");
-    PUT(
+    const formData = new FormData();
+
+    formData.append("store_name", newName);
+    formData.append("store_description", newDesc);
+
+    if (newImageFile) { 
+      formData.append("gambar_toko", newImageFile); 
+    }
+
+    POST_FORMDATA(
       "/api/detail_store",
-      { store_name: newName, store_description: newDesc },
+      formData,
       (response) => {
         if (response.status === "success") {
           renderToast("Berhasil memperbarui data toko", "success");
@@ -114,17 +122,9 @@ export function showEditStoreModal(currentName, currentDescription) {
         renderToast("Terjadi kesalahan saat memperbarui data toko", "error");
         Loading.hide();
       }
-    )
+    );
 
-    // (Contoh: Panggil fungsi API Anda)
-    // const formData = new FormData();
-    // formData.append("store_name", newName);
-    // formData.append("description", newDesc);
-    // if (newImageFile) {
-    //   formData.append("store_image", newImageFile);
-    // }
-    // POST("/api/store/update", formData, (response) => { ... });
 
-    closeModal(); // Tutup modal setelah submit
+    closeModal();
   });
 }
