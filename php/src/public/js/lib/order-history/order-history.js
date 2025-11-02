@@ -331,13 +331,11 @@ function LoadOrderHistoryData(data) {
 }
 
 function handleConfirmReceived(orderId) {
-  // Here you would typically make an API call to confirm receipt
   PUT(`/api/order`, { action: 'update_status', order_id: orderId, status: 'received' }, (response) => {
     if (response.status === 'success') {
       console.log(`Order ID ${orderId} confirmed as received.`);
       renderToast('Order confirmed as received', 'success');
 
-      // Update local order status
       const orderIndex = allOrders.findIndex(order => order.order_id === orderId);
       if (orderIndex !== -1) {
         allOrders[orderIndex].status = 'received';
