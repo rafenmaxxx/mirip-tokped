@@ -159,6 +159,60 @@
   color: white;
 }
 
+/* footer */
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #DDD;
+    font-size: 14px;
+    color: #555;
+    position: relative;
+}
+
+.pagination-nav {
+    display: flex;
+    gap: 6px;
+    position: static;  
+    transform: none;
+    order: 2;
+}
+
+.pagination-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 12px;
+    border: 1px solid #7C8597;
+    border-radius: 6px;   
+}
+
+.pagination-nav span {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.pagination-nav a.active {
+    background-color: #00AA5B;
+    color: white;
+    font-weight: 500;
+}
+
+.pagination-nav a:hover:not(.active) {
+    background-color: #DDD;
+}
+
+.items-per-page {
+    border: 1px solid #BDBDBD;
+    border-radius: 6px;
+    padding: 8px;
+    background-color: white;
+    order: 3
+}
+
 /* Desktop sedang */
 @media (max-width: 1400px) {
   .product_catalog {
