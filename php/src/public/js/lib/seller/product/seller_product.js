@@ -116,14 +116,14 @@ function renderPaginationButtons(totalPages) {
       pageButton.classList.add("active");
     }
 
-    pageButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      currentPage = page;
-      fetchProducts();
-    });
-
-    return pageButton;
-  };
+        pageButton.addEventListener("click", (e) => {
+            e.preventDefault(); 
+            currentPage = page;
+            fetchProducts();
+        });
+        
+        return pageButton;
+    };
 
   const createEllipsis = () => {
     const ellipsis = document.createElement("span");
@@ -275,7 +275,6 @@ function LoadSellerProductData(data) {
                 <img src="/img/unauthorized.png" alt="Tidak ada produk">
               </div>
               <p class="no-products-message">Belum terdapat produk pada kategori ini</p>
-              <a href="/seller/products/add" class="btn-add-first">tambah produk pertama +</a>
             </div>
       `;
       footer.style.display = "none";
