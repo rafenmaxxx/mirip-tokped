@@ -3,11 +3,101 @@ import { GET } from "../../api/api.js";
 import { router } from "../../../app.js";
 import { initHeroSlider } from "../slider.js";
 
+let currentPage = 1;
+let itemsPerPage = 10;
+
+function renderPaginationButtons(totalPages) {
+    const navContainer = document.getElementById("pagination-nav-buttons");
+    if (!navContainer) return;
+
+    navContainer.innerHTML = "";
+
+    const createPageButton = (page) => {
+        const pageButton = document.createElement("a");
+        pageButton.href = "#";
+        pageButton.textContent = page;
+        pageButton.dataset.page = page;
+
+        if (page === currentPage) {
+            pageButton.classList.add("active");
+        }
+
+        pageButton.addEventListener("click", (e) => {
+            e.preventDefault(); 
+            currentPage = page;
+            fetchProducts();
+        });
+        
+        return pageButton;
+    };
+
+    const createEllipsis = () => {
+        const ellipsis = document.createElement("span");
+        ellipsis.textContent = "...";
+        return ellipsis;
+    };
+
+    const pagesToShow = new Set();
+    const siblingCount = 1;
+
+    pagesToShow.add(1);
+    const startPage = Math.max(2, currentPage - siblingCount);
+    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagesToShow.add(i);
+    }
+
+    pagesToShow.add(totalPages);
+
+    let lastPage = 0;
+    pagesToShow.forEach(page => {
+        if (lastPage !== 0 && page - lastPage > 1) {
+            navContainer.appendChild(createEllipsis());
+        }
+        
+        navContainer.appendChild(createPageButton(page));
+        lastPage = page;
+    });
+}
+
 function LoadProduct(data) {
   const container = document.getElementById("product-data");
+  const footer = document.getElementById("pagination-container");
   if (!container) return;
 
+  console.log(data);
+
+  if (data.status !== "success") {
+    container.innerHTML = `<p>Gagal memuat data produk.</p>`;
+    return;
+  }
+  
+  const totalProducts = data.count || 0;
+  if (totalProducts === 0) {
+    container.innerHTML = `
+          <div class="no-products-container">
+            <div class="no-products-image-circle">
+              <img src="/img/unauthorized.png" alt="Tidak ada produk">
+            </div>
+            <p class="no-products-message">Tidak terdapat produk </p>
+          </div>
+    `;
+    footer.style.display = "none";
+    return;
+  }
+
   if (data.status === "success" && Array.isArray(data.data)) {
+    footer.style.display = "flex";
+
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+    renderPaginationButtons(totalPages);
+
+    const paginationInfo = document.querySelector(".pagination-info");
+    if (paginationInfo) {
+      paginationInfo.textContent = `Menampilkan ${data.data.length} dari ${totalProducts} produk`;
+    }
+
     const products = data.data;
 
     const html = products
@@ -40,8 +130,18 @@ function LoadProduct(data) {
       .join("");
     container.innerHTML = html;
     if (html == "") {
-      container.innerHTML = "0 Product";
-    }
+      container.innerHTML = `
+            <div class="no-products-container">
+              <div class="no-products-image-circle">
+                <img src="/img/unauthorized.png" alt="Tidak ada produk">
+              </div>
+              <p class="no-products-message">Belum terdapat produk dengan nama ini :(</p>
+              <p class="no-products-message-2">Cari produk lain, yuk!</p>
+              <a href="/" class="btn-add-first">kembali ke home</a>
+              </div>`;
+      const el = document.getElementById("catalog-label");
+      el.style.display = "none";
+      }
 
     const cards = document.querySelectorAll(".product_card");
     cards.forEach((c, index) => {
@@ -58,29 +158,51 @@ function ProductErr(err) {
   if (err) {
     const container = document.getElementById("product-data");
     if (!container) return;
-    container.innerHTML = "Prouduct Fetch Error :D";
+    container.innerHTML = "Product Fetch Error :D";
   }
 }
 
-function ChangeCatalogLabel() {
+function ChangeCatalogLabel(string) {
   const el = document.getElementById("catalog-label");
   if (!el) {
     console.warn("catalog-label tidak ditemukan!");
     return;
   }
-  el.innerHTML = "Produk Terbaru";
+  el.innerHTML = string;
 }
 
-export function LoadHome() {
+function fetchProducts() {
   let param = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(param);
 
-  if (!param.toString()) {
-    GET("/api/product", {}, LoadProduct, ProductErr);
-    ChangeCatalogLabel("Product You Might Want");
+  params.page = currentPage;
+  params.limit = itemsPerPage;
+
+  console.log("Fetching products with params:", params);
+  GET("/api/product", params, LoadProduct, ProductErr);
+
+  if (!params.hasOwnProperty("search") && !params.hasOwnProperty("filter")) {
+    ChangeCatalogLabel("Products You Might Want");
   } else {
     const banner = document.getElementById("slider");
     banner.innerHTML = "";
-    GET(`/api/product?${param}`, {}, LoadProduct, ProductErr);
-    ChangeCatalogLabel("Product Result");
+    ChangeCatalogLabel("Products Result");
+  }
+}
+
+export function LoadHome() {
+  currentPage = 1;
+  itemsPerPage = 10;
+
+  fetchProducts();
+
+  const itemsPerPageSelect = document.getElementById("items-per-page-select");
+  if (itemsPerPageSelect) {
+    itemsPerPageSelect.addEventListener("change", (e) => {
+      itemsPerPage = parseInt(e.target.value, 10);
+      console.log("Items per page changed to:", itemsPerPage);
+      currentPage = 1;
+      fetchProducts();
+    });
   }
 }
