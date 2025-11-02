@@ -1,7 +1,8 @@
 import { ValidatePassword } from "../../util/password_validation.js";
 import { renderToast } from "../general/toast.js";
+import { InitQuill } from "../general/quill.js";
 
-export function SendBuyerRegisterForm(e) {
+export function SendSellerRegisterForm(e) {
   const _password = document.getElementById("password").value;
   const _confirm = document.getElementById("confirm-password").value;
   if (_password != _confirm) {
@@ -18,10 +19,11 @@ export function SendBuyerRegisterForm(e) {
   }
 }
 
-export function InitRegisterBuyer() {
-  const submitBtn = document.getElementById("regBuyerBtn");
+export function InitRegisterSeller() {
+  InitQuill();
+  const submitBtn = document.getElementById("regSellerBtn");
   submitBtn.addEventListener("click", (e) => {
-    SendBuyerRegisterForm(e);
+    SendSellerRegisterForm(e);
   });
 
   const toggleButtons = document.querySelectorAll(".toggle-password");

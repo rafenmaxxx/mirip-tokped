@@ -88,4 +88,61 @@ class Store
         $stmt->execute([':id' => $seller_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function updateStore($store_id, $store_name, $store_description)
+    {
+        try {
+            $stmt = $this->conn->prepare("
+            UPDATE stores 
+            SET store_name = :store_name, 
+                store_description = :store_description
+            WHERE store_id = :store_id
+        ");
+            $stmt->execute([
+                "store_name" => $store_name,
+                "store_description" => $store_description,
+                "store_id" => $store_id
+            ]);
+
+            return [
+                "status" => true,
+                "message" => "Store updated successfully"
+            ];
+        } catch (PDOException $e) {
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+
+    }
+
+    public function updateStoreWithLogo($store_id, $store_name, $store_description, $store_logo_path)
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                UPDATE stores 
+                SET store_name = :store_name, 
+                    store_description = :store_description, 
+                    store_logo_path = :store_logo_path 
+                WHERE store_id = :store_id
+            ");
+
+            $stmt->execute([
+                "store_name" => $store_name,
+                "store_description" => $store_description,
+                "store_logo_path" => $store_logo_path,
+                "store_id" => $store_id
+            ]);
+            return [
+                "status" => true,
+                "message" => "Store updated successfully"
+            ];
+        } catch (PDOException $e) {
+            return [
+                "status" => false,
+                "message" => $e->getMessage()
+            ];
+        }
+    }
 }

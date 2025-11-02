@@ -50,7 +50,12 @@
   },
   "/login": {
     "html": "/pages/login.html",
-    "js": [],
+    "js": [
+      {
+        "path": "./lib/login/login.js",
+        "func": ["InitLogin"]
+      }
+    ],
     "css": [
       "/css/login/style_login.css",
       "/css/style.css",
@@ -85,7 +90,7 @@
         "func": ["InitRegisterBuyer"]
       }
     ],
-    "css": ["/css/register/style_register.css", "/css/style.css"],
+    "css": ["/css/register/style_register.css", "/css/style.css", "/css/general/style_loading.css"],
     "useNavbar": false,
     "access": ["GUEST"]
   },
@@ -93,8 +98,8 @@
     "html": "/pages/register_seller.html",
     "js": [
       {
-        "path": "./lib/general/quill.js",
-        "func": ["InitQuill"]
+        "path": "./lib/register/register_seller.js",
+        "func": ["InitRegisterSeller"]
       }
     ],
     "css": [
