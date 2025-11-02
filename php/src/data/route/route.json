@@ -56,7 +56,12 @@
   },
   "/login": {
     "html": "/pages/login.html",
-    "js": [],
+    "js": [
+      {
+        "path": "./lib/login/login.js",
+        "func": ["InitLogin"]
+      }
+    ],
     "css": [
       "/css/login/style_login.css",
       "/css/style.css",
