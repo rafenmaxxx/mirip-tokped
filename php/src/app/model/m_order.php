@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../db/db.php';
+require_once __DIR__ . '/../model/m_user.php';
 
 class Order
 {
@@ -101,6 +102,7 @@ class Order
 
         $timeColumn = match ($status) {
             'approved'     => 'confirmed_at',
+            'rejected'     => 'confirmed_at',
             'on_delivery'  => 'delivery_time',
             'received'     => 'received_at',
             default        => null,
@@ -490,11 +492,14 @@ class Order
     public function updateStatus($order_id, $status, $msg = null, $durasi = null)
     {
         // ambil status sekarang
-        $stmt = $this->conn->prepare("SELECT status FROM orders WHERE order_id=:id");
+        $stmt = $this->conn->prepare("SELECT status,total_price,buyer_id,store_id FROM orders WHERE order_id=:id");
         $stmt->execute([':id' => $order_id]);
         $res = $stmt->fetch();
         $isValid = false;
         $curr_stats = $res['status'];
+        $price = $res['total_price'];
+        $buyer_id = $res['buyer_id'];
+        $store_id = $res['store_id'];
 
         switch ($curr_stats) {
             case 'waiting_approval':
@@ -505,6 +510,10 @@ class Order
                     case 'rejected':
                         $isValid = true;
                         $this->updateOrderRejectReason($order_id, $msg);
+
+                        // update balance user
+                        $model = new User();
+                        $model->addBalance($buyer_id, $price);
                         break;
                     default:
                         $isValid = false;
@@ -529,6 +538,10 @@ class Order
                 switch ($status) {
                     case 'received':
                         $isValid = true;
+                        // update balance seller
+                        // tambah validasi user baru bisa confirm klo tanggal sekarang > delivered time
+                        $model = new User();
+                        $model->addBalanceByStoreId($store_id, $price);
                         break;
 
                     default:

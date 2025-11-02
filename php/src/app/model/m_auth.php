@@ -47,6 +47,11 @@ class Auth
         $this->conn = Database::getInstance()->getConnection();
     }
 
+    public function verifyPassword($password, $hashedPassword)
+    {
+        return password_verify($password, $hashedPassword);
+    }
+
     public function login($email, $password)
     {
         try {
@@ -64,7 +69,9 @@ class Auth
             }
 
             if ($password != $user['password']) {
-                return ["status" => false, "message" => "Password salah"];
+                if (!$this->verifyPassword($password, $user['password'])) {
+                    return ["status" => false, "message" => "Password salah"];
+                }
             }
 
 
