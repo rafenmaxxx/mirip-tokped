@@ -4,6 +4,7 @@ require_once __DIR__ . '/../model/m_auth.php';
 $model = new Auth();
 $method = $_SERVER['REQUEST_METHOD'];
 
+guard(['BUYER', 'SELLER']);
 switch ($method) {
     case 'POST':
         $result = $model->logout();
