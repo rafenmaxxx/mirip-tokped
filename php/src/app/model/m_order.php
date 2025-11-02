@@ -228,7 +228,7 @@ class Order
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':store_id' => $store_id]);
-        
+
         return (int)$stmt->fetchColumn();
     }
 
@@ -312,7 +312,7 @@ class Order
             ':store_id' => $store_id,
             ':status' => $status
         ]);
-        
+
         return (int)$stmt->fetchColumn();
     }
 
@@ -398,7 +398,7 @@ class Order
             ':store_id' => $store_id,
             ':title' => "%$title%"
         ]);
-        
+
         return (int)$stmt->fetchColumn();
     }
 
@@ -485,14 +485,14 @@ class Order
             ':status' => $status,
             ':title' => "%$title%"
         ]);
-        
+
         return (int)$stmt->fetchColumn();
     }
-    
+
     public function updateStatus($order_id, $status, $msg = null, $durasi = null)
     {
         // ambil status sekarang
-        $stmt = $this->conn->prepare("SELECT status,total_price,buyer_id,store_id FROM orders WHERE order_id=:id");
+        $stmt = $this->conn->prepare("SELECT status,total_price,buyer_id,store_id,delivery_time FROM orders WHERE order_id=:id");
         $stmt->execute([':id' => $order_id]);
         $res = $stmt->fetch();
         $isValid = false;
@@ -500,6 +500,7 @@ class Order
         $price = $res['total_price'];
         $buyer_id = $res['buyer_id'];
         $store_id = $res['store_id'];
+        $delivery = $res['delivery_time'];
 
         switch ($curr_stats) {
             case 'waiting_approval':
@@ -537,11 +538,18 @@ class Order
             case 'on_delivery':
                 switch ($status) {
                     case 'received':
-                        $isValid = true;
                         // update balance seller
                         // tambah validasi user baru bisa confirm klo tanggal sekarang > delivered time
-                        $model = new User();
-                        $model->addBalanceByStoreId($store_id, $price);
+                        $now = new DateTime();
+                        $deliveryTime = new DateTime($delivery);
+                        if ($now > $deliveryTime) {
+                            $model = new User();
+                            $model->addBalanceByStoreId($store_id, $price);
+                            $isValid = true;
+                        } else {
+                            $isValid = false;
+                        }
+
                         break;
 
                     default:

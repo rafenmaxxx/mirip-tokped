@@ -20,7 +20,7 @@ class User
     public function createUser($name, $email, $password, $address, $role, $balance)
     {
         try {
-            
+
             $hashedPassword = $this->hashPassword($password);
 
             $stmt = $this->conn->prepare("
@@ -134,11 +134,11 @@ class User
 
         foreach ($updates as $field => $value) {
             if (!is_null($value) && $value !== '') {
-                
+
                 if ($field === 'password') {
                     $value = $this->hashPassword($value);
                 }
-                
+
                 $fields[] = "$field = :$field";
                 $params[":$field"] = $value;
             }

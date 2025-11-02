@@ -1,18 +1,19 @@
-/* Kontainer utama, selalu center dan max-width agar stabil */
+
 .detail_store_page {
-  width: 90%;           
-  max-width: 1200px;    
+  width: 70%;           
+
   margin: 0 auto;      
   font-family: 'Inter', sans-serif;
   padding: 2rem 1rem;   
   box-sizing: border-box;
   margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .detail_store_profile {
   position: relative;
-  width: 100%;
-  max-width: 600px;
+  width: 90%;
   margin: 2rem auto; 
   align-self: center;
   overflow: hidden;
@@ -21,6 +22,8 @@
   font-family: "Inter", sans-serif;
   background: #fff;
   padding: 2rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .store_card {
@@ -136,8 +139,8 @@
 .btn-checkout {
   background-color: #00a14b;
   color: white;
-  font-weight: bold;
-  margin-left: auto;
+  font-weight: 400;
+  margin-right: auto;
 }
 
 .btn-checkout:hover {

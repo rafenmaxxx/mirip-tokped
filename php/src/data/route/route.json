@@ -90,7 +90,11 @@
         "func": ["InitRegisterBuyer"]
       }
     ],
-    "css": ["/css/register/style_register.css", "/css/style.css", "/css/general/style_loading.css"],
+    "css": [
+      "/css/register/style_register.css",
+      "/css/style.css",
+      "/css/general/style_loading.css"
+    ],
     "useNavbar": false,
     "access": ["GUEST"]
   },

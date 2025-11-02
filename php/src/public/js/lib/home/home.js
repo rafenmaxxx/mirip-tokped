@@ -31,7 +31,8 @@ function LoadProduct(data) {
                   <div class="product_desc">
                     <div class="product_name">${p.product_name}</div>
                     <div class="product_price">${price}</div>
-                    <div class="product_store">Toko ${p.store_id}</div>
+                    <div class="product_stock">Stok : ${p.stock}</div>
+                    <div class="product_store">${p.store_name}</div>
                   </div>
                 </div>
               `;
