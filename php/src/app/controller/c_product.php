@@ -22,7 +22,6 @@ switch ($method) {
         if ($search) {
             $count = $model->countByName($search);
             $data = $model->getByName($search, $page, $limit);
-
         } else if ($store_id && $filter && $title) {
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
@@ -31,7 +30,6 @@ switch ($method) {
 
             $count = $model->countFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
             $data = $model->getFilterProductByStoreAndName($store_id, $title, $page, $limit, $minPrice, $maxPrice, $categories);
-
         } else if ($store_id && $filter) {
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
@@ -40,17 +38,13 @@ switch ($method) {
 
             $count = $model->countFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
             $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice, $page, $limit);
-
         } else if ($store_id && $title) {
             $count = $model->countProductByStoreAndName($store_id, $title);
             $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit);
-
         } else if ($id) {
             $data = $model->getDetailById($id);
-    
         } else if ($title) {
             $data = $model->getTitle($title);
-    
         } else if ($filter) {
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
@@ -59,15 +53,12 @@ switch ($method) {
 
             $count = $model->countFilterProduct($categories, $minPrice, $maxPrice);
             $data = $model->getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit);
-
         } else if ($store_id) {
             $count = $model->countByStoreId($store_id);
             $data = $model->getByStoreId($store_id, $page, $limit);
-    
         } else {
             $count = $model->countAll();
             $data = $model->getAll($page, $limit);
-    
         }
 
         echo json_encode(['status' => 'success', 'data' => $data, 'count' => $count ?? null]);
@@ -210,10 +201,7 @@ switch ($method) {
         );
 
         if ($result) {
-            echo "<script>
-                alert('Produk berhasil di update ');
-                window.location.href = '/seller/products';
-                </script>";
+            warn("Produk berhasil di update !", "/seller/products");
             exit;
         } else {
             echo "<script>
