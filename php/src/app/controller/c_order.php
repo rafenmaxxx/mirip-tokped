@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../model/m_order.php';
-
+require_once __DIR__ . '/../model/m_auth.php';
 $model = new Order();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -16,36 +16,36 @@ switch ($method) {
         $page = $_GET['page'] ?? null;
         $limit = $_GET['limit'] ?? null;
 
-        if ($action == "count_buyer_order") {
-            $data = $model;
-            echo json_encode(['status' => 'success', 'data' => $data]);
-            break;
-        }
 
         if ($store_id && $status && $title) {
+            guard(['SELLER']);
             $count = $model->countOrderByStoreAndStatusAndName($store_id, $status, $title);
             $data = $model->getOrderByStoreAndStatusAndName($store_id, $status, $title, $page, $limit);
         } else if ($store_id && $status) {
+            guard(['SELLER']);
             $count = $model->countOrderByStoreAndStatus($store_id, $status);
             $data = $model->getOrderByStoreAndStatus($store_id, $status, $page, $limit);
         } else if ($store_id && $title) {
+            guard(['SELLER']);
             $count = $model->countOrderByStoreAndName($store_id, $title);
             $data = $model->getOrderByStoreAndName($store_id, $title, $page, $limit);
         } else if ($store_id) {
+            guard(['SELLER']);
             $count = $model->countOrderByStore($store_id);
             $data = $model->getOrderByStore($store_id, $page, $limit);
         } else if ($id) {
-            $data = $model->getById($id);
+            guard(['BUYER', 'SELLER']);
+            $data = $model->getById($id, $user_id);
         } else if ($user_id) {
+            guard(['BUYER']);
             $data = $model->getByUserId($user_id);
-        } else {
-            $data = $model->getAll();
         }
 
         echo json_encode(['status' => 'success', 'data' => $data, 'count' => $count ?? null]);
         break;
 
     case 'POST':
+        guard(['BUYER']);
         $action = $_POST['action'] ?? null;
 
         switch ($action) {
@@ -66,6 +66,7 @@ switch ($method) {
         }
         break;
     case 'PUT':
+        guard(['BUYER', 'SELLER']);
         parse_str(file_get_contents("php://input"), $PUT);
         $action = $PUT['action'] ?? null;
 
