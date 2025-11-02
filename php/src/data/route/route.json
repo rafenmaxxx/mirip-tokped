@@ -116,8 +116,12 @@
   "/unauthorized": {
     "html": "/pages/unauthorized.html",
     "js": [],
-    "css": ["/css/general/style_unauthorized.css", "/css/style.css"],
-    "useNavbar": true,
+    "css": [
+      "/css/general/style_unauthorized.css",
+      "/css/style.css",
+      "/css/general/style_loading.css"
+    ],
+    "useNavbar": false,
     "access": ["GUEST", "BUYER", "SELLER"]
   },
   "/seller": {
@@ -150,7 +154,8 @@
       "/css/seller/style_seller_product.css",
       "/css/style.css",
       "/css/general/style_toast.css",
-      "/css/general/style_loading.css"
+      "/css/general/style_loading.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["SELLER"]
@@ -186,7 +191,7 @@
       "/css/seller/style_seller_product_info.css",
       "/css/style.css",
       "/css/general/style_toast.css",
-      "/css/general/style_toast.css",
+
       "/css/general/style_loading.css"
     ],
     "useNavbar": true,

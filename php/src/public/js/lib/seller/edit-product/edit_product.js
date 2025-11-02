@@ -1,5 +1,6 @@
 import { router } from "../../../../app.js";
 import { GET } from "../../../api/api.js";
+import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
 import { showModalConfirmation } from "../../general/modal.js";
 import { changePlaceHolder, InitQuill } from "../../general/quill.js";
 
@@ -70,6 +71,35 @@ export function InitEditProduct() {
       () => {}
     );
   });
+  document.getElementById("product-img").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      document.querySelector(".form-image-upload").innerHTML = `
+      <img src="${event.target.result}" alt="Preview"
+           style="width:100%;border-radius:10px;object-fit:cover;max-height:200px;">
+    `;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.querySelector(".product-form").addEventListener("submit", (e) => {
+    const nama = document.getElementById("nama-produk").value.trim();
+    const harga = document.getElementById("harga").value.trim();
+    const stok = document.getElementById("stok").value.trim();
+
+    if (!nama || !harga || !stok) {
+      e.preventDefault();
+      alert("Pastikan semua field wajib diisi!");
+    }
+  });
+
+  ChangeInnerHtmlById(
+    "tersembunyi",
+    ` <input type="hidden" name="_method" id="_method" value="PUT">
+        <input type="hidden" name="product_id" id="product-id" value=${param_id}>`
+  );
 
   LoadPlaceHolder(param_id);
 }

@@ -1,4 +1,7 @@
-import { GET } from "../../../api/api.js";
+import { router } from "../../../../app.js";
+import { DELETE, GET } from "../../../api/api.js";
+import { showModalConfirmation } from "../../general/modal.js";
+import { renderToast } from "../../general/toast.js";
 
 let allProducts = [];
 let productCategory = [];
@@ -14,23 +17,27 @@ function renderFilterDropdown(data) {
   console.log("Category Data for Filter:", data);
   let categories = [];
 
-  categories.push({ value: "", label: "All Categories" }); 
+  categories.push({ value: "", label: "All Categories" });
 
   if (data.status === "success" && Array.isArray(data.data)) {
-    data.data.forEach(category => {
+    data.data.forEach((category) => {
       categories.push({
-        value: category.name, 
-        label: category.name
+        value: category.name,
+        label: category.name,
       });
       productCategory.push(category.name);
     });
   }
 
-  const optionsHtml = categories.map(cat => `
+  const optionsHtml = categories
+    .map(
+      (cat) => `
     <option value="${cat.value}">
       ${cat.label}
     </option>
-  `).join('');
+  `
+    )
+    .join("");
 
   filterContainer.innerHTML = optionsHtml;
 }
@@ -39,36 +46,40 @@ function renderFilteredProducts() {
   const container = document.getElementById("pg1");
   if (!container) return;
 
-  const filteredProducts = allProducts
+  const filteredProducts = allProducts;
 
   switch (currentSort) {
-        case "harga-asc":
-            filteredProducts.sort((a, b) => a.price - b.price);
-            console.log("Sorted Products by harga-asc:", filteredProducts);
-            break;
-        case "harga-desc":
-            filteredProducts.sort((a, b) => b.price - a.price);
-            break;
-        case "nama-asc":
-            filteredProducts.sort((a, b) => a.product_name.localeCompare(b.product_name));
-            break;
-        case "nama-desc":
-            filteredProducts.sort((a, b) => b.product_name.localeCompare(a.product_name));
-            break;
-        case "stok-asc":
-            filteredProducts.sort((a, b) => a.stock - b.stock);
-            break;
-        case "stok-desc":
-            filteredProducts.sort((a, b) => b.stock - a.stock);
-            break;
-    }
-  
+    case "harga-asc":
+      filteredProducts.sort((a, b) => a.price - b.price);
+      console.log("Sorted Products by harga-asc:", filteredProducts);
+      break;
+    case "harga-desc":
+      filteredProducts.sort((a, b) => b.price - a.price);
+      break;
+    case "nama-asc":
+      filteredProducts.sort((a, b) =>
+        a.product_name.localeCompare(b.product_name)
+      );
+      break;
+    case "nama-desc":
+      filteredProducts.sort((a, b) =>
+        b.product_name.localeCompare(a.product_name)
+      );
+      break;
+    case "stok-asc":
+      filteredProducts.sort((a, b) => a.stock - b.stock);
+      break;
+    case "stok-desc":
+      filteredProducts.sort((a, b) => b.stock - a.stock);
+      break;
+  }
+
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
   renderPaginationButtons(totalPages);
-  
+
   container.innerHTML = "";
   if (paginatedProducts.length === 0) {
     container.innerHTML = "<p class='no-orders'>Belum ada produk.</p>";
@@ -78,42 +89,41 @@ function renderFilteredProducts() {
     }
     return;
   } else {
-    paginatedProducts.forEach(product => {
+    paginatedProducts.forEach((product) => {
       renderProductCard(product, container);
     });
   }
 
   const paginationInfo = document.querySelector(".pagination-info");
-    if (paginationInfo) {
-        paginationInfo.textContent = `Menampilkan ${paginatedProducts.length} dari ${allProducts.length} product`;
-    }
-
+  if (paginationInfo) {
+    paginationInfo.textContent = `Menampilkan ${paginatedProducts.length} dari ${allProducts.length} product`;
+  }
 }
 
 function renderPaginationButtons(totalPages) {
-    const navContainer = document.getElementById("pagination-nav-buttons");
-    if (!navContainer) return;
+  const navContainer = document.getElementById("pagination-nav-buttons");
+  if (!navContainer) return;
 
-    navContainer.innerHTML = "";
+  navContainer.innerHTML = "";
 
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement("a");
-        pageButton.href = "#";
-        pageButton.textContent = i;
-        pageButton.dataset.page = i;
+  for (let i = 1; i <= totalPages; i++) {
+    const pageButton = document.createElement("a");
+    pageButton.href = "#";
+    pageButton.textContent = i;
+    pageButton.dataset.page = i;
 
-        if (i === currentPage) {
-            pageButton.classList.add("active");
-        }
-
-        pageButton.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            currentPage = i;
-            renderFilteredProducts();
-        });
-
-        navContainer.appendChild(pageButton);
+    if (i === currentPage) {
+      pageButton.classList.add("active");
     }
+
+    pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = i;
+      renderFilteredProducts();
+    });
+
+    navContainer.appendChild(pageButton);
+  }
 }
 
 function renderProductCard(product, container) {
@@ -121,10 +131,12 @@ function renderProductCard(product, container) {
     product.main_image_path && product.main_image_path !== ""
       ? `/api/image?file=${product.main_image_path}`
       : `https://picsum.photos/200/200?random=${product.product_id}`;
-  
+
   const productName = product.product_name || "Nama Produk";
   const productStock = product.stock !== undefined ? product.stock : "N/A";
-  const productPrice = product.price ? parseInt(product.price).toLocaleString('id-ID') : "0";
+  const productPrice = product.price
+    ? parseInt(product.price).toLocaleString("id-ID")
+    : "0";
 
   const cardElement = document.createElement("article");
   cardElement.className = "product-card";
@@ -153,14 +165,18 @@ function renderProductCard(product, container) {
   `;
 
   const onCategorySuccess = (categories) => {
-    const categoryContainer = cardElement.querySelector(`#${categoryPlaceholderId}`);
+    const categoryContainer = cardElement.querySelector(
+      `#${categoryPlaceholderId}`
+    );
     if (!categoryContainer) return;
 
     if (categories.status === "success" && Array.isArray(categories.data)) {
       if (categories.data.length === 0) {
         categoryContainer.innerHTML = "<span class='tag'>Uncategorized</span>";
       } else {
-        const tags = categories.data.map(cat => `<span class="tag">${cat.category_name}</span>`).join(' ');
+        const tags = categories.data
+          .map((cat) => `<span class="tag">${cat.category_name}</span>`)
+          .join(" ");
         categoryContainer.innerHTML = `<span>kategori:</span> ${tags}`;
       }
     } else {
@@ -169,25 +185,43 @@ function renderProductCard(product, container) {
   };
 
   const onCategoryError = () => {
-    const categoryContainer = cardElement.querySelector(`#${categoryPlaceholderId}`);
+    const categoryContainer = cardElement.querySelector(
+      `#${categoryPlaceholderId}`
+    );
     if (categoryContainer) {
-      categoryContainer.innerHTML = "<span class='tag error'>Gagal memuat kategori</span>";
+      categoryContainer.innerHTML =
+        "<span class='tag error'>Gagal memuat kategori</span>";
     }
   };
 
   GET(
-    "/api/category", 
-    {"product_id": product.product_id}, 
+    "/api/category",
+    { product_id: product.product_id },
     onCategorySuccess,
     onCategoryError
   );
 
-  cardElement.querySelector('.btn-edit').addEventListener('click', () => {
-    // TODO: edit product
+  cardElement.querySelector(".btn-edit").addEventListener("click", () => {
+    router.navigateTo("/seller/products/edit?product_id=" + product.product_id);
   });
 
-  cardElement.querySelector('.btn-delete').addEventListener('click', () => {
-    // TODO: delete product
+  cardElement.querySelector(".btn-delete").addEventListener("click", () => {
+    showModalConfirmation("Yaking menghapus product?", () => {
+      DELETE(
+        "/api/product",
+        { product_id: product.product_id },
+        (data) => {
+          if (data.status == "success") {
+            renderToast("Berhasil Menghapus Produk !", "success");
+          } else {
+            renderToast("Gagal Menghapus Product !", "error");
+          }
+        },
+        () => {
+          renderToast("Gagal Menghapus Product", "info");
+        }
+      );
+    });
   });
 
   container.appendChild(cardElement);
@@ -212,7 +246,7 @@ function LoadSellerProductData(data) {
               <p class="no-products-message">Belum terdapat produk pada kategori ini</p>
               <a href="/seller/products/add" class="btn-add-first">tambah produk pertama +</a>
             </div>
-      `;     
+      `;
       footer.style.display = "none";
       return;
     }
@@ -222,43 +256,45 @@ function LoadSellerProductData(data) {
   }
 }
 
-function SellerProductErr(err) {  
+function SellerProductErr(err) {
   if (!err) {
-      return;
+    return;
   }
 
   const container = document.getElementById("pg1");
   if (!container) return;
 
-  container.innerHTML = "<p class='error-message'>Error loading order history. Please try again later.</p>";
+  container.innerHTML =
+    "<p class='error-message'>Error loading order history. Please try again later.</p>";
 }
 
-function CategoryProductErr(err) {  
+function CategoryProductErr(err) {
   if (!err) {
-      return;
+    return;
   }
 
   const container = document.getElementById("pg1");
   if (!container) return;
 
-  container.innerHTML = "<p class='error-message'>Error loading category data. Please try again later.</p>";
+  container.innerHTML =
+    "<p class='error-message'>Error loading category data. Please try again later.</p>";
 }
 
 function fetchProducts() {
-   const params = {};
+  const params = {};
 
-   const filters = {};
-   if (currentCategory) {
-     filters.categories = [currentCategory];
-   }
+  const filters = {};
+  if (currentCategory) {
+    filters.categories = [currentCategory];
+  }
 
-   if (Object.keys(filters).length > 0) {
-     params.filter = JSON.stringify(filters);
-   }
+  if (Object.keys(filters).length > 0) {
+    params.filter = JSON.stringify(filters);
+  }
 
-   console.log("Fetching products with params:", params); 
+  console.log("Fetching products with params:", params);
 
-   GET("/api/product", params, LoadSellerProductData, SellerProductErr);
+  GET("/api/product", params, LoadSellerProductData, SellerProductErr);
 }
 
 export async function InitSellerProductPage() {
@@ -267,7 +303,7 @@ export async function InitSellerProductPage() {
   allProducts = [];
 
   fetchProducts();
-  GET('/api/category', {}, renderFilterDropdown, CategoryProductErr);
+  GET("/api/category", {}, renderFilterDropdown, CategoryProductErr);
 
   const itemsPerPageSelect = document.getElementById("items-per-page-select");
   if (itemsPerPageSelect) {
@@ -278,7 +314,7 @@ export async function InitSellerProductPage() {
       renderFilteredProducts();
     });
   }
-  
+
   const sortSelect = document.getElementById("sort-filter");
   if (sortSelect) {
     sortSelect.addEventListener("change", (e) => {
@@ -289,12 +325,12 @@ export async function InitSellerProductPage() {
   }
 
   const categorySelect = document.getElementById("category-filter");
-    if (categorySelect) {
-        categorySelect.addEventListener("change", (e) => {
-            currentCategory = e.target.value;
-            console.log("Category filter changed to:", currentCategory);
-            currentPage = 1;
-            fetchProducts();
-        });
-    }
+  if (categorySelect) {
+    categorySelect.addEventListener("change", (e) => {
+      currentCategory = e.target.value;
+      console.log("Category filter changed to:", currentCategory);
+      currentPage = 1;
+      fetchProducts();
+    });
+  }
 }
