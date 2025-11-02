@@ -1,6 +1,9 @@
-import { GET } from "../../../api/api.js";
+import { GET, PUT } from "../../../api/api.js";
 import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
 import { router } from "../../../../app.js";
+import { renderToast } from "../../general/toast.js";
+import { Loading } from "../../general/loading.js";
+
 function LoadSellerData() {
   GET(
     "/api/detail_store",
@@ -35,7 +38,9 @@ export function InitSeller() {
   const addProdBtn = document.getElementById("addProdBtn");
 
   editBtn.addEventListener("click", () => {
-    router.navigateTo("");
+    const currentName = document.getElementById("store-name").textContent;
+    const currentDesc = document.getElementById("store-description").textContent;
+    showEditStoreModal(currentName, currentDesc);
   });
 
   kelolaBtn.addEventListener("click", () => {
@@ -48,5 +53,78 @@ export function InitSeller() {
 
   addProdBtn.addEventListener("click", () => {
     router.navigateTo("/seller/products/add");
+  });
+}
+
+
+export function showEditStoreModal(currentName, currentDescription) {
+  
+  const modal = document.getElementById("edit-store-modal");
+  const form = document.getElementById("edit-store-form");
+  const nameInput = document.getElementById("edit-store-name");
+  const descInput = document.getElementById("edit-store-desc");
+  const imageInput = document.getElementById("edit-store-image");
+  const cancelBtn = document.getElementById("cancel-edit-btn");
+  const closeBtn = document.getElementById("close-edit-modal");
+
+  if (!modal) return;
+
+  nameInput.value = currentName;
+  descInput.value = currentDescription;
+  imageInput.value = "";
+
+  modal.style.display = "flex";
+
+  const closeModal = () => {
+    modal.style.display = "none";
+  };
+
+  cancelBtn.addEventListener("click", closeModal);
+  closeBtn.addEventListener("click", closeModal);
+
+  // cloneNode untuk menghapus event listener sebelumnya
+  const newForm = form.cloneNode(true);
+  form.parentNode.replaceChild(newForm, form);
+
+  newForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const newName = newForm.querySelector("#edit-store-name").value;
+    const newDesc = newForm.querySelector("#edit-store-desc").value;
+    const newImageFile = newForm.querySelector("#edit-store-image").files[0];
+
+    console.log("Menyimpan data baru:");
+    console.log("Nama:", newName);
+    console.log("Deskripsi:", newDesc);
+    console.log("File Gambar:", newImageFile); // Ini perlu di-handle dengan FormData
+
+    Loading.show("Menyimpan perubahan...");
+    PUT(
+      "/api/detail_store",
+      { store_name: newName, store_description: newDesc },
+      (response) => {
+        if (response.status === "success") {
+          renderToast("Berhasil memperbarui data toko", "success");
+          LoadSellerData();
+        } else {
+          renderToast("Gagal memperbarui data toko", "error");
+        }
+        Loading.hide();
+      }, () => {
+        renderToast("Terjadi kesalahan saat memperbarui data toko", "error");
+        Loading.hide();
+      }
+    )
+
+    // (Contoh: Panggil fungsi API Anda)
+    // const formData = new FormData();
+    // formData.append("store_name", newName);
+    // formData.append("description", newDesc);
+    // if (newImageFile) {
+    //   formData.append("store_image", newImageFile);
+    // }
+    // POST("/api/store/update", formData, (response) => { ... });
+
+    closeModal(); // Tutup modal setelah submit
   });
 }
