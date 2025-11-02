@@ -86,6 +86,120 @@
   text-align: right;
 }
 
+/* footer */
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #DDD;
+    font-size: 14px;
+    color: #555;
+    position: relative;
+}
+
+.pagination-nav {
+    display: flex;
+    gap: 6px;
+    position: static;  
+    transform: none;
+    order: 2;
+}
+
+.pagination-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 12px;
+    border: 1px solid #7C8597;
+    border-radius: 6px;   
+}
+
+.pagination-nav span {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.pagination-nav a.active {
+    background-color: #00AA5B;
+    color: white;
+    font-weight: 500;
+}
+
+.pagination-nav a:hover:not(.active) {
+    background-color: #DDD;
+}
+
+.items-per-page {
+    border: 1px solid #BDBDBD;
+    border-radius: 6px;
+    padding: 8px;
+    background-color: white;
+    order: 3
+}
+
+/* empty state */
+.no-products-container {
+  grid-column: 1 / -1; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px; 
+  text-align: center;
+  height: 100%;
+  min-height: 400px;
+}
+
+.no-products-image-circle {
+  width: 180px;
+  height: 180px;
+  background-color: #EAEAEA;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.no-products-image-circle img {
+  width: 120px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.no-products-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #555; 
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.no-products-message-2 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #555; 
+  margin: 0;
+  margin-bottom: 30px;
+}
+
+.btn-add-first {
+  background-color: #00AA5B; 
+  color: white;
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-add-first:hover {
+  background-color: #008C4A;
+}
 
 @media (max-width: 768px) {
   .home_page {
