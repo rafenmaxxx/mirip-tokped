@@ -96,7 +96,7 @@ class Product
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getFilterProductByStore($store_id, $categories = [], $minPrice = null, $maxPrice = null)
+    public function getFilterProductByStore($store_id, $categories = [], $minPrice = null, $maxPrice = null, $page, $limit)
     {
         $query = "SELECT DISTINCT p.* 
               FROM products p
@@ -121,12 +121,50 @@ class Product
             $params[] = $maxPrice;
         }
 
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $query .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getFilterProductByStoreAndName($store_id, $name, $categories = [], $minPrice = null, $maxPrice = null)
+    public function countFilterProductByStore($store_id, $categories = [], $minPrice = null, $maxPrice = null)
+    {
+        $query = "SELECT COUNT(DISTINCT p.product_id) AS total
+              FROM products p
+              LEFT JOIN category_items ci ON p.product_id = ci.product_id
+              LEFT JOIN categories c ON ci.category_id = c.category_id
+              WHERE p.store_id = ? and p.deleted_at is NULL";
+        $params = [$store_id];
+
+        if (!empty($categories)) {
+            $placeholders = implode(',', array_fill(0, count($categories), '?'));
+            $query .= " AND c.name IN ($placeholders)";
+            $params = array_merge($params, $categories);
+        }
+
+        if ($minPrice !== null) {
+            $query .= " AND p.price >= ?";
+            $params[] = $minPrice;
+        }
+
+        if ($maxPrice !== null) {
+            $query .= " AND p.price <= ?";
+            $params[] = $maxPrice;
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? (int)$result['total'] : 0;
+    }
+
+    public function getFilterProductByStoreAndName($store_id, $name, $categories = [], $minPrice = null, $maxPrice = null, $page, $limit)
     {
         $query = "SELECT DISTINCT p.* 
               FROM products p
@@ -151,26 +189,103 @@ class Product
             $params[] = $maxPrice;
         }
 
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $query .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getProductByStoreAndName($store_id, $name)
+    public function countFilterProductByStoreAndName($store_id, $name, $categories = [], $minPrice = null, $maxPrice = null)
+    {
+        $query = "SELECT COUNT(DISTINCT p.product_id) AS total
+              FROM products p
+              LEFT JOIN category_items ci ON p.product_id = ci.product_id
+              LEFT JOIN categories c ON ci.category_id = c.category_id
+              WHERE p.store_id = ? AND p.product_name ILIKE ?";
+        $params = [$store_id, "%$name%"];
+
+        if (!empty($categories)) {
+            $placeholders = implode(',', array_fill(0, count($categories), '?'));
+            $query .= " AND c.name IN ($placeholders)";
+            $params = array_merge($params, $categories);
+        }
+
+        if ($minPrice !== null) {
+            $query .= " AND p.price >= ?";
+            $params[] = $minPrice;
+        }
+
+        if ($maxPrice !== null) {
+            $query .= " AND p.price <= ?";
+            $params[] = $maxPrice;
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? (int)$result['total'] : 0;
+    }
+
+    public function getProductByStoreAndName($store_id, $name, $page, $limit)
     {
         $query = "SELECT * FROM products p WHERE p.store_id = ? AND p.product_name ILIKE ?";
         $params = [$store_id, "%$name%"];
 
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $query .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getByStoreId($store_id)
+    public function countProductByStoreAndName($store_id, $name)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM products WHERE store_id=:store_id and deleted_at is null");
-        $stmt->execute([':store_id' => $store_id]);
-        return $stmt->fetchAll();
+        $query = "SELECT COUNT(*) AS total FROM products p WHERE p.store_id = ? AND p.product_name ILIKE ?";
+        $params = [$store_id, "%$name%"];
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? (int)$result['total'] : 0;
+    }
+
+    public function getByStoreId($store_id, $page, $limit)
+    {
+        $query = "SELECT * FROM products WHERE store_id = ? AND deleted_at IS NULL";
+        $params = [$store_id];
+
+        if ($page !== null && $limit !== null) {
+            $offset = ($page - 1) * $limit;
+            $query .= " LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countByStoreId($store_id)
+    {
+        $query = "SELECT COUNT(*) AS total FROM products WHERE store_id = ? AND deleted_at IS NULL";
+        $params = [$store_id];
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? (int)$result['total'] : 0;
     }
 
     public function createProduct($store_id, $product_name, $description, $price, $stock, $main_image_path = null, $categories = [])
