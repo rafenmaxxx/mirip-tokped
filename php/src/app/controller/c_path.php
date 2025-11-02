@@ -7,7 +7,7 @@ switch ($method) {
     case 'GET':
         $route = urldecode($_GET['path'] ?? '');
         if (isset($_SESSION['user']) && $_SESSION['user']['role'] == 'SELLER') {
-            if ($route == '/' || $route == '/home') {
+            if ($route == '/' || $route == '/home' || $route == '/#' || $route == '/home#') {
                 $route = '/seller';
             }
         }

@@ -3,21 +3,20 @@ import { LoadComponent } from "../../util/component_loader.js";
 export function showModalConfirmation(message, yesCallback, noCallback) {
   const modal = document.getElementById("confirmation-modal");
 
-  // Kalau modal belum pernah dimuat, muat dulu secara dinamis
   if (!modal) {
     LoadComponent(
       "global-modal-container",
       "/components/general/modal_confirmation.html",
       () => {
-        attachModalLogic(message, yesCallback, noCallback);
+        attachModalConfirmationLogic(message, yesCallback, noCallback);
       }
     );
   } else {
-    attachModalLogic(message, yesCallback, noCallback);
+    attachModalConfirmationLogic(message, yesCallback, noCallback);
   }
 }
 
-function attachModalLogic(message, yesCallback, noCallback) {
+function attachModalConfirmationLogic(message, yesCallback, noCallback) {
   const modal = document.getElementById("confirmation-modal");
   const messageEl = modal.querySelector("#confirmation-message");
   const yesBtn = modal.querySelector("#confirm-yes");
@@ -26,16 +25,112 @@ function attachModalLogic(message, yesCallback, noCallback) {
   messageEl.textContent = message;
   modal.style.display = "flex";
 
-  // Bersihkan event listener lama
   const newYes = yesBtn.cloneNode(true);
   yesBtn.parentNode.replaceChild(newYes, yesBtn);
   const newNo = noBtn.cloneNode(true);
   noBtn.parentNode.replaceChild(newNo, noBtn);
 
-  // Tambahkan event listener baru
   newYes.addEventListener("click", () => {
     modal.style.display = "none";
     if (typeof yesCallback === "function") yesCallback();
+  });
+
+  newNo.addEventListener("click", () => {
+    modal.style.display = "none";
+    if (typeof noCallback === "function") noCallback();
+  });
+}
+
+export function showModalNumberInput(message, yesCallback, noCallback) {
+  const modal = document.getElementById("input-number-modal");
+
+  if (!modal) {
+    LoadComponent(
+      "global-modal-container",
+      "/components/general/modal_input_number.html",
+      () => {
+        attachModalNumberLogic(message, yesCallback, noCallback);
+      }
+    );
+  } else {
+    attachModalNumberLogic(message, yesCallback, noCallback);
+  }
+}
+
+function attachModalNumberLogic(message, yesCallback, noCallback) {
+  const modal = document.getElementById("input-number-modal");
+  const messageEl = modal.querySelector("#input-number-message");
+  const inputField = modal.querySelector("#input-number-field");
+  const yesBtn = modal.querySelector("#input-number-yes");
+  const noBtn = modal.querySelector("#input-number-no");
+
+  messageEl.textContent = message;
+  inputField.value = "";
+  modal.style.display = "flex";
+
+  const newYes = yesBtn.cloneNode(true);
+  yesBtn.parentNode.replaceChild(newYes, yesBtn);
+  const newNo = noBtn.cloneNode(true);
+  noBtn.parentNode.replaceChild(newNo, noBtn);
+
+  newYes.addEventListener("click", () => {
+    const value = parseInt(inputField.value, 10);
+    if (isNaN(value) || value < 0) {
+      alert("Masukkan angka >= 0");
+      return;
+    }
+
+    modal.style.display = "none";
+    if (typeof yesCallback === "function") yesCallback(value);
+  });
+
+  newNo.addEventListener("click", () => {
+    modal.style.display = "none";
+    if (typeof noCallback === "function") noCallback();
+  });
+}
+
+export function showModalTextInput(message, yesCallback, noCallback) {
+  const modal = document.getElementById("input-text-modal");
+
+  if (!modal) {
+    LoadComponent(
+      "global-modal-container",
+      "/components/general/modal_input_text.html",
+      () => {
+        attachModalTextLogic(message, yesCallback, noCallback);
+      }
+    );
+  } else {
+    attachModalTextLogic(message, yesCallback, noCallback);
+  }
+}
+
+function attachModalTextLogic(message, yesCallback, noCallback) {
+  const modal = document.getElementById("input-text-modal");
+  const messageEl = modal.querySelector("#input-text-message");
+  const inputField = modal.querySelector("#input-text-field");
+  const yesBtn = modal.querySelector("#input-text-yes");
+  const noBtn = modal.querySelector("#input-text-no");
+
+  messageEl.textContent = message;
+  inputField.value = "";
+  modal.style.display = "flex";
+
+  const newYes = yesBtn.cloneNode(true);
+  yesBtn.parentNode.replaceChild(newYes, yesBtn);
+  const newNo = noBtn.cloneNode(true);
+  noBtn.parentNode.replaceChild(newNo, noBtn);
+
+  newYes.addEventListener("click", () => {
+    const value = inputField.value.trim();
+    if (!value) {
+      alert("Masukkan teks tidak boleh kosong!");
+      return;
+    }
+
+    modal.style.display = "none";
+    if (typeof yesCallback === "function") yesCallback(value);
   });
 
   newNo.addEventListener("click", () => {

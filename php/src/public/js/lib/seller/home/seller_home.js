@@ -3,6 +3,7 @@ import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
 import { router } from "../../../../app.js";
 import { renderToast } from "../../general/toast.js";
 import { Loading } from "../../general/loading.js";
+import { InitQuill, changePlaceHolder } from "../../general/quill.js";
 
 function LoadSellerData() {
   GET(
@@ -39,7 +40,8 @@ export function InitSeller() {
 
   editBtn.addEventListener("click", () => {
     const currentName = document.getElementById("store-name").textContent;
-    const currentDesc = document.getElementById("store-description").textContent;
+    const currentDesc =
+      document.getElementById("store-description").textContent;
     showEditStoreModal(currentName, currentDesc);
   });
 
@@ -56,19 +58,19 @@ export function InitSeller() {
   });
 }
 
-
 export function showEditStoreModal(currentName, currentDescription) {
-  
   const modal = document.getElementById("edit-store-modal");
   const form = document.getElementById("edit-store-form");
   const nameInput = document.getElementById("edit-store-name");
-  const descInput = document.getElementById("edit-store-desc");
+  const descInput = document.getElementById("quill-desc-input");
   const imageInput = document.getElementById("edit-store-image");
   const cancelBtn = document.getElementById("cancel-edit-btn");
   const closeBtn = document.getElementById("close-edit-modal");
 
   if (!modal) return;
+  InitQuill();
 
+  changePlaceHolder(currentDescription);
   nameInput.value = currentName;
   descInput.value = currentDescription;
   imageInput.value = "";
@@ -88,9 +90,9 @@ export function showEditStoreModal(currentName, currentDescription) {
 
   newForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    
+
     const newName = newForm.querySelector("#edit-store-name").value;
-    const newDesc = newForm.querySelector("#edit-store-desc").value;
+    const newDesc = newForm.querySelector("#quill-desc-input").value;
     const newImageFile = newForm.querySelector("#edit-store-image").files[0];
 
     console.log("Menyimpan data baru:");
@@ -103,8 +105,8 @@ export function showEditStoreModal(currentName, currentDescription) {
     formData.append("store_name", newName);
     formData.append("store_description", newDesc);
 
-    if (newImageFile) { 
-      formData.append("gambar_toko", newImageFile); 
+    if (newImageFile) {
+      formData.append("gambar_toko", newImageFile);
     }
 
     POST_FORMDATA(
@@ -118,12 +120,12 @@ export function showEditStoreModal(currentName, currentDescription) {
           renderToast("Gagal memperbarui data toko", "error");
         }
         Loading.hide();
-      }, () => {
+      },
+      () => {
         renderToast("Terjadi kesalahan saat memperbarui data toko", "error");
         Loading.hide();
       }
     );
-
 
     closeModal();
   });

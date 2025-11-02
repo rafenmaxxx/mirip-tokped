@@ -1,10 +1,7 @@
 {
   "/": {
     "html": "/pages/home.html",
-    "js": [
-      { "path": "./lib/home/home.js", "func": ["LoadHome"] },
-      { "path": "./lib/slider.js", "func": ["initHeroSlider"] }
-    ],
+    "js": [{ "path": "./lib/home/home.js", "func": ["LoadHome"] }],
     "css": [
       "/css/general/style_navbar.css",
       "/css/style.css",
@@ -21,10 +18,7 @@
   },
   "/home": {
     "html": "/pages/home.html",
-    "js": [
-      { "path": "./lib/home/home.js", "func": ["LoadHome"] },
-      { "path": "./lib/slider.js", "func": ["initHeroSlider"] }
-    ],
+    "js": [{ "path": "./lib/home/home.js", "func": ["LoadHome"] }],
     "css": [
       "/css/home/style_sliding_card.css",
       "/css/general/style_balance.css",
@@ -214,7 +208,8 @@
       "/css/seller/style_seller_order_management.css",
       "/css/style.css",
       "/css/general/style_toast.css",
-      "/css/general/style_loading.css"
+      "/css/general/style_loading.css",
+      "/css/general/style_modal_confirmation.css"
     ],
     "useNavbar": true,
     "access": ["SELLER"]

@@ -35,32 +35,32 @@ export class Router {
             {},
             (html) => {
               this.app.innerHTML = html;
+              // Navbar
+              if (route.useNavbar && !this.navBarInit) {
+                this.navBarInit = true;
+                LoadComponent(
+                  "navbar",
+                  this.devMode
+                    ? `/components/general/navbar.html?v=${Date.now()}`
+                    : "/components/general/navbar.html",
+                  () => {
+                    this.loadModuleOnce("./lib/general/navbar.js", [
+                      "InitNavbar",
+                    ]);
+                    this.loadCSS(["/css/general/style_navbar.css"]);
+                  }
+                );
+              } else if (!route.useNavbar) {
+                RemoveComponent("navbar");
+                this.navBarInit = false;
+              }
+              this.loadCSS(route.css || []);
+              this.handleFunc(route.js);
             },
             () => {
               this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
             }
           );
-
-          // Navbar
-          if (route.useNavbar && !this.navBarInit) {
-            this.navBarInit = true;
-            LoadComponent(
-              "navbar",
-              this.devMode
-                ? `/components/general/navbar.html?v=${Date.now()}`
-                : "/components/general/navbar.html",
-              () => {
-                this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
-                this.loadCSS(["/css/general/style_navbar.css"]);
-              }
-            );
-          } else if (!route.useNavbar) {
-            RemoveComponent("navbar");
-            this.navBarInit = false;
-          }
-
-          this.loadCSS(route.css || []);
-          this.handleFunc(route.js);
         } catch (err) {
           console.error("Error loading view:", err);
           this.app.innerHTML = `<h1>Error loading page</h1>`;
