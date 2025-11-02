@@ -45,28 +45,6 @@
   color: #00a14b;
 }
 
-.hero-slider__btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.4);
-  border: none;
-  color: white;
-  font-size: 2rem;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-  border-radius: 50%;
-  z-index: 10;
-}
-
-.hero-slider__btn.prev { left: 10px; }
-.hero-slider__btn.next { right: 10px; }
-
-.hero-slider__btn:hover {
-  background: rgba(0,0,0,0.6);
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .hero-slide img { height: 300px; }

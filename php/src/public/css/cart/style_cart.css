@@ -135,6 +135,14 @@
   /* border-bottom: 1px solid #eee; */
 }
 
+.cart_item_invalid {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* jarak antara gambar dan info */
+  padding: 10px 0;
+  /* border-bottom: 1px solid #eee; */
+}
+
 .cart_item_image img {
   width: 100px;
   height: 100px;
@@ -153,6 +161,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.cart_item_warn  {
+  background-color: #f46a5b; /* warna merah */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: fit-content;
 }
 
 .cart_item_name {
@@ -359,6 +377,8 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
+
+
 
 /* Animasi fade in */
 @keyframes modalFadeIn {

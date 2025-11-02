@@ -95,10 +95,9 @@ function renderFilteredProducts() {
   }
 
   const paginationInfo = document.querySelector(".pagination-info");
-    if (paginationInfo) {
-        paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} produk`;
-    }
-
+  if (paginationInfo) {
+    paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} produk`;
+  }
 }
 
 function renderPaginationButtons(totalPages) {
@@ -214,6 +213,7 @@ function renderProductCard(product, container) {
         (data) => {
           if (data.status == "success") {
             renderToast("Berhasil Menghapus Produk !", "success");
+            fetchProducts();
           } else {
             renderToast("Gagal Menghapus Product !", "error");
           }
@@ -290,18 +290,18 @@ function fetchProducts() {
     filters.categories = [currentCategory];
   }
 
-   if (Object.keys(filters).length > 0) {
-     params.filter = JSON.stringify(filters);
-   }
+  if (Object.keys(filters).length > 0) {
+    params.filter = JSON.stringify(filters);
+  }
 
-   if (currentSearch) {
-      params.title = currentSearch;
-   }
+  if (currentSearch) {
+    params.title = currentSearch;
+  }
 
-   if (currentPage) {
-      params.page = currentPage;
-      params.limit = itemsPerPage;
-    }
+  if (currentPage) {
+    params.page = currentPage;
+    params.limit = itemsPerPage;
+  }
 
   console.log("Fetching products with params:", params);
 
@@ -341,26 +341,25 @@ export async function InitSellerProductPage() {
   const categorySelect = document.getElementById("category-filter");
   if (categorySelect) {
     categorySelect.addEventListener("change", (e) => {
-        currentCategory = e.target.value;
-        console.log("Category filter changed to:", currentCategory);
-        currentPage = 1;
-        fetchProducts();
+      currentCategory = e.target.value;
+      console.log("Category filter changed to:", currentCategory);
+      currentPage = 1;
+      fetchProducts();
     });
   }
 
-  const searchInput = document.getElementById("search-input"); 
+  const searchInput = document.getElementById("search-input");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
-        clearTimeout(debounceTimer);
+      clearTimeout(debounceTimer);
 
-        debounceTimer = setTimeout(() => {
-            console.log("Debounce selesai, mencari:", e.target.value);
-            
-            currentSearch = e.target.value;
-            currentPage = 1;
-            fetchProducts();
-            
-        }, 400);
+      debounceTimer = setTimeout(() => {
+        console.log("Debounce selesai, mencari:", e.target.value);
+
+        currentSearch = e.target.value;
+        currentPage = 1;
+        fetchProducts();
+      }, 400);
     });
   }
 }
