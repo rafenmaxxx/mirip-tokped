@@ -136,27 +136,15 @@
   min-width:auto;
 }
 
-.btn-checkout {
+.btn-cart {
   background-color: #00a14b;
   color: white;
   font-weight: 400;
   margin-right: auto;
 }
 
-.btn-checkout:hover {
-  background-color: #009042;
-}
-
-.btn-cart {
-  background-color: transparent;
-  border: 1px solid #00a14b;
-  color: #00a14b;
-  font-weight: bold;
-}
-
 .btn-cart:hover {
-  background-color: #00a14b;
-  color: white;
+  background-color: #009042;
 }
 
 /* footer */

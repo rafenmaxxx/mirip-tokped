@@ -68,17 +68,9 @@ function morphProductBtn(data) {
     buttons.forEach((btnContainer, index) => {
       const product_id = btnContainer.getAttribute("product-id");
       const html = `
-        <button class="btn btn-checkout" product-id="${product_id}">Add to Cart</button>
+        <button class="btn btn-cart" product-id="${product_id}">Add to Cart</button>
       `;
       btnContainer.innerHTML = html;
-    });
-
-    const checkoutButtons = document.querySelectorAll(".btn-checkout");
-    checkoutButtons.forEach((btn, index) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        router.navigateTo("/checkout?product_id=" + products[index].product_id);
-      });
     });
 
     const cartButtons = document.querySelectorAll(".btn-cart");
