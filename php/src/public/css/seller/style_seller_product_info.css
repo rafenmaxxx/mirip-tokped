@@ -248,6 +248,36 @@ textarea {
   transform: scale(1.1);
 }
 
+.form-image-upload {
+  width: 200px;
+  height: 200px;
+  background-color: #E0E0E0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #2C2C2C;
+  overflow: hidden; /* agar gambar tidak keluar kotak */
+  position: relative;
+}
+
+.form-image-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* isi penuh tanpa distorsi */
+  border-radius: 8px;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Sembunyikan teks dan icon jika sudah ada gambar */
+.form-image-upload.has-image .plus-icon,
+.form-image-upload.has-image p {
+  display: none;
+}
+
 /* Responsive agar rapi di mobile */
 @media (max-width: 768px) {
   .filter-checkboxes {

@@ -69,6 +69,8 @@ function morphAuthBtn(data) {
   const chart = document.getElementById("navbar-chart");
   const balance = document.getElementById("balance-btn");
   const orderHist = document.getElementById("order-hist");
+  const search = document.getElementById("navbar__search");
+  const filter = document.getElementById("filter-btn");
   if (data.status == "success") {
     // udah login
     btn.innerHTML = `<button class="btn btn-login" id="btn-profile">Profile</button>
@@ -96,18 +98,37 @@ function morphAuthBtn(data) {
         () => {}
       );
     });
-    InitBalance();
-    InitCountCart();
+
     const profile = document.getElementById("btn-profile");
     profile.addEventListener("click", () => {
       router.navigateTo("/profile");
     });
-    chart.addEventListener("click", () => {
-      router.navigateTo("/cart");
-    });
-    orderHist.addEventListener("click", () => {
-      router.navigateTo("/order-history");
-    });
+    if (data.data.role == "BUYER") {
+      chart.addEventListener("click", () => {
+        router.navigateTo("/cart");
+      });
+      orderHist.addEventListener("click", () => {
+        router.navigateTo("/order-history");
+      });
+      document.getElementById("balance-n").innerHTML = "";
+      InitBalance();
+      InitCountCart();
+    }
+    if (data.data.role == "SELLER") {
+      chart.innerHTML = `<button class="btn btn-login" id="chartBtn">Produk</button>`;
+
+      orderHist.innerHTML = `<button class="btn btn-login" id="chartBtn">Order</button>`;
+      chart.addEventListener("click", () => {
+        router.navigateTo("/seller/products");
+      });
+      orderHist.addEventListener("click", () => {
+        router.navigateTo("/seller/orders");
+      });
+      balance.innerHTML = ``;
+      InitBalance();
+      search.innerHTML = "";
+      filter.innerHTML = "";
+    }
   } else {
     // blom login
     btn.innerHTML = ` <a href="/login"><button class="btn btn-login">Login</button></a>
@@ -115,6 +136,7 @@ function morphAuthBtn(data) {
     chart.innerHTML = "";
     balance.innerHTML = "";
     orderHist.innerHTML = "";
+    document.getElementById("balance-n").innerHTML = "";
   }
 }
 
