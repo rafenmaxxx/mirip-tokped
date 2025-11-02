@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__ . '/../model/m_image.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {

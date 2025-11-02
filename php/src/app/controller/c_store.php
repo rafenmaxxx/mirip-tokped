@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../model/m_store.php';
 require_once __DIR__ . '/../model/m_product.php';
-
+require_once __DIR__ . '/../model/m_auth.php';
 $model = new Store();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -10,15 +10,10 @@ switch ($method) {
         $store_id = $_GET['store_id'] ?? null;
 
         if ($store_id) {
+            guard(['SELLER', 'BUYER', 'GUEST']);
             $data = $model->getByStoreId($store_id);
         } else {
-            if (!isset($_SESSION['user'])) {
-                echo "<script>
-                alert('Login dulu Bos !');
-                window.location.href = '/login';
-            </script>";
-                exit;
-            }
+            guard(['SELLER']);
             $id = $_SESSION['user']['id'];
 
             $data = $model->getStoreByUserId($id);
@@ -26,12 +21,13 @@ switch ($method) {
 
         echo json_encode(['status' => 'success', 'data' => $data]);
         break;
-    
+
     case 'POST':
+        guard(['SELLER']);
         $store_id = $_SESSION['user']['store_id'] ?? null;
         $store_name = $_POST['store_name'] ?? null;
         $store_description = $_POST['store_description'] ?? null;
-        
+
         if (isset($_FILES['gambar_toko']) && $_FILES['gambar_toko']['error'] == 0) {
 
             // validasi tipe file
@@ -63,7 +59,7 @@ switch ($method) {
                 echo json_encode(['status' => 'error', 'message' => 'Gagal meng-upload gambar.']);
                 exit;
             }
-            
+
             $result = $model->updateStoreWithLogo($store_id, $store_name, $store_description, $path_to_save_in_db);
         } else {
 
@@ -72,7 +68,7 @@ switch ($method) {
 
         echo json_encode(['status' => 'success', 'message' => 'Store updated successfully']);
         break;
-    
+
     default:
         http_response_code(405);
         echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);

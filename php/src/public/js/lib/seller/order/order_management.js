@@ -128,58 +128,58 @@ function SellerOrderErr(err) {
 }
 
 function renderPaginationButtons(totalPages) {
-    const navContainer = document.getElementById("pagination-nav-buttons");
-    if (!navContainer) return;
+  const navContainer = document.getElementById("pagination-nav-buttons");
+  if (!navContainer) return;
 
-    navContainer.innerHTML = "";
+  navContainer.innerHTML = "";
 
-    const createPageButton = (page) => {
-        const pageButton = document.createElement("a");
-        pageButton.href = "#";
-        pageButton.textContent = page;
-        pageButton.dataset.page = page;
+  const createPageButton = (page) => {
+    const pageButton = document.createElement("a");
+    pageButton.href = "#";
+    pageButton.textContent = page;
+    pageButton.dataset.page = page;
 
-        if (page === currentPage) {
-            pageButton.classList.add("active");
-        }
-
-        pageButton.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            currentPage = page;
-            fetchOrders();
-        });
-        
-        return pageButton;
-    };
-
-    const createEllipsis = () => {
-        const ellipsis = document.createElement("span");
-        ellipsis.textContent = "...";
-        return ellipsis;
-    };
-
-    const pagesToShow = new Set();
-    const siblingCount = 1;
-
-    pagesToShow.add(1);
-    const startPage = Math.max(2, currentPage - siblingCount);
-    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
-
-    for (let i = startPage; i <= endPage; i++) {
-        pagesToShow.add(i);
+    if (page === currentPage) {
+      pageButton.classList.add("active");
     }
 
-    pagesToShow.add(totalPages);
-
-    let lastPage = 0;
-    pagesToShow.forEach(page => {
-        if (lastPage !== 0 && page - lastPage > 1) {
-            navContainer.appendChild(createEllipsis());
-        }
-        
-        navContainer.appendChild(createPageButton(page));
-        lastPage = page;
+    pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = page;
+      fetchOrders();
     });
+
+    return pageButton;
+  };
+
+  const createEllipsis = () => {
+    const ellipsis = document.createElement("span");
+    ellipsis.textContent = "...";
+    return ellipsis;
+  };
+
+  const pagesToShow = new Set();
+  const siblingCount = 1;
+
+  pagesToShow.add(1);
+  const startPage = Math.max(2, currentPage - siblingCount);
+  const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+  for (let i = startPage; i <= endPage; i++) {
+    pagesToShow.add(i);
+  }
+
+  pagesToShow.add(totalPages);
+
+  let lastPage = 0;
+  pagesToShow.forEach((page) => {
+    if (lastPage !== 0 && page - lastPage > 1) {
+      navContainer.appendChild(createEllipsis());
+    }
+
+    navContainer.appendChild(createPageButton(page));
+    lastPage = page;
+  });
 }
 
 // --- Loader utama ---
@@ -254,39 +254,39 @@ function LoadOrder(data) {
     })
   );
 
-      document.querySelectorAll(".btn-reject").forEach((btn) =>
-        btn.addEventListener("click", (e) => {
-          showModalTextInput(
-            "Reject order ? berikan alasan !",
-            (reason) => {
-              console.log("Reject order:", e.target.dataset.id);
-              PUT(
-                "/api/order",
-                {
-                  action: "update_status",
-                  status: "rejected",
-                  order_id: e.target.dataset.id,
-                  msg: reason,
-                },
-                (data) => {
-                  if (data.status == "success") {
-                    renderToast("Berhasil update status", "success");
-                    LoadOrder();
-                  } else {
-                    renderToast("Gagal update status", "error");
-                  }
-                },
-                (err) => {
-                  if (err) {
-                    renderToast("Gagal update status", "error");
-                  }
-                }
-              );
+  document.querySelectorAll(".btn-reject").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      showModalTextInput(
+        "Reject order ? berikan alasan !",
+        (reason) => {
+          console.log("Reject order:", e.target.dataset.id);
+          PUT(
+            "/api/order",
+            {
+              action: "update_status",
+              status: "rejected",
+              order_id: e.target.dataset.id,
+              msg: reason,
             },
-            () => {}
+            (data) => {
+              if (data.status == "success") {
+                renderToast("Berhasil update status", "success");
+                LoadOrder();
+              } else {
+                renderToast("Gagal update status", "error");
+              }
+            },
+            (err) => {
+              if (err) {
+                renderToast("Gagal update status", "error");
+              }
+            }
           );
-        })
+        },
+        () => {}
       );
+    })
+  );
 
   document.querySelectorAll(".btn-deliver").forEach((btn) =>
     btn.addEventListener("click", (e) => {
@@ -322,15 +322,13 @@ function LoadOrder(data) {
     })
   );
 
-  document
-    .querySelectorAll(".btn-detail")
-    .forEach((btn) =>
-      btn.addEventListener("click", (e) => {
-        console.log("Lihat detail order:", e.target.dataset.id);
-        renderOrderDetailModal(
-          orders.find((o) => o.order_id == e.target.dataset.id)
-        );
-      })
+  document.querySelectorAll(".btn-detail").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      console.log("Lihat detail order:", e.target.dataset.id);
+      renderOrderDetailModal(
+        orders.find((o) => o.order_id == e.target.dataset.id)
+      );
+    })
   );
 }
 
@@ -342,10 +340,10 @@ function renderOrderDetailModal(order) {
   if (Array.isArray(order.items)) {
     order.items.forEach((item, index) => {
       const imageUrl =
-          item.main_image_path && item.main_image_path !== ""
-            ? `/api/image?file=${item.main_image_path}`
-            : `https://picsum.photos/200/200?random=${index + 1}`;
-      
+        item.main_image_path && item.main_image_path !== ""
+          ? `/api/image?file=${item.main_image_path}`
+          : `https://picsum.photos/200/200?random=${index + 1}`;
+
       itemsHtml += `
         <div class="detail-item">
           <img src="${imageUrl}" 
@@ -354,8 +352,12 @@ function renderOrderDetailModal(order) {
           <div class="detail-item-info">
             <h4>${item.product_name}</h4>
             <p class="item-quantity">Quantity: ${item.quantity}x</p>
-            <p class="item-price">Rp ${parseInt(item.price_at_order).toLocaleString('id-ID')}</p>
-            <p class="item-subtotal">Subtotal: Rp ${parseInt(item.subtotal).toLocaleString('id-ID')}</p>
+            <p class="item-price">Rp ${parseInt(
+              item.price_at_order
+            ).toLocaleString("id-ID")}</p>
+            <p class="item-subtotal">Subtotal: Rp ${parseInt(
+              item.subtotal
+            ).toLocaleString("id-ID")}</p>
           </div>
         </div>
       `;
@@ -370,12 +372,14 @@ function renderOrderDetailModal(order) {
   else if (order.status === "rejected") statusClass = "status-rejected";
 
   // Reject reason (jika ada)
-  const rejectReasonHtml = order.reject_reason ? `
+  const rejectReasonHtml = order.reject_reason
+    ? `
     <div class="reject-reason">
       <h4>Alasan Penolakan:</h4>
       <p>${order.reject_reason}</p>
     </div>
-  ` : '';
+  `
+    : "";
 
   modal.innerHTML = `
     <div class="modal-overlay">
@@ -390,10 +394,6 @@ function renderOrderDetailModal(order) {
             <span class="info-value">${order.order_id}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">Store:</span>
-            <span class="info-value">${order.store_name}</span>
-          </div>
-          <div class="info-row">
             <span class="info-label">Status:</span>
             <span class="info-value">
               <span class="status-badge ${statusClass}">${order.status}</span>
@@ -401,19 +401,59 @@ function renderOrderDetailModal(order) {
           </div>
           <div class="info-row">
             <span class="info-label">Order Date:</span>
-            <span class="info-value">${new Date(order.created_at).toLocaleString('id-ID')}</span>
+            <span class="info-value">${new Date(
+              order.created_at
+            ).toLocaleString("id-ID")}</span>
           </div>
-          ${order.delivery_time ? `
+           ${
+             order.confirmed_at && order.status === "rejected"
+               ? `
+          <div class="info-row">
+            <span class="info-label">Rejected Time:</span>
+            <span class="info-value">${new Date(
+              order.confirmed_at
+            ).toLocaleString("id-ID")}</span>
+          </div>
+          `
+               : `
+          <div class="info-row">
+            <span class="info-label">Approved Time:</span>
+            <span class="info-value">${new Date(
+              order.confirmed_at
+            ).toLocaleString("id-ID")}</span>
+          </div>
+          `
+           }
+          ${
+            order.delivery_time
+              ? `
           <div class="info-row">
             <span class="info-label">Delivery Time:</span>
-            <span class="info-value">${new Date(order.delivery_time).toLocaleString('id-ID')}</span>
+            <span class="info-value">${new Date(
+              order.delivery_time
+            ).toLocaleString("id-ID")}</span>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
+           ${
+             order.received_at
+               ? `
+          <div class="info-row">
+            <span class="info-label">Received Time:</span>
+            <span class="info-value">${new Date(
+              order.received_at
+            ).toLocaleString("id-ID")}</span>
+          </div>
+          `
+               : ""
+           }
+         
         </div>
 
         <div class="shipping-section">
           <h3>Shipping Address</h3>
-          <p>${order.shipping_address || 'No address provided'}</p>
+          <p>${order.shipping_address || "No address provided"}</p>
         </div>
 
         ${rejectReasonHtml}
@@ -426,7 +466,9 @@ function renderOrderDetailModal(order) {
         </div>
 
         <div class="total-section">
-          <h3>Total Price: <span class="total-price">Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</span></h3>
+          <h3>Total Price: <span class="total-price">Rp ${parseInt(
+            order.total_price
+          ).toLocaleString("id-ID")}</span></h3>
         </div>
       </div>
     </div>
@@ -440,7 +482,9 @@ function renderOrderDetailModal(order) {
     document.body.classList.remove("modal-open");
   };
 
-  document.getElementById("close-detail-modal").addEventListener("click", closeModal);
+  document
+    .getElementById("close-detail-modal")
+    .addEventListener("click", closeModal);
 
   modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
     if (e.target.classList.contains("modal-overlay")) {
@@ -487,26 +531,25 @@ export function InitOrderSeller() {
   const statusSelect = document.getElementById("status-filter");
   if (statusSelect) {
     statusSelect.addEventListener("change", (e) => {
-        currentStatus = e.target.value;
-        console.log("Status filter changed to:", currentStatus);
-        currentPage = 1;
-        fetchOrders();
+      currentStatus = e.target.value;
+      console.log("Status filter changed to:", currentStatus);
+      currentPage = 1;
+      fetchOrders();
     });
   }
 
-  const searchInput = document.getElementById("search-input"); 
+  const searchInput = document.getElementById("search-input");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
-        clearTimeout(debounceTimer);
+      clearTimeout(debounceTimer);
 
-        debounceTimer = setTimeout(() => {
-            console.log("Debounce selesai, mencari:", e.target.value);
-            
-            currentSearch = e.target.value;
-            currentPage = 1;
-            fetchOrders();
-            
-        }, 400);
+      debounceTimer = setTimeout(() => {
+        console.log("Debounce selesai, mencari:", e.target.value);
+
+        currentSearch = e.target.value;
+        currentPage = 1;
+        fetchOrders();
+      }, 400);
     });
   }
 }

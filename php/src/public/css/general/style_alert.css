@@ -1,0 +1,77 @@
+
+
+
+.custom-alert-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.custom-alert-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 360px;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+    animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.alert-icon {
+    background: #e6f8ef;
+    color: #00aa5b;
+    font-size: 32px;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+}
+
+.alert-title {
+       font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #00aa5b;
+    margin-bottom: 8px;
+}
+
+.alert-message {
+       font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 24px;
+}
+
+.alert-btn {
+    background-color: #00aa5b;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.alert-btn:hover {
+    background-color: #00914f;
+}

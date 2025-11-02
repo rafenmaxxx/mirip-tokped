@@ -5,6 +5,9 @@ import { router } from "../../../app.js";
 import { Loading } from "../general/loading.js";
 import { renderToast } from "../general/toast.js";
 import { InitCountCart } from "../general/navbar.js";
+import { showModalConfirmation } from "../general/modal.js";
+
+let canCheckout = true;
 
 function reloadCartPage() {
   GET(
@@ -13,6 +16,7 @@ function reloadCartPage() {
     (data) => {
       LoadCartItems(data);
       refreshSummary();
+      validateCart();
     },
     CartItemsErr
   );
@@ -53,6 +57,7 @@ function attachQuantityButtonListeners(container = document) {
               quantityValue.innerHTML = newQty;
               updateStoreSubtotal(store_id);
               refreshSummary();
+              validateCart();
             }
           },
           Increamenterr
@@ -88,6 +93,7 @@ function attachQuantityButtonListeners(container = document) {
               quantityValue.innerHTML = newQty;
               updateStoreSubtotal(store_id);
               refreshSummary();
+              validateCart();
             }
           },
           Increamenterr
@@ -147,13 +153,17 @@ function LoadCartItems(data) {
             currency: "IDR",
             minimumFractionDigits: 0,
           });
-
+          let isValid = true;
+          if (detail.deleted_at != null || detail.stock < detail.quantity) {
+            isValid = false;
+            canCheckout = false;
+          }
           const imageUrl =
             detail.image && detail.image !== ""
               ? `/api/image?file=${detail.image}`
               : `https://picsum.photos/200/200?random=${index + 1}`;
-
-          return ` 
+          if (isValid) {
+            return ` 
           <div class="cart_item_detail">
             <div class="cart_item_image">
                 <img src="${imageUrl}">
@@ -164,12 +174,49 @@ function LoadCartItems(data) {
                 <p class="cart_item_price">${price}</p>
               </div>
               <div class="cart_quantity">
-                  <button class="btn btn-decreament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${item.store_id}" >-</button>
-                  <span class="quantity_value" id="quantity-value-${detail.cart_item_id}" data-stock="${detail.stock}">${detail.quantity}</span>
-                  <button class="btn btn-increament-quantity" data-cart-item-id="${detail.cart_item_id}" data-store-id="${item.store_id}" >+</button>
+                  <button class="btn btn-decreament-quantity" data-cart-item-id="${
+                    detail.cart_item_id
+                  }" data-store-id="${item.store_id}" >-</button>
+                  <span class="quantity_value" id="quantity-value-${
+                    detail.cart_item_id
+                  }" data-stock="${detail.stock}"  data-deleted="${
+              detail.deleted_at ? "true" : "false"
+            }">${detail.quantity}</span>
+                  <button class="btn btn-increament-quantity" data-cart-item-id="${
+                    detail.cart_item_id
+                  }" data-store-id="${item.store_id}" >+</button>
               </div>
             </div>
           </div>`;
+          } else {
+            return ` 
+          <div class="cart_item_detail">
+            <div class="cart_item_image">
+                <img src="${imageUrl}">
+            </div>
+            <div class="cart_item_info_container">
+              <p class="cart_item_warn">Produk Invalid</p>
+              <div class="cart_item_info">
+                <p class="cart_item_name">${detail.product_name}</p>
+                <p class="cart_item_price">${price}</p>
+              </div>
+
+              <div class="cart_quantity">
+                  <button class="btn btn-decreament-quantity" data-cart-item-id="${
+                    detail.cart_item_id
+                  }" data-store-id="${item.store_id}" >-</button>
+                  <span class="quantity_value" id="quantity-value-${
+                    detail.cart_item_id
+                  }" data-stock="${detail.stock}"data-deleted="${
+              detail.deleted_at ? "true" : "false"
+            }">${detail.quantity}</span>
+                  <button class="btn btn-increament-quantity" data-cart-item-id="${
+                    detail.cart_item_id
+                  }" data-store-id="${item.store_id}" >+</button>
+              </div>
+            </div>
+          </div>`;
+          }
         });
         return `
         <div class="cart_item_card" data-store-card-id="${item.store_id}">
@@ -313,6 +360,7 @@ function confirmDelete() {
           Loading.hide();
           closeModal();
           reloadCartPage();
+          setTimeout(validateCart, 500);
         } else {
           Loading.hide();
           closeModal();
@@ -400,10 +448,72 @@ function LoadSummary(data) {
     if (summary.total_price !== 0) {
       const checkout = document.getElementById("checkout-btn");
       checkout.addEventListener("click", () => {
-        router.navigateTo("/checkout");
+        if (canCheckout) {
+          showModalConfirmation(
+            "Mau Checkout bos ? ",
+            () => {
+              router.navigateTo("/checkout");
+            },
+            () => {}
+          );
+        } else {
+          renderToast("Ada produk tidak valid !", "error");
+        }
       });
     }
   }
+}
+
+function validateCart() {
+  let allValid = true;
+
+  const items = document.querySelectorAll(".cart_item_detail");
+
+  items.forEach((item) => {
+    const quantityEl = item.querySelector(".quantity_value");
+    const stock = parseInt(quantityEl.getAttribute("data-stock"));
+    const quantity = parseInt(quantityEl.textContent);
+    const isDeleted = quantityEl.getAttribute("data-deleted") === "true";
+
+    const warnText = item.querySelector(".cart_item_warn");
+
+    if (isDeleted) {
+      allValid = false;
+      if (!warnText) {
+        const warn = document.createElement("p");
+        warn.classList.add("cart_item_warn");
+        warn.textContent = isDeleted
+          ? "Produk telah dihapus"
+          : "Produk Invalid";
+        const infoContainer = item.querySelector(".cart_item_info_container");
+        infoContainer.insertBefore(warn, infoContainer.firstChild);
+      } else {
+        warnText.textContent = isDeleted
+          ? "Produk telah dihapus"
+          : "Produk Invalid";
+      }
+    } else if (quantity > stock) {
+      allValid = false;
+
+      if (!warnText) {
+        const warn = document.createElement("p");
+        warn.classList.add("cart_item_warn");
+        warn.textContent = isDeleted
+          ? "Produk telah dihapus"
+          : "Produk Invalid";
+        const infoContainer = item.querySelector(".cart_item_info_container");
+        infoContainer.insertBefore(warn, infoContainer.firstChild);
+      } else {
+        warnText.textContent = isDeleted
+          ? "Produk telah dihapus"
+          : "Produk Invalid";
+      }
+    } else {
+      if (warnText) warnText.remove();
+    }
+  });
+
+  canCheckout = allValid;
 }
 
 function Increamenterr(err) {

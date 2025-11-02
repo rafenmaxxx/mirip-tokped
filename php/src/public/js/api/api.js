@@ -49,7 +49,7 @@ export function GETMODULE(url, params = {}, callback, err) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", req_url, true);
   xhr.withCredentials = true;
-  Loading.show("Loading");
+  // Loading.show("Loading");
   xhr.onload = function () {
     if (xhr.status === 200) {
       try {
@@ -64,7 +64,7 @@ export function GETMODULE(url, params = {}, callback, err) {
       console.error("Request failed. Status:", xhr.status);
       err(true);
     }
-    Loading.hide();
+    // Loading.hide();
   };
 
   xhr.onerror = function () {

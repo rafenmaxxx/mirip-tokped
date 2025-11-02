@@ -11,28 +11,18 @@ switch ($method) {
         $password = $_POST['password'] ?? null;
         header('Content-Type: text/html; charset=utf-8');
         if (!$email || !$password) {
-            echo "<script>
-                alert('Email/Password tidak boleh kosong');
-                window.location.href = '/login';
-            </script>";
+            warn("Email/Password tidak boleh kosong", '/login');
             exit;
         }
 
         $result = $model->login($email, $password);
 
         if ($result['status']) {
-            echo "<script>
-                alert('Berhasil login $email!');
-                window.location.href = '/';
-            </script>";
+            warn("Berhasil login $email!", "/");
             exit;
         } else {
-            $msg = urlencode($result['message']);
-            echo "<script>
-                alert('Gagal login $email! $msg');
-                window.location.href = '/login';
-            </script>";
-
+            $msg = $result['message'];
+            warn("Gagal login $email! Email atau password yang Anda masukkan salah.", "/login");
             exit;
         }
     default:

@@ -7,35 +7,50 @@ function guard(array $allowed)
 
     if (!isset($_SESSION['user'])) {
         if ($isGuestAllowed) {
-
             return;
         } else {
-
-            echo "<script>
-                    alert('Login dulu Bos!');
-                    window.location.href = '/login';
-                  </script>";
+            warn("Login dulu bos", "/login");
             exit;
         }
     }
 
-    if ($isGuestAllowed) {
-        echo "<script>
-                alert('Kamu sudah login Bos!');
-                window.location.href = '/';
-              </script>";
-        exit;
+    $role = $_SESSION['user']['role'] ?? null;
+
+    if (in_array($role, $allowed)) {
+        return;
     }
 
-    $role = $_SESSION['user']['role'] ?? null;
-    if (!in_array($role, $allowed)) {
-        echo "<script>
-                alert('Kamu tidak punya akses ke API ini!');
-                window.location.href = '/login';
-              </script>";
-        exit;
-    }
+    warn("Kamu tidak punya akses ke halaman ini!", "/");
+    exit;
 }
+
+function warn($message, $href)
+{
+    $publicCssPath = '/css/general/style_alert.css';
+    echo "
+    <link rel='stylesheet' href='" . htmlspecialchars($publicCssPath) . "' />
+
+    <div class='custom-alert-overlay' id='customAlert'>
+        <div class='custom-alert-box'>
+            <div class='alert-title'>Peringatan</div>
+            <div class='alert-message'>" . htmlspecialchars($message) . "</div>
+            <button class='alert-btn' id='alertOkBtn'>Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('alertOkBtn').addEventListener('click', function() {
+            const overlay = document.getElementById('customAlert');
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.2s ease';
+            setTimeout(() => {
+                window.location.href = '" . addslashes($href) . "';
+            }, 200);
+        });
+    </script>
+    ";
+}
+
 
 
 class Auth

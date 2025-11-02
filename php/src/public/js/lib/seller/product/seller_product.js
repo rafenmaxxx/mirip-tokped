@@ -68,65 +68,64 @@ function renderFilteredProducts() {
   }
 
   const paginationInfo = document.querySelector(".pagination-info");
-    if (paginationInfo) {
-        paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} produk`;
-    }
-
+  if (paginationInfo) {
+    paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} produk`;
+  }
 }
 
 function renderPaginationButtons(totalPages) {
-    const navContainer = document.getElementById("pagination-nav-buttons");
-    if (!navContainer) return;
+  const navContainer = document.getElementById("pagination-nav-buttons");
+  if (!navContainer) return;
 
-    navContainer.innerHTML = "";
+  navContainer.innerHTML = "";
 
-    const createPageButton = (page) => {
-        const pageButton = document.createElement("a");
-        pageButton.href = "#";
-        pageButton.textContent = page;
-        pageButton.dataset.page = page;
+  const createPageButton = (page) => {
+    const pageButton = document.createElement("a");
+    pageButton.href = "#";
+    pageButton.textContent = page;
+    pageButton.dataset.page = page;
 
-        if (page === currentPage) {
-            pageButton.classList.add("active");
-        }
-
-        pageButton.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            currentPage = page;
-            fetchProducts();
-        });
-        
-        return pageButton;
-    };
-
-    const createEllipsis = () => {
-        const ellipsis = document.createElement("span");
-        ellipsis.textContent = "...";
-        return ellipsis;
-    };
-
-    const pagesToShow = new Set();
-    const siblingCount = 1;
-
-    pagesToShow.add(1);
-    const startPage = Math.max(2, currentPage - siblingCount);
-    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
-
-    for (let i = startPage; i <= endPage; i++) {
-        pagesToShow.add(i);
+    if (page === currentPage) {
+      pageButton.classList.add("active");
     }
 
-    pagesToShow.add(totalPages);
-
-    let lastPage = 0;
-    pagesToShow.forEach(page => {
-        if (lastPage !== 0 && page - lastPage > 1) {
-            navContainer.appendChild(createEllipsis());
-        }
-        
-        navContainer.appendChild(createPageButton(page));
-        lastPage = page;
+    pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = page;
+      fetchProducts();
     });
+
+    return pageButton;
+  };
+
+  const createEllipsis = () => {
+    const ellipsis = document.createElement("span");
+    ellipsis.textContent = "...";
+    return ellipsis;
+  };
+
+  const pagesToShow = new Set();
+  const siblingCount = 1;
+
+  pagesToShow.add(1);
+  const startPage = Math.max(2, currentPage - siblingCount);
+  const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+  for (let i = startPage; i <= endPage; i++) {
+    pagesToShow.add(i);
+  }
+
+  pagesToShow.add(totalPages);
+
+  let lastPage = 0;
+  pagesToShow.forEach((page) => {
+    if (lastPage !== 0 && page - lastPage > 1) {
+      navContainer.appendChild(createEllipsis());
+    }
+
+    navContainer.appendChild(createPageButton(page));
+    lastPage = page;
+  });
 }
 
 function renderProductCard(product, container) {
@@ -216,6 +215,7 @@ function renderProductCard(product, container) {
         (data) => {
           if (data.status == "success") {
             renderToast("Berhasil Menghapus Produk !", "success");
+            fetchProducts();
           } else {
             renderToast("Gagal Menghapus Product !", "error");
           }
@@ -346,26 +346,25 @@ export async function InitSellerProductPage() {
   const categorySelect = document.getElementById("category-filter");
   if (categorySelect) {
     categorySelect.addEventListener("change", (e) => {
-        currentCategory = e.target.value;
-        console.log("Category filter changed to:", currentCategory);
-        currentPage = 1;
-        fetchProducts();
+      currentCategory = e.target.value;
+      console.log("Category filter changed to:", currentCategory);
+      currentPage = 1;
+      fetchProducts();
     });
   }
 
-  const searchInput = document.getElementById("search-input"); 
+  const searchInput = document.getElementById("search-input");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
-        clearTimeout(debounceTimer);
+      clearTimeout(debounceTimer);
 
-        debounceTimer = setTimeout(() => {
-            console.log("Debounce selesai, mencari:", e.target.value);
-            
-            currentSearch = e.target.value;
-            currentPage = 1;
-            fetchProducts();
-            
-        }, 400);
+      debounceTimer = setTimeout(() => {
+        console.log("Debounce selesai, mencari:", e.target.value);
+
+        currentSearch = e.target.value;
+        currentPage = 1;
+        fetchProducts();
+      }, 400);
     });
   }
 }

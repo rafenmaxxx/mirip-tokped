@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../model/m_user.php';
 require_once __DIR__ . '/../model/m_store.php';
-
+require_once __DIR__ . '/../model/m_auth.php';
 $model = new User();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -13,61 +13,58 @@ switch ($method) {
 
         if ($action) {
             switch ($action):
-            case 'balance':
-                if (!isset($_SESSION['user'])) {
-                    echo "<script>
-                        alert('Login dulu Bos !');
-                        window.location.href = '/login';
-                    </script>";
-                    exit;
-                }
-                $id = $_SESSION['user']['id'];
-                $res = $model->getBalance($id);
+                case 'balance':
+                    guard(['BUYER', 'SELLER']);
 
-                header('Content-Type: application/json');
-                if ($res) {
-                    http_response_code(200);
-                    echo json_encode([
-                        'status' => 'success',
-                        'message' => 'Get Balance Success',
-                        'data' => $res
-                    ]);
-                } else {
-                    http_response_code(400);
-                    echo json_encode([
-                        'status' => 'failed',
-                        'message' => 'Get Balance Failed',
-                        'data' => $res
-                    ]);
-                }
-                break;
-            case "address":
-                $id = $_SESSION['user']['id'];
-                $res = $model->getAddressById($id);
+                    $id = $_SESSION['user']['id'];
+                    $res = $model->getBalance($id);
 
-                header('Content-Type: application/json');
-                if ($res) {
-                    http_response_code(200);
-                    echo json_encode([
-                        'status' => 'success',
-                        'message' => 'Get Address Success',
-                        'data' => $res
-                    ]);
-                } else {
-                    http_response_code(400);
-                    echo json_encode([
-                        'status' => 'failed',
-                        'message' => 'Get Address Failed',
-                        'data' => $res
-                    ]);
-                }
-                break;
-            default:
-                http_response_code(405);
-                echo json_encode(['status' => 'error', 'message' => 'Action not allowed']);
-                break;
-        endswitch;
+                    header('Content-Type: application/json');
+                    if ($res) {
+                        http_response_code(200);
+                        echo json_encode([
+                            'status' => 'success',
+                            'message' => 'Get Balance Success',
+                            'data' => $res
+                        ]);
+                    } else {
+                        http_response_code(400);
+                        echo json_encode([
+                            'status' => 'failed',
+                            'message' => 'Get Balance Failed',
+                            'data' => $res
+                        ]);
+                    }
+                    break;
+                case "address":
+                    guard(['BUYER', 'SELLER']);
+                    $id = $_SESSION['user']['id'];
+                    $res = $model->getAddressById($id);
+
+                    header('Content-Type: application/json');
+                    if ($res) {
+                        http_response_code(200);
+                        echo json_encode([
+                            'status' => 'success',
+                            'message' => 'Get Address Success',
+                            'data' => $res
+                        ]);
+                    } else {
+                        http_response_code(400);
+                        echo json_encode([
+                            'status' => 'failed',
+                            'message' => 'Get Address Failed',
+                            'data' => $res
+                        ]);
+                    }
+                    break;
+                default:
+                    http_response_code(405);
+                    echo json_encode(['status' => 'error', 'message' => 'Action not allowed']);
+                    break;
+            endswitch;
         } else if ($id) {
+            guard(['BUYER', 'SELLER', 'GUEST']);
             $data = $model->getById($id);
             if ($data) {
                 http_response_code(200);
@@ -80,10 +77,11 @@ switch ($method) {
             http_response_code(401);
             echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
         }
-        
+
         break;
 
     case 'POST':
+        guard(['GUEST']);
         header('Content-Type: text/html; charset=utf-8');
 
         $email = $_POST['email'] ?? null;
@@ -130,25 +128,25 @@ switch ($method) {
 
 
         if ($data['status']) {
-            echo "<script>
-                alert('Berhasil mendaftarkan $email!');
-                window.location.href = '/login';
-            </script>";
+            warn("Berhasil mendaftarkan $email!", '/');
         } else {
             $roleLower = strtolower($role);
             echo "<script>
                 alert('Gagal mendaftar!');
                 window.location.href = '/register/$roleLower';
             </script>";
+            warn("Gagal mendaftarkan user!", '/register/$roleLower');
         }
         break;
-        
+
     case 'PUT':
+        guard(['BUYER', 'SELLER']);
         parse_str(file_get_contents("php://input"), $_PUT);
         $id = $_SESSION['user']['id'] ?? null;
-        
+
         // Helper function untuk normalisasi input
-        function normalizeInput($value) {
+        function normalizeInput($value)
+        {
             // Jika tidak ada, kosong, atau string "null", return null
             if (empty($value) || $value === 'null' || $value === 'undefined') {
                 return null;
@@ -156,40 +154,7 @@ switch ($method) {
             // Trim whitespace
             return trim($value);
         }
-        
-        $new_name = normalizeInput($_PUT['nama'] ?? null);
-        $new_address = normalizeInput($_PUT['alamat'] ?? null);
-        $new_password = normalizeInput($_PUT['password'] ?? null);
 
-        if (!$id) {
-            echo json_encode(['status' => 'error', 'message' => 'User tidak ditemukan']);
-            break;
-        }
-
-        // Jika tidak ada data yang akan diubah
-        if (!$new_name && !$new_address && !$new_password) {
-            echo json_encode(['status' => 'error', 'message' => 'Tidak ada data yang diubah']);
-            break;
-        }
-
-        $data = $model->updateUser($id, $new_name, $new_address, $new_password);
-        echo json_encode(['status' => 'success', 'data' => $data]);
-        break;
-
-    case 'PUT':
-        parse_str(file_get_contents("php://input"), $_PUT);
-        $id = $_SESSION['user']['id'] ?? null;
-        
-        // Helper function untuk normalisasi input
-        function normalizeInput($value) {
-            // Jika tidak ada, kosong, atau string "null", return null
-            if (empty($value) || $value === 'null' || $value === 'undefined') {
-                return null;
-            }
-            // Trim whitespace
-            return trim($value);
-        }
-        
         $new_name = normalizeInput($_PUT['nama'] ?? null);
         $new_address = normalizeInput($_PUT['alamat'] ?? null);
         $new_password = normalizeInput($_PUT['password'] ?? null);

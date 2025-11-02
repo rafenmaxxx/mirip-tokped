@@ -1,17 +1,12 @@
 <?php
 require_once __DIR__ . '/../model/m_cart.php';
+require_once __DIR__ . '/../model/m_auth.php';
+
 
 $model = new Cart();
 $method = $_SERVER['REQUEST_METHOD'];
 
-if (!isset($_SESSION['user'])) {
-    echo "<script>
-                alert('Login dulu Bos !');
-                window.location.href = '/login';
-            </script>";
-    exit;
-}
-
+guard(['BUYER']);
 switch ($method) {
     case 'POST':
         $buyer_id = $_SESSION['user']['id'] ?? null;

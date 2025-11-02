@@ -21,10 +21,11 @@ switch ($method) {
         $sort = $_GET['sort'] ?? null;
 
         if ($search) {
+            guard(['BUYER', 'GUEST']);
             $count = $model->countByName($search);
             $data = $model->getByName($search, $page, $limit);
-
         } else if ($store_id && $filter && $title) {
+            guard(['SELLER']);
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
@@ -32,8 +33,8 @@ switch ($method) {
 
             $count = $model->countFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
             $data = $model->getFilterProductByStoreAndName($store_id, $title, $page, $limit, $minPrice, $maxPrice, $categories, $sort);
-
         } else if ($store_id && $filter) {
+            guard(['SELLER']);
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
@@ -41,18 +42,18 @@ switch ($method) {
 
             $count = $model->countFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
             $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice, $page, $limit, $sort);
-
         } else if ($store_id && $title) {
+            guard(['SELLER']);
             $count = $model->countProductByStoreAndName($store_id, $title);
             $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit, $sort);
-
         } else if ($id) {
+            guard(['BUYER', 'GUEST']);
             $data = $model->getDetailById($id);
-    
         } else if ($title) {
+            guard(['BUYER', 'GUEST']);
             $data = $model->getTitle($title);
-    
         } else if ($filter) {
+            guard(['BUYER', 'GUEST']);
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
@@ -60,15 +61,14 @@ switch ($method) {
 
             $count = $model->countFilterProduct($categories, $minPrice, $maxPrice);
             $data = $model->getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit, $sort);
-
         } else if ($store_id) {
+            guard(['BUYER', 'SELLER']);
             $count = $model->countByStoreId($store_id);
             $data = $model->getByStoreId($store_id, $page, $limit, $sort);
-    
         } else {
+            guard(['BUYER', 'GUEST']);
             $count = $model->countAll();
             $data = $model->getAll($page, $limit);
-    
         }
 
         echo json_encode(['status' => 'success', 'data' => $data, 'count' => $count ?? null]);
@@ -79,13 +79,6 @@ switch ($method) {
         guard(['SELLER']);
 
         $store_id = $_SESSION['user']['store_id'] ?? null;
-        if (!$store_id) {
-            echo "<script>
-                alert('Ga ada store Id');
-                window.location.href = '/login';
-            </script>";
-            exit;
-        }
 
 
         $nama_produk = trim($_POST['nama_produk'] ?? '');
@@ -97,10 +90,7 @@ switch ($method) {
 
 
         if (empty($nama_produk) || $harga < 0 || $stok < 0) {
-            echo "<script>
-                alert('Parameter kurang');
-                window.location.href = '/seller/products/add';
-            </script>";
+            warn('Parameter Kurang', '/seller/products/add');
             exit;
         }
 
@@ -121,10 +111,7 @@ switch ($method) {
             if (move_uploaded_file($_FILES['product-img']['tmp_name'], $destination)) {
                 $main_image_path = "/data/products/" . $filename;
             } else {
-                echo "<script>
-                alert('Gagal Upload foto kurang');
-                window.location.href = '/seller/products/add';
-                </script>";
+                warn('Gagal Upload foto', '/seller/products/add');
                 exit;
             }
         }
@@ -141,16 +128,10 @@ switch ($method) {
         );
 
         if ($result) {
-            echo "<script>
-                alert('Berhasil menambahkan Produk');
-                window.location.href = '/seller/products';
-                </script>";
+            warn('Berhasil menambahkan Produk', '/seller/products');
             exit;
         } else {
-            echo "<script>
-                alert('Gagal Menambahkan Product');
-                window.location.href = '/seller/products/add';
-                </script>";
+            warn('Gagal Menambahkan Product', '/seller/products/add');
             exit;
         }
 
@@ -167,10 +148,7 @@ switch ($method) {
         $categories  = $_POST['categories'] ?? [];
 
         if (!$product_id) {
-            echo "<script>
-                alert('Gaada produk Id');
-                window.location.href = '/seller/products';
-                </script>";
+            warn('Gaada product id', '/seller/products');
             exit;
         }
 
@@ -191,10 +169,7 @@ switch ($method) {
             if (move_uploaded_file($_FILES['product-img']['tmp_name'], $destination)) {
                 $main_image_path = "/data/products/" . $filename;
             } else {
-                echo "<script>
-                alert('gagal upload image');
-                window.location.href = '/seller/products';
-                </script>";
+                warn('Gagal upload image', '/seller/products');
                 exit;
             }
         }
@@ -211,16 +186,10 @@ switch ($method) {
         );
 
         if ($result) {
-            echo "<script>
-                alert('Produk berhasil di update ');
-                window.location.href = '/seller/products';
-                </script>";
+            warn("Produk berhasil di update !", "/seller/products");
             exit;
         } else {
-            echo "<script>
-                alert('Produk gagal di update');
-                window.location.href = '/seller/products';
-                </script>";
+            warn('Gagal update Product', '/seller/products');
             exit;
         }
         break;

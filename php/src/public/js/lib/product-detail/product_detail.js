@@ -3,6 +3,7 @@ import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { renderToast } from "../general/toast.js";
 import { InitCountCart } from "../general/navbar.js";
+import { showModalConfirmation } from "../general/modal.js";
 
 function LoadDetail(data) {
   const res = data.data;
@@ -79,6 +80,21 @@ function LoadAddCartBtn(id) {
             );
           });
         }
+      } else {
+        ChangeInnerHtmlById(
+          "add-cart",
+          `<button class="visit-store-btn" id="cartBtn">Add To Cart</button>`
+        );
+        const cartBtn = document.getElementById("cartBtn");
+        cartBtn.addEventListener("click", (e) => {
+          showModalConfirmation(
+            "Login untuk menambahkan !",
+            () => {
+              router.navigateTo("/login");
+            },
+            () => {}
+          );
+        });
       }
       {
       }

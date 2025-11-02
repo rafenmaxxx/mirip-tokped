@@ -143,18 +143,3 @@
 }
 
 
-
-@media (max-width: 768px) {
-  .navbar {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem;
-  }
-
-  .navbar__search {
-    order: 3;
-    width: 100%;
-    max-width: none;
-  }
-}
-
