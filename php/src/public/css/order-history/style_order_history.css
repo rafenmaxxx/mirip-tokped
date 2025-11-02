@@ -683,8 +683,8 @@
 }
 
 /* Confirm Received Button */
-.confirm_received_btn {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+.view_details_btn {
+  background: linear-gradient(135deg, #1a9b5b 0%, #137a47 100%);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -696,13 +696,13 @@
   box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
 
-.confirm_received_btn:hover {
+.view_details_btn:hover {
   background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
   transform: translateY(-2px);
 }
 
-.confirm_received_btn:active {
+.view_details_btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
@@ -715,7 +715,7 @@
 }
 
 /* View Details Button Enhancement */
-.view_details_btn {
+.confirm_received_btn {
   background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: white;
   border: none;
@@ -728,13 +728,13 @@
   box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
-.view_details_btn:hover {
+.confirm_received_btn:hover {
   background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
   transform: translateY(-2px);
 }
 
-.view_details_btn:active {
+.confirm_received_btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
