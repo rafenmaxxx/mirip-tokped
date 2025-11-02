@@ -3,6 +3,65 @@ import { POST } from "../../api/api.js";
 import { router } from "../../../app.js";
 import { renderToast } from "../general/toast.js";
 
+let currentPage = 1;
+let itemsPerPage = 5;
+
+function renderPaginationButtons(totalPages) {
+    const navContainer = document.getElementById("pagination-nav-buttons");
+    if (!navContainer) return;
+
+    navContainer.innerHTML = "";
+
+    const createPageButton = (page) => {
+        const pageButton = document.createElement("a");
+        pageButton.href = "#";
+        pageButton.textContent = page;
+        pageButton.dataset.page = page;
+
+        if (page === currentPage) {
+            pageButton.classList.add("active");
+        }
+
+        pageButton.addEventListener("click", (e) => {
+            e.preventDefault(); 
+            currentPage = page;
+            fetchProducts();
+        });
+        
+        return pageButton;
+    };
+
+    const createEllipsis = () => {
+        const ellipsis = document.createElement("span");
+        ellipsis.textContent = "...";
+        return ellipsis;
+    };
+
+    const pagesToShow = new Set();
+    const siblingCount = 1;
+
+    pagesToShow.add(1);
+    const startPage = Math.max(2, currentPage - siblingCount);
+    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagesToShow.add(i);
+    }
+
+    pagesToShow.add(totalPages);
+
+    let lastPage = 0;
+    pagesToShow.forEach(page => {
+        if (lastPage !== 0 && page - lastPage > 1) {
+            navContainer.appendChild(createEllipsis());
+        }
+        
+        navContainer.appendChild(createPageButton(page));
+        lastPage = page;
+    });
+}
+
+
 function morphProductBtn(data) {
   if (data.status == "success" && data.data.role == "BUYER") {
     const buttons = document.querySelectorAll(".product_buttons");
@@ -52,7 +111,16 @@ function LoadProduct(data) {
   const container = document.getElementById("product-data");
   if (!container) return;
 
+  const totalProducts = data.count || 0;
   if (data.status === "success" && Array.isArray(data.data)) {
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+    renderPaginationButtons(totalPages);
+
+    const paginationInfo = document.querySelector(".pagination-info");
+    if (paginationInfo) {
+      paginationInfo.textContent = `Menampilkan ${data.data.length} dari ${totalProducts} produk`;
+    }
+
     const products = data.data;
 
     const html = products
@@ -147,19 +215,31 @@ function ProductErr(err) {
   }
 }
 
-export async function InitDetailStore() {
+function fetchProducts() {
   let param = new URLSearchParams(window.location.search);
   const param_id = param.get("store_id");
 
   if (!param_id) {
     router.navigateTo("/unauthorized");
   } else {
-    GET(
-      "/api/detail_store",
-      { store_id: param_id },
-      LoadProfileStore,
-      ProfileErr
-    );
-    GET("/api/product", { store_id: param_id }, LoadProduct, ProductErr);
+    GET("/api/detail_store", { store_id: param_id }, LoadProfileStore, ProfileErr);
+    GET("/api/product", { store_id: param_id, page: currentPage, limit: itemsPerPage }, LoadProduct, ProductErr);
+  } 
+
+}
+export async function InitDetailStore() {
+  currentPage = 1;
+  itemsPerPage = 5;
+
+  fetchProducts();
+
+  const itemsPerPageSelect = document.getElementById("items-per-page-select");
+  if (itemsPerPageSelect) {
+    itemsPerPageSelect.addEventListener("change", (e) => {
+      itemsPerPage = parseInt(e.target.value, 10);
+      console.log("Items per page changed to:", itemsPerPage);
+      currentPage = 1;
+      fetchProducts();
+    });
   }
 }
