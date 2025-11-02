@@ -60,7 +60,7 @@ class User
     {
         $stmt = $this->conn->prepare("UPDATE users SET balance = balance + :val WHERE user_id = :id");
         $stmt->execute([":id" => $user_id, ":val" => $value]);
-        return $stmt->fetch();
+        return $stmt;
     }
 
     public function addBalanceByStoreId($store_id, $value)
