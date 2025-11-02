@@ -1,19 +1,14 @@
 <?php
 require_once __DIR__ . '/../model/m_user.php';
-
+require_once __DIR__ . '/../model/m_auth.php';
 $model = new User();
 $method = $_SERVER['REQUEST_METHOD'];
 
-if (!isset($_SESSION['user'])) {
-    echo "<script>
-                alert('Login dulu Bos !');
-                window.location.href = '/login';
-            </script>";
-    exit;
-}
+
 
 switch ($method) {
     case 'POST':
+        guard(['BUYER']);
         $value = $_POST['value'];
         $id = $_SESSION['user']['id'];
         $data = $model->addBalance($id, $value);
