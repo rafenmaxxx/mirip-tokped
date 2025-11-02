@@ -166,8 +166,8 @@ function LoadOrder(data) {
     return;
   }
 
-  const orders = data.data.orders || [];
-  const totalOrders = data.data.count || 0;
+  const orders = data.data || [];
+  const totalOrders = data.count || 0;
   if (totalOrders === 0) {
     grid.innerHTML = `
           <div class="no-products-container">
@@ -189,7 +189,7 @@ function LoadOrder(data) {
 
   const paginationInfo = document.querySelector(".pagination-info");
   if (paginationInfo) {
-    paginationInfo.textContent = `Menampilkan ${data.data.orders.length} dari ${totalOrders} order`;
+    paginationInfo.textContent = `Menampilkan ${data.data.length} dari ${totalOrders} order`;
   }
   // Event listener
   document.querySelectorAll(".btn-approve").forEach((btn) =>
