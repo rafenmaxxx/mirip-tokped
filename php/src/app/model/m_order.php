@@ -138,7 +138,7 @@ class Order
             ':order_id' => $order_id
         ]);
 
-        return $stmt->rowCount();
+        return $stmt;
     }
 
 
@@ -523,6 +523,30 @@ class Order
                         // update balance user
                         $model = new User();
                         $model->addBalance($buyer_id, $price);
+
+                        // update stok barang
+                        $sql = "
+                        SELECT product_id, quantity
+                        FROM order_items
+                        WHERE order_id = :order_id
+                        ";
+                        $stmtItems = $this->conn->prepare($sql);
+                        $stmtItems->execute([':order_id' => $order_id]);
+                        $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+                        if ($items) {
+                            foreach ($items as $item) {
+                                $updateStock = $this->conn->prepare("
+                                UPDATE products
+                                SET stock = stock + :qty
+                                WHERE product_id = :pid
+                            ");
+                                $updateStock->execute([
+                                    ':qty' => $item['quantity'],
+                                    ':pid' => $item['product_id']
+                                ]);
+                            }
+                        }
                         break;
                     default:
                         $isValid = false;
@@ -575,7 +599,7 @@ class Order
         if ($isValid) {
             $data = $this->updateOrderStatus($order_id, $status, $durasi);
         } else {
-            $data = null;
+            $data = false;
         }
         return $data;
     }
