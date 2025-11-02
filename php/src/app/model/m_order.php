@@ -19,10 +19,18 @@ class Order
         return $stmt->fetchAll();
     }
 
-    public function getById($id)
+    public function getById($id, $user_id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM orders WHERE order_id=:id");
-        $stmt->execute([':id' => $id]);
+        if ($_SESSION['user']['role'] == 'BUYER') {
+            $stmt = $this->conn->prepare("SELECT * FROM orders WHERE order_id=:id AND buyer_id = :user_id");
+            $stmt->execute([':id' => $id, ':user_id' => $user_id]);
+        }
+
+        if ($_SESSION['user']['role'] == 'SELLER') {
+            $stmt = $this->conn->prepare("SELECT * FROM orders o JOIN stores s ON o.store_id = s.store_id WHERE o.order_id=:id AND s.user_id = :user_id");
+            $stmt->execute([':id' => $id, ':user_id' => $user_id]);
+        }
+
         return $stmt->fetch();
     }
 
