@@ -13,6 +13,8 @@ switch ($method) {
         $store_id = $_SESSION['user']['store_id'] ?? null;
         $filter = $_GET['filter'] ?? null;
         $title = $_GET['title'] ?? null;
+        $page = $_GET['page'] ?? null;
+        $limit = $_GET['limit'] ?? null;
 
         if ($search) {
 
@@ -24,7 +26,8 @@ switch ($method) {
             $minPrice = $filterData['minPrice'] ?? null;
             $maxPrice = $filterData['maxPrice'] ?? null;
             
-            $data = $model->getFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
+            $count = $model->countFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
+            $data = $model->getFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice, $page, $limit);
         } else if ($store_id && $filter) {
             
             $filterData = json_decode($filter, true);
@@ -32,10 +35,12 @@ switch ($method) {
             $minPrice = $filterData['minPrice'] ?? null;
             $maxPrice = $filterData['maxPrice'] ?? null;
             
-            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
+            $count = $model->countFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
+            $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice, $page, $limit);
         } else if ($store_id && $title) {
             
-            $data = $model->getProductByStoreAndName($store_id, $title);
+            $count = $model->countProductByStoreAndName($store_id, $title);
+            $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit);
         } else if ($id) {
 
             $data = $model->getDetailById($id);
@@ -52,13 +57,14 @@ switch ($method) {
             $data = $model->getFilterProduct($categories, $minPrice, $maxPrice);
         } else if ($store_id) {
 
-            $data = $model->getByStoreId($store_id);
+            $count = $model->countByStoreId($store_id);
+            $data = $model->getByStoreId($store_id, $page, $limit);
         } else {
 
             $data = $model->getAll();
         }
 
-        echo json_encode(['status' => 'success', 'data' => $data]);
+        echo json_encode(['status' => 'success', 'data' => ['products' => $data, 'count' => $count ?? null]]);
         break;
 
     case 'POST':

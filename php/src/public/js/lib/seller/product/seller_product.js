@@ -4,6 +4,7 @@ import { showModalConfirmation } from "../../general/modal.js";
 import { renderToast } from "../../general/toast.js";
 
 let allProducts = [];
+let productCounts = 0;
 let productCategory = [];
 let currentPage = 1;
 let itemsPerPage = 2;
@@ -76,14 +77,11 @@ function renderFilteredProducts() {
       break;
   }
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(productCounts / itemsPerPage);
   renderPaginationButtons(totalPages);
 
   container.innerHTML = "";
-  if (paginatedProducts.length === 0) {
+  if (filteredProducts.length === 0) {
     container.innerHTML = "<p class='no-orders'>Belum ada produk.</p>";
     const paginationInfoEmpty = document.querySelector(".pagination-info");
     if (paginationInfoEmpty) {
@@ -91,14 +89,14 @@ function renderFilteredProducts() {
     }
     return;
   } else {
-    paginatedProducts.forEach((product) => {
+    filteredProducts.forEach((product) => {
       renderProductCard(product, container);
     });
   }
 
   const paginationInfo = document.querySelector(".pagination-info");
     if (paginationInfo) {
-        paginationInfo.textContent = `Menampilkan ${paginatedProducts.length} dari ${filteredProducts.length} product`;
+        paginationInfo.textContent = `Menampilkan ${filteredProducts.length} dari ${productCounts} product`;
     }
 
 }
@@ -122,7 +120,7 @@ function renderPaginationButtons(totalPages) {
     pageButton.addEventListener("click", (e) => {
       e.preventDefault();
       currentPage = i;
-      renderFilteredProducts();
+      fetchProducts();
     });
 
     navContainer.appendChild(pageButton);
@@ -237,10 +235,11 @@ function LoadSellerProductData(data) {
 
   console.log("Seller Product Data:", data);
 
-  if (data.status === "success" && Array.isArray(data.data)) {
-    allProducts = data.data;
+  if (data.status === "success" && Array.isArray(data.data.products)) {
+    allProducts = data.data.products;
+    productCounts = data.data.count;
 
-    if (allProducts.length === 0) {
+    if (productCounts === 0) {
       container.innerHTML = `
             <div class="no-products-container">
               <div class="no-products-image-circle">
@@ -299,9 +298,20 @@ function fetchProducts() {
       params.title = currentSearch;
    }
 
+   if (currentPage) {
+      params.page = currentPage;
+      params.limit = itemsPerPage;
+    }
+
   console.log("Fetching products with params:", params);
 
   GET("/api/product", params, LoadSellerProductData, SellerProductErr);
+}
+
+function setProductCounts(data) {
+  if (data.status === "success") {
+    productCounts = data.data.length;
+  }
 }
 
 export async function InitSellerProductPage() {
@@ -309,6 +319,8 @@ export async function InitSellerProductPage() {
   currentCategory = "";
   allProducts = [];
   currentSearch = "";
+  currentPage = 1;
+  itemsPerPage = 2;
 
   fetchProducts();
   GET("/api/category", {}, renderFilterDropdown, CategoryProductErr);
@@ -319,7 +331,7 @@ export async function InitSellerProductPage() {
       itemsPerPage = parseInt(e.target.value, 10);
       console.log("Items per page changed to:", itemsPerPage);
       currentPage = 1;
-      renderFilteredProducts();
+      fetchProducts();
     });
   }
 
