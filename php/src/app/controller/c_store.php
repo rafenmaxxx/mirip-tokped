@@ -30,6 +30,26 @@ switch ($method) {
 
         if (isset($_FILES['gambar_toko']) && $_FILES['gambar_toko']['error'] == 0) {
 
+            // validasi tipe file
+            $temp_file_path = $_FILES['gambar_toko']['tmp_name'];
+            $allowed_mime_types = [
+                'image/jpeg', // .jpg dan .jpeg
+                'image/png',
+                'image/webp'
+            ];
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime_type = finfo_file($finfo, $temp_file_path);
+            finfo_close($finfo);
+    
+            if (!in_array($mime_type, $allowed_mime_types)) {
+                echo json_encode([
+                    'status' => 'error', 
+                    'message' => "Tipe file tidak valid ($mime_type). Harap unggah JPG, PNG, atau WEBP."
+                ]);
+                exit;
+            }
+    
             $file_name = uniqid() . '-' . basename($_FILES['gambar_toko']['name']);
             $path_to_save_in_db = "/data/store/" . $file_name;
             $target_directory = dirname(dirname(__DIR__)) . "/data/store/";

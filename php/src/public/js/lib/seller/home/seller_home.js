@@ -117,12 +117,12 @@ export function showEditStoreModal(currentName, currentDescription) {
           renderToast("Berhasil memperbarui data toko", "success");
           LoadSellerData();
         } else {
-          renderToast("Gagal memperbarui data toko", "error");
+          renderToast(response.message, "error");
         }
         Loading.hide();
       },
-      () => {
-        renderToast("Terjadi kesalahan saat memperbarui data toko", "error");
+      (response) => {
+        renderToast(response.message, "error");
         Loading.hide();
       }
     );
