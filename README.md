@@ -87,67 +87,67 @@ Akses aplikasi melalui browser di `http://localhost:8000`
 ## Tangkapan Layar
 
 ### 1. Halaman Login
-![Halaman Login]()
+![Halaman Login](docs/image.png)
 *Halaman login untuk pengguna masuk ke sistem*
 
 ### 2. Halaman Register Choice
-![Halaman Register Choice]()
+![Halaman Register Choice](docs/image-1.png)
 *Halaman registrasi pengguna baru*
 
 ### 3. Halaman Register Buyer
-![Halaman Register Buyer]()
+![Halaman Register Buyer](docs/image-2.png)
 *Halaman registrasi pembeli baru*
 
 ### 4. Halaman Register Seller
-![Halaman Register Seller]()
+![Halaman Register Seller](docs/image-3.png)
 *Halaman registrasi penjual baru*
 
 ### 5. Halaman Home/Landing Page
-![Halaman Home]()
+![Halaman Home](docs/image-4.png)
 *Halaman utama dengan fitur pencarian dan filter*
 
 ### 6. Halaman Detail Produk
-![Halaman Detail Produk]()
+![Halaman Detail Produk](docs/image-5.png)
 *Halaman detail informasi produk*
 
 ### 7. Halaman Detail Store
-![Halaman Detail Produk]()
+![Halaman Detail Produk](docs/image-6.png)
 *Halaman detail informasi produk*
 
 ### 8. Halaman Keranjang Belanja
-![Halaman Cart]()
+![Halaman Cart](docs/image-7.png)
 *Halaman keranjang belanja pengguna*
 
 ### 9. Halaman Checkout
-![Halaman Checkout]()
+![Halaman Checkout](docs/image-8.png)
 *Halaman proses checkout dan pembayaran*
 
 ### 10. Halaman Riwayat Order
-![Halaman Riwayat]()
+![Halaman Riwayat](docs/image-9.png)
 *Halaman riwayat order pengguna*
 
 ### 11. Halaman Profile
-![Halaman Profile]()
+![Halaman Profile](docs/image-10.png)
 *Halaman profil pembeli*
 
 ### 12. Halaman Dashboard Seller
-![Halaman Dashboard Admin]()
+![Halaman Dashboard Admin](docs/image-12.png)
 *Dashboard penjual untuk manajemen toko*
 
 ### 13. Halaman Product Manajement
-![Halaman Product Manajemen]()
+![Halaman Product Manajemen](docs/image-13.png)
 *Halaman penjual untuk manajemen produk*
 
 ### 14. Halaman Add Product
-![Halaman Edit Product]()
+![Halaman Edit Product](docs/image-14.png)
 *Halaman penjual untuk menambah produk*
 
 ### 15. Halaman Edit Product
-![Halaman Edit Product]()
+![Halaman Edit Product](docs/image-15.png)
 *Halaman penjual untuk mengedit produk*
 
 ### 16. Halaman Order Manajemen
-![Halaman Order Manajemen]()
+![Halaman Order Manajemen](docs/image-16.png)
 *Halaman penjual untuk manajemen order*
 
 
