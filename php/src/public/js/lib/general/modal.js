@@ -25,7 +25,6 @@ function attachModalConfirmationLogic(message, yesCallback, noCallback) {
   messageEl.textContent = message;
   modal.style.display = "flex";
 
-  // Reset event listener
   const newYes = yesBtn.cloneNode(true);
   yesBtn.parentNode.replaceChild(newYes, yesBtn);
   const newNo = noBtn.cloneNode(true);
@@ -69,7 +68,6 @@ function attachModalNumberLogic(message, yesCallback, noCallback) {
   inputField.value = "";
   modal.style.display = "flex";
 
-  // Reset event listener
   const newYes = yesBtn.cloneNode(true);
   yesBtn.parentNode.replaceChild(newYes, yesBtn);
   const newNo = noBtn.cloneNode(true);
@@ -79,6 +77,55 @@ function attachModalNumberLogic(message, yesCallback, noCallback) {
     const value = parseInt(inputField.value, 10);
     if (isNaN(value) || value < 0) {
       alert("Masukkan angka >= 0");
+      return;
+    }
+
+    modal.style.display = "none";
+    if (typeof yesCallback === "function") yesCallback(value);
+  });
+
+  newNo.addEventListener("click", () => {
+    modal.style.display = "none";
+    if (typeof noCallback === "function") noCallback();
+  });
+}
+
+export function showModalTextInput(message, yesCallback, noCallback) {
+  const modal = document.getElementById("input-text-modal");
+
+  if (!modal) {
+    LoadComponent(
+      "global-modal-container",
+      "/components/general/modal_input_text.html",
+      () => {
+        attachModalTextLogic(message, yesCallback, noCallback);
+      }
+    );
+  } else {
+    attachModalTextLogic(message, yesCallback, noCallback);
+  }
+}
+
+function attachModalTextLogic(message, yesCallback, noCallback) {
+  const modal = document.getElementById("input-text-modal");
+  const messageEl = modal.querySelector("#input-text-message");
+  const inputField = modal.querySelector("#input-text-field");
+  const yesBtn = modal.querySelector("#input-text-yes");
+  const noBtn = modal.querySelector("#input-text-no");
+
+  messageEl.textContent = message;
+  inputField.value = "";
+  modal.style.display = "flex";
+
+  const newYes = yesBtn.cloneNode(true);
+  yesBtn.parentNode.replaceChild(newYes, yesBtn);
+  const newNo = noBtn.cloneNode(true);
+  noBtn.parentNode.replaceChild(newNo, noBtn);
+
+  newYes.addEventListener("click", () => {
+    const value = inputField.value.trim();
+    if (!value) {
+      alert("Masukkan teks tidak boleh kosong!");
       return;
     }
 
