@@ -3,6 +3,7 @@ import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
 import {
   showModalConfirmation,
   showModalNumberInput,
+  showModalTextInput,
 } from "../../general/modal.js";
 import { renderToast } from "../../general/toast.js";
 
@@ -144,9 +145,9 @@ function LoadOrder() {
 
       document.querySelectorAll(".btn-reject").forEach((btn) =>
         btn.addEventListener("click", (e) => {
-          showModalConfirmation(
-            "Reject order ?",
-            () => {
+          showModalTextInput(
+            "Reject order ? taro alasan !",
+            (reason) => {
               console.log("Reject order:", e.target.dataset.id);
               PUT(
                 "/api/order",
@@ -154,6 +155,7 @@ function LoadOrder() {
                   action: "update_status",
                   status: "rejected",
                   order_id: e.target.dataset.id,
+                  msg: reason,
                 },
                 (data) => {
                   if (data.status == "success") {

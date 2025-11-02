@@ -60,7 +60,35 @@ class User
     {
         $stmt = $this->conn->prepare("UPDATE users SET balance = balance + :val WHERE user_id = :id");
         $stmt->execute([":id" => $user_id, ":val" => $value]);
-        return $stmt->fetchAll();
+        return $stmt->fetch();
+    }
+
+    public function addBalanceByStoreId($store_id, $value)
+    {
+        try {
+
+            $stmt = $this->conn->prepare("SELECT user_id FROM stores WHERE store_id = :store_id");
+            $stmt->execute([':store_id' => $store_id]);
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$res) {
+                throw new Exception("Store dengan ID $store_id tidak ditemukan");
+            }
+
+            $user_id = $res['user_id'];
+
+
+            $updateStmt = $this->conn->prepare("UPDATE users SET balance = balance + :val, updated_at = NOW() WHERE user_id = :user_id");
+            $updateStmt->execute([
+                ':val' => $value,
+                ':user_id' => $user_id
+            ]);
+
+            return $updateStmt->rowCount();
+        } catch (PDOException $e) {
+            error_log("Error saat menambahkan balance: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getBalance($user_id)
@@ -96,14 +124,14 @@ class User
         $fields = [];
         $params = [':id' => $id];
 
-        // Mapping field yang akan diupdate
+
         $updates = [
             'name' => $new_name,
             'address' => $new_address,
             'password' => $new_password
         ];
 
-        // Hanya tambahkan field yang tidak null dan tidak kosong
+
         foreach ($updates as $field => $value) {
             if (!is_null($value) && $value !== '') {
                 
@@ -116,7 +144,7 @@ class User
             }
         }
 
-        // Jika tidak ada field yang diubah, return data lama
+
         if (empty($fields)) {
             return $this->getById($id);
         }

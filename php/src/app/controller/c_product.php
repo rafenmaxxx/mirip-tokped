@@ -11,6 +11,9 @@ switch ($method) {
         $search = $_GET['search'] ?? null;
         $id = $_GET['id'] ?? null;
         $store_id = $_SESSION['user']['store_id'] ?? null;
+        if (!$store_id) {
+            $store_id = $_GET['store_id'] ?? null;
+        }
         $filter = $_GET['filter'] ?? null;
         $title = $_GET['title'] ?? null;
 
@@ -18,23 +21,23 @@ switch ($method) {
 
             $data = $model->getByName($search);
         } else if ($store_id && $filter && $title) {
-            
+
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
             $maxPrice = $filterData['maxPrice'] ?? null;
-            
+
             $data = $model->getFilterProductByStoreAndName($store_id, $title, $categories, $minPrice, $maxPrice);
         } else if ($store_id && $filter) {
-            
+
             $filterData = json_decode($filter, true);
             $categories = $filterData['categories'] ?? [];
             $minPrice = $filterData['minPrice'] ?? null;
             $maxPrice = $filterData['maxPrice'] ?? null;
-            
+
             $data = $model->getFilterProductByStore($store_id, $categories, $minPrice, $maxPrice);
         } else if ($store_id && $title) {
-            
+
             $data = $model->getProductByStoreAndName($store_id, $title);
         } else if ($id) {
 
