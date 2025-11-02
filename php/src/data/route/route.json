@@ -99,8 +99,8 @@
     "html": "/pages/register_seller.html",
     "js": [
       {
-        "path": "./lib/general/quill.js",
-        "func": ["InitQuill"]
+        "path": "./lib/register/register_seller.js",
+        "func": ["InitRegisterSeller"]
       }
     ],
     "css": [
