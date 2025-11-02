@@ -101,29 +101,58 @@ function renderFilteredProducts() {
 }
 
 function renderPaginationButtons(totalPages) {
-  const navContainer = document.getElementById("pagination-nav-buttons");
-  if (!navContainer) return;
+    const navContainer = document.getElementById("pagination-nav-buttons");
+    if (!navContainer) return;
 
-  navContainer.innerHTML = "";
+    navContainer.innerHTML = "";
 
-  for (let i = 1; i <= totalPages; i++) {
-    const pageButton = document.createElement("a");
-    pageButton.href = "#";
-    pageButton.textContent = i;
-    pageButton.dataset.page = i;
+    const createPageButton = (page) => {
+        const pageButton = document.createElement("a");
+        pageButton.href = "#";
+        pageButton.textContent = page;
+        pageButton.dataset.page = page;
 
-    if (i === currentPage) {
-      pageButton.classList.add("active");
+        if (page === currentPage) {
+            pageButton.classList.add("active");
+        }
+
+        pageButton.addEventListener("click", (e) => {
+            e.preventDefault(); 
+            currentPage = page;
+            renderFilteredProducts();
+        });
+        
+        return pageButton;
+    };
+
+    const createEllipsis = () => {
+        const ellipsis = document.createElement("span");
+        ellipsis.textContent = "...";
+        return ellipsis;
+    };
+
+    const pagesToShow = new Set();
+    const siblingCount = 1;
+
+    pagesToShow.add(1);
+    const startPage = Math.max(2, currentPage - siblingCount);
+    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagesToShow.add(i);
     }
 
-    pageButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      currentPage = i;
-      fetchProducts();
-    });
+    pagesToShow.add(totalPages);
 
-    navContainer.appendChild(pageButton);
-  }
+    let lastPage = 0;
+    pagesToShow.forEach(page => {
+        if (lastPage !== 0 && page - lastPage > 1) {
+            navContainer.appendChild(createEllipsis());
+        }
+        
+        navContainer.appendChild(createPageButton(page));
+        lastPage = page;
+    });
 }
 
 function renderProductCard(product, container) {
