@@ -1,6 +1,10 @@
-import { GET } from "../../../api/api.js";
+import { GET, POST, PUT } from "../../../api/api.js";
 import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
-import { showModalNumberInput } from "../../general/modal.js";
+import {
+  showModalConfirmation,
+  showModalNumberInput,
+} from "../../general/modal.js";
+import { renderToast } from "../../general/toast.js";
 
 // --- Utility: Format angka ke rupiah ---
 function formatRupiah(number) {
@@ -105,29 +109,105 @@ function LoadOrder() {
       grid.innerHTML = orders.map(createOrderCard).join("");
 
       // Event listener
-      document
-        .querySelectorAll(".btn-approve")
-        .forEach((btn) =>
-          btn.addEventListener("click", (e) =>
-            console.log("Approve order:", e.target.dataset.id)
-          )
-        );
+      document.querySelectorAll(".btn-approve").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          showModalConfirmation(
+            "Approve order ?",
+            () => {
+              console.log("Approve order:", e.target.dataset.id);
+              PUT(
+                "/api/order",
+                {
+                  action: "update_status",
+                  status: "approved",
+                  order_id: e.target.dataset.id,
+                },
+                (data) => {
+                  if (data.status == "success") {
+                    renderToast("Berhasil update status", "success");
+                    LoadOrder();
+                  } else {
+                    renderToast("Gagal update status", "error");
+                  }
+                },
+                (err) => {
+                  if (err) {
+                    renderToast("Gagal update status", "error");
+                  }
+                }
+              );
+            },
+            () => {}
+          );
+        })
+      );
 
-      document
-        .querySelectorAll(".btn-reject")
-        .forEach((btn) =>
-          btn.addEventListener("click", (e) =>
-            console.log("Reject order:", e.target.dataset.id)
-          )
-        );
+      document.querySelectorAll(".btn-reject").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          showModalConfirmation(
+            "Reject order ?",
+            () => {
+              console.log("Reject order:", e.target.dataset.id);
+              PUT(
+                "/api/order",
+                {
+                  action: "update_status",
+                  status: "rejected",
+                  order_id: e.target.dataset.id,
+                },
+                (data) => {
+                  if (data.status == "success") {
+                    renderToast("Berhasil update status", "success");
+                    LoadOrder();
+                  } else {
+                    renderToast("Gagal update status", "error");
+                  }
+                },
+                (err) => {
+                  if (err) {
+                    renderToast("Gagal update status", "error");
+                  }
+                }
+              );
+            },
+            () => {}
+          );
+        })
+      );
 
-      document
-        .querySelectorAll(".btn-deliver")
-        .forEach((btn) =>
-          btn.addEventListener("click", (e) =>
-            console.log("Deliver order:", e.target.dataset.id)
-          )
-        );
+      document.querySelectorAll(".btn-deliver").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          console.log("Deliver order:", e.target.dataset.id);
+          showModalNumberInput(
+            "Deliver barang ? masukkan estimasi durasi",
+            (durasi) => {
+              PUT(
+                "/api/order",
+                {
+                  action: "update_status",
+                  status: "on_delivery",
+                  order_id: e.target.dataset.id,
+                  durasi: durasi,
+                },
+                (data) => {
+                  if (data.status == "success") {
+                    renderToast("Berhasil update status", "success");
+                    LoadOrder();
+                  } else {
+                    renderToast("Gagal update status", "error");
+                  }
+                },
+                (err) => {
+                  if (err) {
+                    renderToast("Gagal update status", "error");
+                  }
+                }
+              );
+            },
+            () => {}
+          );
+        })
+      );
 
       document
         .querySelectorAll(".btn-detail")
