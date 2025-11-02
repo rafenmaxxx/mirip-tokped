@@ -9,8 +9,7 @@ function morphProductBtn(data) {
     buttons.forEach((btnContainer, index) => {
       const product_id = btnContainer.getAttribute("product-id");
       const html = `
-        <button class="btn btn-cart" product-id="${product_id}">Add to Cart</button>
-        <button class="btn btn-checkout">Checkout</button>
+        <button class="btn btn-checkout" product-id="${product_id}">Add to Cart</button>
       `;
       btnContainer.innerHTML = html;
     });

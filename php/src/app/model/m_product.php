@@ -17,7 +17,7 @@ class Product
             soalnya si memori db ga kuat :D
         */
 
-        $stmt = $this->conn->prepare("SELECT * FROM products where deleted_at is NULL");
+        $stmt = $this->conn->prepare("SELECT p.*,s.store_name FROM products p JOIN stores s on p.store_id = s.store_id where p.deleted_at is NULL");
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -164,7 +164,7 @@ class Product
         return $result ? (int)$result['total'] : 0;
     }
 
-    public function getFilterProductByStoreAndName($store_id, $name, $categories = [], $minPrice = null, $maxPrice = null, $page, $limit)
+    public function getFilterProductByStoreAndName($store_id, $name,  $page, $limit, $minPrice = null, $maxPrice = null, $categories = [])
     {
         $query = "SELECT DISTINCT p.* 
               FROM products p
@@ -421,6 +421,4 @@ class Product
         $stmt->execute([':id' => $product_id]);
         return $stmt->fetchAll();
     }
-
-
 }
