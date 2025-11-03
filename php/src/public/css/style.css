@@ -1,4 +1,17 @@
+.app {
+  min-height: 100vh;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.app.visible{
+  visibility: visible;
+  opacity: 1;
+}
+
 body {
     font-family: 'Inter', sans-serif;
 }
+
+
 
