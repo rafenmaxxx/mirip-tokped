@@ -31,6 +31,10 @@ function LoadDetail(data) {
     "s-img",
     `<img src="${s_img_url}" alt="${res.store_name} Logo" class="seller-avatar">`
   );
+  ChangeInnerHtmlById(
+    "btn-store",
+    `<button class="visit-store-btn" id="v-store">Kunjungi Toko</button>`
+  );
   const storeBtn = document.getElementById("v-store");
   storeBtn.addEventListener("click", () => {
     router.navigateTo("/store?store_id=" + res.store_id);
@@ -109,6 +113,13 @@ export function InitProductDetail() {
   const params = new URLSearchParams(window.location.search);
   const param_id = params.get("id");
 
-  GET("/api/product", { id: param_id }, LoadDetail, IsErr);
-  LoadAddCartBtn(param_id);
+  GET(
+    "/api/product",
+    { id: param_id },
+    (data) => {
+      LoadDetail(data);
+      LoadAddCartBtn(param_id);
+    },
+    IsErr
+  );
 }

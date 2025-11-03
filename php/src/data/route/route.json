@@ -105,20 +105,19 @@
         "func": ["InitSellerProductPage"]
       }
     ],
-    "css": ["/css/seller/style_seller_product.css", "/css/style.css"],
+    "css": ["/css/seller/style_seller_product.css"],
     "useNavbar": true,
     "access": ["SELLER"]
   },
   "/seller/products/add": {
     "html": "/pages/seller_product_info.html",
     "js": [
-      { "path": "./lib/general/quill.js", "func": ["InitQuill"] },
       {
         "path": "./lib/seller/add-product/add_product.js",
         "func": ["InitAddProduct"]
       }
     ],
-    "css": ["/css/seller/style_seller_product_info.css", "/css/style.css"],
+    "css": ["/css/seller/style_seller_product_info.css"],
     "useNavbar": true,
     "access": ["SELLER"]
   },

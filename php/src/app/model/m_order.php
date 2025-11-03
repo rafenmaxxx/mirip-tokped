@@ -138,7 +138,7 @@ class Order
             ':order_id' => $order_id
         ]);
 
-        return $stmt;
+        return $stmt->rowCount();
     }
 
 
@@ -599,7 +599,7 @@ class Order
         if ($isValid) {
             $data = $this->updateOrderStatus($order_id, $status, $durasi);
         } else {
-            $data = false;
+            $data = 0;
         }
         return $data;
     }

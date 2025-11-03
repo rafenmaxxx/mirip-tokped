@@ -9,6 +9,7 @@
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 90%;
+  min-width: 400px;
 }
 
 /* Kolom kiri */
@@ -21,6 +22,7 @@
   border-radius: 8px;
   object-fit: cover;
   height: 232px;
+  aspect-ratio: 1/1;
 }
 
 .product-stock {
@@ -66,9 +68,9 @@
 
 /* Kolom kanan (Toko Penjual) */
 .product-right {
-  display: flex;
-  align-items: top;
-  justify-content: center;
+  display: grid;
+  grid-row: auto auto auto;
+  place-items: start center;
 }
 
 .seller-card {
@@ -80,7 +82,9 @@
   width: 100%;
   max-width: 260px;
   max-height: fit-content;
+  min-height: 278px;
 }
+
 
 .seller-avatar {
   width: 80px;
@@ -88,6 +92,7 @@
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 1rem;
+  aspect-ratio: 1/1;
 }
 
 .seller-name {

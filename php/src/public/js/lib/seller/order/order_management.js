@@ -180,6 +180,8 @@ function renderPaginationButtons(totalPages) {
     navContainer.appendChild(createPageButton(page));
     lastPage = page;
   });
+  const footer = document.querySelector(".pagination-footer");
+  footer?.classList.add("visible");
 }
 
 // --- Loader utama ---
@@ -237,7 +239,7 @@ function LoadOrder(data) {
             (data) => {
               if (data.status == "success") {
                 renderToast("Berhasil update status", "success");
-                LoadOrder();
+                LoadOrder(data);
               } else {
                 renderToast("Gagal update status", "error");
               }
@@ -305,7 +307,7 @@ function LoadOrder(data) {
             (data) => {
               if (data.status == "success") {
                 renderToast("Berhasil update status", "success");
-                LoadOrder();
+                LoadOrder(data);
               } else {
                 renderToast("Gagal update status", "error");
               }

@@ -71,6 +71,7 @@ function morphAuthBtn(data) {
   const orderHist = document.getElementById("order-hist");
   const search = document.getElementById("navbar__search");
   const filter = document.getElementById("filter-btn");
+
   if (data.status == "success") {
     // udah login
     btn.innerHTML = `<button class="btn btn-login" id="btn-profile">Profile</button>
