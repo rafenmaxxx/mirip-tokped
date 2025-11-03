@@ -51,7 +51,7 @@ export function InitAddProduct() {
     showModalConfirmation(
       "Yakin batal? ini ga akan kesimpen lho",
       () => {
-        router.navigateTo("/");
+        router.navigateTo("/seller/products");
       },
       () => {}
     );
