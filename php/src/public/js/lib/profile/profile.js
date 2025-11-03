@@ -17,7 +17,7 @@ function renderPasswordChangeModal() {
                     <div class="password-input-wrapper">
                         <input type="password" id="current-password" name="current-password" required>
                         <button type="button" class="toggle-password" data-target="current-password">
-                            👁️
+                            show
                         </button>
                     </div>
                 </div>
@@ -27,7 +27,7 @@ function renderPasswordChangeModal() {
                     <div class="password-input-wrapper">
                         <input type="password" id="new-password" name="new-password" required>
                         <button type="button" class="toggle-password" data-target="new-password">
-                            👁️
+                            show
                         </button>
                     </div>
                 </div>
@@ -37,7 +37,7 @@ function renderPasswordChangeModal() {
                     <div class="password-input-wrapper">
                         <input type="password" id="confirm-password" name="confirm-password" required>
                         <button type="button" class="toggle-password" data-target="confirm-password">
-                            👁️
+                            show
                         </button>
                     </div>
                 </div>
@@ -59,10 +59,10 @@ function renderPasswordChangeModal() {
       const input = document.getElementById(targetId);
       if (input.type === "password") {
         input.type = "text";
-        btn.textContent = "🙈";
+        btn.textContent = "hide";
       } else {
         input.type = "password";
-        btn.textContent = "👁️";
+        btn.textContent = "show";
       }
     });
   });
