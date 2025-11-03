@@ -283,6 +283,13 @@
     font-size: 14px;
     color: #555;
     position: relative;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.pagination-footer.visible{
+    visibility: visible;
+    opacity: 1;
 }
 
 .pagination-nav {
