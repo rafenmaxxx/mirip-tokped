@@ -180,6 +180,8 @@ function renderPaginationButtons(totalPages) {
     navContainer.appendChild(createPageButton(page));
     lastPage = page;
   });
+  const footer = document.querySelector(".pagination-footer");
+  footer?.classList.add("visible");
 }
 
 // --- Loader utama ---
