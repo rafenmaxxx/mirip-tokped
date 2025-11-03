@@ -14,7 +14,12 @@
   left: 0;
   right: 0;
   z-index: 1000; 
+  height: 64px;
+   min-height: 64px;
+
 }
+
+
 
 
 .navbar__logo {
@@ -22,6 +27,7 @@
   font-size: 1.5rem;
   color: #00a14b;
   cursor: pointer;
+  width: max-content;
 }
 
 
@@ -75,8 +81,8 @@
 
 
 .navbar__auth {
-  display: flex;
-  gap: 0.5rem;
+   min-width: 80px;
+  white-space: nowrap;
 }
 
 .btn {
