@@ -344,7 +344,9 @@ function handleConfirmReceived(orderId) {
     } else {
       console.error(`Failed to confirm order ID ${orderId}: ${response.message}`);
     }
-  }, () => {});
+  }, (err) => {
+    renderToast('Please wait until delivery time has passed.', 'error');
+  });
 }
 
 // --- Error Handler ---

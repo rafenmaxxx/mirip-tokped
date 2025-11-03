@@ -200,7 +200,6 @@ function handleCheckout(balance) {
       if (balance < total_price) {
         renderToast("Kurang Duit", "error");
       } else {
-        alert("bisa checkout");
         POST(
           "/api/checkout",
           { address: shippingAddress },
