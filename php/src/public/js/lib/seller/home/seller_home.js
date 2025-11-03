@@ -1,5 +1,8 @@
 import { GET, POST_FORMDATA } from "../../../api/api.js";
-import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
+import {
+  ChangeInnerHtmlById,
+  ChangeTextContentById,
+} from "../../../util/component_loader.js";
 import { router } from "../../../../app.js";
 import { renderToast } from "../../general/toast.js";
 import { Loading } from "../../general/loading.js";
@@ -12,12 +15,12 @@ function LoadSellerData() {
     (data) => {
       if (data.status == "success") {
         const res = data.data;
-        ChangeInnerHtmlById("store-name", res.store_name);
-        ChangeInnerHtmlById("store-description", res.store_description);
-        ChangeInnerHtmlById("total-product", res.total_products);
-        ChangeInnerHtmlById("total-revenue", res.total_revenue);
-        ChangeInnerHtmlById("low-stock", res.low_stock_products);
-        ChangeInnerHtmlById("pending-order", res.pending_orders);
+        ChangeTextContentById("store-name", res.store_name);
+        ChangeTextContentById("store-description", res.store_description);
+        ChangeTextContentById("total-product", res.total_products);
+        ChangeTextContentById("total-revenue", res.total_revenue);
+        ChangeTextContentById("low-stock", res.low_stock_products);
+        ChangeTextContentById("pending-order", res.pending_orders);
         const imgUrl = `/api/image?file=${res.store_logo_path}`;
         console.log(imgUrl);
         ChangeInnerHtmlById(
@@ -31,6 +34,7 @@ function LoadSellerData() {
 }
 
 export function InitSeller() {
+  InitQuill();
   LoadSellerData();
 
   const editBtn = document.getElementById("editBtn");
@@ -68,7 +72,6 @@ export function showEditStoreModal(currentName, currentDescription) {
   const closeBtn = document.getElementById("close-edit-modal");
 
   if (!modal) return;
-  InitQuill();
 
   changePlaceHolder(currentDescription);
   nameInput.value = currentName;
