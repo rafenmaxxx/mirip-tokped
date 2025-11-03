@@ -1,4 +1,4 @@
-import { LoadComponent } from "../../util/component_loader.js";
+import { LoadComponent, renderSkeleton } from "../../util/component_loader.js";
 import { GET } from "../../api/api.js";
 import { router } from "../../../app.js";
 import { initHeroSlider } from "../slider.js";
@@ -7,58 +7,60 @@ let currentPage = 1;
 let itemsPerPage = 10;
 
 function renderPaginationButtons(totalPages) {
-    const navContainer = document.getElementById("pagination-nav-buttons");
-    if (!navContainer) return;
+  const navContainer = document.getElementById("pagination-nav-buttons");
+  if (!navContainer) return;
 
-    navContainer.innerHTML = "";
+  navContainer.innerHTML = "";
 
-    const createPageButton = (page) => {
-        const pageButton = document.createElement("a");
-        pageButton.href = "#";
-        pageButton.textContent = page;
-        pageButton.dataset.page = page;
+  const createPageButton = (page) => {
+    const pageButton = document.createElement("a");
+    pageButton.href = "#";
+    pageButton.textContent = page;
+    pageButton.dataset.page = page;
 
-        if (page === currentPage) {
-            pageButton.classList.add("active");
-        }
-
-        pageButton.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            currentPage = page;
-            fetchProducts();
-        });
-        
-        return pageButton;
-    };
-
-    const createEllipsis = () => {
-        const ellipsis = document.createElement("span");
-        ellipsis.textContent = "...";
-        return ellipsis;
-    };
-
-    const pagesToShow = new Set();
-    const siblingCount = 1;
-
-    pagesToShow.add(1);
-    const startPage = Math.max(2, currentPage - siblingCount);
-    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
-
-    for (let i = startPage; i <= endPage; i++) {
-        pagesToShow.add(i);
+    if (page === currentPage) {
+      pageButton.classList.add("active");
     }
 
-    pagesToShow.add(totalPages);
-
-    let lastPage = 0;
-    pagesToShow.forEach(page => {
-        if (lastPage !== 0 && page - lastPage > 1) {
-            navContainer.appendChild(createEllipsis());
-        }
-        
-        navContainer.appendChild(createPageButton(page));
-        lastPage = page;
+    pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = page;
+      fetchProducts();
     });
+
+    return pageButton;
+  };
+
+  const createEllipsis = () => {
+    const ellipsis = document.createElement("span");
+    ellipsis.textContent = "...";
+    return ellipsis;
+  };
+
+  const pagesToShow = new Set();
+  const siblingCount = 1;
+
+  pagesToShow.add(1);
+  const startPage = Math.max(2, currentPage - siblingCount);
+  const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+  for (let i = startPage; i <= endPage; i++) {
+    pagesToShow.add(i);
+  }
+
+  pagesToShow.add(totalPages);
+
+  let lastPage = 0;
+  pagesToShow.forEach((page) => {
+    if (lastPage !== 0 && page - lastPage > 1) {
+      navContainer.appendChild(createEllipsis());
+    }
+
+    navContainer.appendChild(createPageButton(page));
+    lastPage = page;
+  });
+  const footer = document.querySelector(".pagination-footer");
+  footer?.classList.add("visible");
 }
 
 function LoadProduct(data) {
@@ -72,17 +74,17 @@ function LoadProduct(data) {
     container.innerHTML = `<p>Gagal memuat data produk.</p>`;
     return;
   }
-  
+
   const totalProducts = data.count || 0;
   if (totalProducts === 0) {
     container.innerHTML = `
-          <div class="no-products-container">
-            <div class="no-products-image-circle">
-              <img src="/img/unauthorized.png" alt="Tidak ada produk">
-            </div>
-            <p class="no-products-message">Tidak terdapat produk </p>
-          </div>
-    `;
+              <div class="no-products-container">
+                <div class="no-products-image-circle">
+                  <img src="/img/unauthorized.png" alt="Tidak ada produk">
+                </div>
+                <p class="no-products-message">Tidak terdapat produk </p>
+              </div>
+        `;
     footer.style.display = "none";
     return;
   }
@@ -141,7 +143,7 @@ function LoadProduct(data) {
               </div>`;
       const el = document.getElementById("catalog-label");
       el.style.display = "none";
-      }
+    }
 
     const cards = document.querySelectorAll(".product_card");
     cards.forEach((c, index) => {
@@ -172,6 +174,24 @@ function ChangeCatalogLabel(string) {
 }
 
 function fetchProducts() {
+  const container = document.getElementById("product-data");
+  const footer = document.getElementById("pagination-container");
+  const slider = document.getElementById("slider");
+  slider.innerHTML = `<div class="hero-slider" id="slider-id">
+            <div class="hero-slider__track">
+                <div class="hero-slide">
+                    <img src="img/slide-1.jpeg" alt="Slide" width="1028px" height="500" />
+                    <div class="hero-slide__info">
+                        <h2>TUBES WBD UHUY</h2>
+                        <p>Alfian, Joel, dan Max</p>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+  if (footer) {
+    footer.style.display = "none";
+  }
   let param = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(param);
 
@@ -193,7 +213,8 @@ function fetchProducts() {
 export function LoadHome() {
   currentPage = 1;
   itemsPerPage = 10;
-
+  renderSkeleton("#product-data", 10);
+  renderSkeleton("#slider", 1, "banner");
   fetchProducts();
 
   const itemsPerPageSelect = document.getElementById("items-per-page-select");
