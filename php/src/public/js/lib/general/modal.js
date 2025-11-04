@@ -138,3 +138,81 @@ function attachModalTextLogic(message, yesCallback, noCallback) {
     if (typeof noCallback === "function") noCallback();
   });
 }
+
+export function showModalSpinnerInput(
+  message,
+  maxValue,
+  yesCallback,
+  noCallback
+) {
+  const modal = document.getElementById("input-spinner-modal");
+
+  if (!modal) {
+    LoadComponent(
+      "global-modal-container",
+      "/components/general/modal_input_spinner.html",
+      () => {
+        attachModalSpinnerLogic(message, maxValue, yesCallback, noCallback);
+      }
+    );
+  } else {
+    attachModalSpinnerLogic(message, maxValue, yesCallback, noCallback);
+  }
+}
+
+function attachModalSpinnerLogic(message, maxValue, yesCallback, noCallback) {
+  const modal = document.getElementById("input-spinner-modal");
+  const messageEl = modal.querySelector("#input-spinner-message");
+  const inputField = modal.querySelector("#spinner-field");
+  const decBtn = modal.querySelector("#spinner-decrease");
+  const incBtn = modal.querySelector("#spinner-increase");
+  const yesBtn = modal.querySelector("#spinner-yes");
+  const noBtn = modal.querySelector("#spinner-no");
+
+  messageEl.textContent = message;
+  inputField.value = "1";
+  inputField.min = 1;
+  inputField.max = maxValue;
+  modal.style.display = "flex";
+
+  // Reset event listener lama
+  const newYes = yesBtn.cloneNode(true);
+  yesBtn.parentNode.replaceChild(newYes, yesBtn);
+  const newNo = noBtn.cloneNode(true);
+  noBtn.parentNode.replaceChild(newNo, noBtn);
+
+  // Tombol increment/decrement
+  decBtn.onclick = () => {
+    let val = parseInt(inputField.value, 10);
+    if (val > 1) inputField.value = val - 1;
+  };
+
+  incBtn.onclick = () => {
+    let val = parseInt(inputField.value, 10);
+    if (val < maxValue) inputField.value = val + 1;
+  };
+
+  // Validasi input manual
+  inputField.addEventListener("input", () => {
+    let val = parseInt(inputField.value, 10);
+    if (isNaN(val) || val < 1) inputField.value = 1;
+    else if (val > maxValue) inputField.value = maxValue;
+  });
+
+  // Tombol OK
+  newYes.addEventListener("click", () => {
+    const value = parseInt(inputField.value, 10);
+    if (isNaN(value) || value < 1 || value > maxValue) {
+      alert(`Masukkan angka antara 1 dan ${maxValue}`);
+      return;
+    }
+    modal.style.display = "none";
+    if (typeof yesCallback === "function") yesCallback(value);
+  });
+
+  // Tombol Batal
+  newNo.addEventListener("click", () => {
+    modal.style.display = "none";
+    if (typeof noCallback === "function") noCallback();
+  });
+}

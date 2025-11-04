@@ -193,18 +193,6 @@ function ChangeCatalogLabel(string) {
 function fetchProducts() {
   const container = document.getElementById("product-data");
   const footer = document.getElementById("pagination-container");
-  const slider = document.getElementById("slider");
-  slider.innerHTML = `<div class="hero-slider" id="slider-id">
-            <div class="hero-slider__track">
-                <div class="hero-slide">
-                    <img src="img/slide-1.jpeg" alt="Slide" width="1028px" height="500" />
-                    <div class="hero-slide__info">
-                        <h2>TUBES WBD UHUY</h2>
-                        <p>Alfian, Joel, dan Max</p>
-                    </div>
-                </div>
-            </div>
-        </div>`;
 
   if (footer) {
     footer.style.display = "none";
@@ -233,7 +221,18 @@ export function LoadHome() {
   renderSkeleton("#product-data", 4);
   renderSkeleton("#slider", 1, "banner");
   fetchProducts();
-
+  const slider = document.getElementById("slider");
+  slider.innerHTML = `<div class="hero-slider" id="slider-id">
+            <div class="hero-slider__track">
+                <div class="hero-slide">
+                    <img src="img/slide-1.jpeg" alt="Slide" width="1028px" height="500" />
+                    <div class="hero-slide__info">
+                        <h2>TUBES WBD UHUY</h2>
+                        <p>Alfian, Joel, dan Max</p>
+                    </div>
+                </div>
+            </div>
+        </div>`;
   const itemsPerPageSelect = document.getElementById("items-per-page-select");
   if (itemsPerPageSelect) {
     itemsPerPageSelect.addEventListener("change", (e) => {

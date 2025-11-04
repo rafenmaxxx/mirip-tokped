@@ -152,20 +152,11 @@ switch ($method) {
         parse_str(file_get_contents("php://input"), $_PUT);
         $id = $_SESSION['user']['id'] ?? null;
 
-        // Helper function untuk normalisasi input
-        function normalizeInput($value)
-        {
-            // Jika tidak ada, kosong, atau string "null", return null
-            if (empty($value) || $value === 'null' || $value === 'undefined') {
-                return null;
-            }
-            // Trim whitespace
-            return trim($value);
-        }
 
-        $new_name = normalizeInput($_PUT['nama'] ?? null);
-        $new_address = normalizeInput($_PUT['alamat'] ?? null);
-        $new_password = normalizeInput($_PUT['password'] ?? null);
+
+        $new_name = sanitizePlainText($_PUT['nama'] ?? null);
+        $new_address = sanitizePlainText($_PUT['alamat'] ?? null);
+        $new_password = ($_PUT['password'] ?? null);
 
         if (!$id) {
             echo json_encode(['status' => 'error', 'message' => 'User tidak ditemukan']);

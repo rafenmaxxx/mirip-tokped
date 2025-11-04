@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../model/m_cart.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
+
 $model = new Cart();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -41,11 +43,13 @@ switch ($method) {
         $action = $_POST['action'] ?? null;
         $buyer_id = $_SESSION['user']['id'];
         $product_id = $_POST['product_id'] ?? null;
+        $qty = $_POST['quantity'] ?? null;
+
 
         switch ($action) {
             case 'add':
                 if ($buyer_id && $product_id) {
-                    $result = $model->addToCart($buyer_id, $product_id, 1);
+                    $result = $model->addToCart($buyer_id, $product_id, $qty);
                     echo json_encode($result);
                 } else {
                     http_response_code(400);
