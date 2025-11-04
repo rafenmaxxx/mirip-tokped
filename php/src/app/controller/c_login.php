@@ -8,9 +8,7 @@ switch ($method) {
     case 'POST':
         guard(["GUEST"]);
         $email = $_POST['email'] ?? null;
-        $email = sanitizePlainText($email);
         $password = $_POST['password'] ?? null;
-        $email = sanitizePlainText($password);
         header('Content-Type: text/html; charset=utf-8');
         if (!$email || !$password) {
             warn("Email/Password tidak boleh kosong", '/login');
