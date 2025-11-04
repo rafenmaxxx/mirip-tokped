@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../model/m_user.php';
 require_once __DIR__ . '/../model/m_store.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
 $model = new User();
 $method = $_SERVER['REQUEST_METHOD'];
 
