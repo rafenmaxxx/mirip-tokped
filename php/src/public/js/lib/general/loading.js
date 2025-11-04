@@ -149,7 +149,7 @@ async function fetchExample() {
   try {
     const response = await fetch('/api/orders');
     const data = await response.json();
-    console.log(data);
+     
   } catch (error) {
     console.error('Error:', error);
   } finally {
@@ -203,7 +203,7 @@ function callbackExample() {
   GET('/api/orders', {},
     (response) => {
       // Success callback
-      console.log('Success:', response);
+       
       Loading.hide();
     },
     (error) => {
@@ -298,7 +298,7 @@ async function promiseAllExample() {
       fetch('/api/users').then(r => r.json())
     ]);
     
-    console.log({ orders, products, users });
+     
   } catch (error) {
     console.error('Error:', error);
   } finally {
@@ -312,7 +312,7 @@ async function promiseAllExample() {
 // ========================================
 function conditionalLoadingExample(data) {
   if (Loading.isActive()) {
-    console.log('Already loading, skip...');
+     
     return;
   }
   
@@ -373,7 +373,7 @@ async function fileUploadExample(file) {
     if (response.ok) {
       Loading.updateMessage('Memproses file...');
       const result = await response.json();
-      console.log('Upload success:', result);
+       
     }
   } catch (error) {
     console.error('Upload error:', error);
