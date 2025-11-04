@@ -17,7 +17,7 @@ function renderPasswordChangeModal() {
                     <div class="password-input-wrapper">
                         <input type="password" id="current-password" name="current-password" required>
                         <button type="button" class="toggle-password" data-target="current-password">
-                            👁️
+                            show
                         </button>
                     </div>
                 </div>
@@ -27,7 +27,7 @@ function renderPasswordChangeModal() {
                     <div class="password-input-wrapper">
                         <input type="password" id="new-password" name="new-password" required>
                         <button type="button" class="toggle-password" data-target="new-password">
-                            👁️
+                            show
                         </button>
                     </div>
                 </div>
@@ -37,7 +37,7 @@ function renderPasswordChangeModal() {
                     <div class="password-input-wrapper">
                         <input type="password" id="confirm-password" name="confirm-password" required>
                         <button type="button" class="toggle-password" data-target="confirm-password">
-                            👁️
+                            show
                         </button>
                     </div>
                 </div>
@@ -59,10 +59,10 @@ function renderPasswordChangeModal() {
       const input = document.getElementById(targetId);
       if (input.type === "password") {
         input.type = "text";
-        btn.textContent = "🙈";
+        btn.textContent = "hide";
       } else {
         input.type = "password";
-        btn.textContent = "👁️";
+        btn.textContent = "show";
       }
     });
   });
@@ -183,7 +183,6 @@ function renderConfirmationModal(nama, alamat, onConfirm) {
     modal.style.display = "none";
   });
 
-  // Close when clicking overlay
   modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
     if (e.target.classList.contains("modal-overlay")) {
       modal.style.display = "none";
@@ -241,8 +240,8 @@ function renderProfile(data) {
   document.getElementById("nama").value = data.name || "";
   document.getElementById("email").value = data.email || "";
   document.getElementById("alamat").value = data.address || "";
-
-  // Isi form edit juga
+ 
+  // Isi form edit
   document.getElementById("nama-edit").value = data.name || "";
   document.getElementById("alamat-edit").value = data.address || "";
 }
@@ -254,7 +253,6 @@ function setupEditHandlers(userId) {
     "change-password-btn-profile"
   );
 
-  // --- Tombol Edit ---
   editBtn.addEventListener("click", (e) => {
     e.preventDefault();
 
@@ -269,17 +267,14 @@ function setupEditHandlers(userId) {
     // Tampilkan modal konfirmasi
     renderConfirmationModal(nama, alamat, () => {
       console.log("Submitting edit:", nama, alamat);
-      Loading.show("Menyimpan perubahan...");
       PUT(
         "/api/user",
         { nama: nama, alamat: alamat },
         (response) => {
           if (response.status === "success") {
-            Loading.hide();
-            renderToast("Profil berhasil diperbarui!", "success");
+            setToastAfterReload("Profil berhasil diperbarui!", "success");
             location.reload();
           } else {
-            Loading.hide();
             renderToast(
               "Gagal memperbarui profil: " + (response.message || ""),
               "error"
@@ -299,18 +294,27 @@ function setupEditHandlers(userId) {
   });
 }
 
-// --- Fungsi utama halaman Profile ---
+function setToastAfterReload(message, type) {
+  sessionStorage.setItem('pendingToast', JSON.stringify({ message, type }));
+}
+
+function showPendingToast() {
+  const pendingToast = sessionStorage.getItem('pendingToast');
+  if (pendingToast) {
+    const { message, type } = JSON.parse(pendingToast);
+    sessionStorage.removeItem('pendingToast');
+    renderToast(message, type);
+  }
+}
+
 export function InitProfilePage() {
   const profileContent = document.getElementById("profile-content");
-
+  showPendingToast();
   GET(
     "/api/user",
     {},
     (response) => {
       if (response.status === "success" && response.data) {
-        console.log("Data profil:", response);
-        // const test = document.getElementById("nama");
-        // console.log("Test nama element:", test);
         renderProfile(response.data);
         setupEditHandlers(response.data.user_id);
       } else {
