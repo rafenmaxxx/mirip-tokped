@@ -139,7 +139,6 @@ button:hover {
 
 /* Toggle Password Button */
 .toggle-password {
-    /* color : #333; */
     color : #555;
     font-weight: 500;
     position: absolute;

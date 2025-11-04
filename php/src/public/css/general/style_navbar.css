@@ -166,16 +166,16 @@
 
 @media (max-width: 960px) {
     .navbar {
-      padding-left: 1rem; /* kurangi padding untuk layar kecil */
+      padding-left: 1rem;
       margin-left: 1rem;
-      padding-right: 1rem; /* seimbangkan dengan kanan */
+      padding-right: 1rem;
     }
 
     .navbar__menu {
       display: none;
-      flex-direction: row;   /* 1. Atur semua item (tombol) jadi sebaris */
-      flex-wrap: wrap;       /* 2. Izinkan item turun baris jika tidak muat */
-      justify-content: center; /* 3. Pusatkan item di dalam menu */
+      flex-direction: row; 
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
       position: absolute;
       top: 64px;
@@ -213,15 +213,14 @@
         text-align: center;
     }
 
-    /* --- TAMBAHKAN BLOK INI (untuk tombol sisanya) --- */
     .navbar__menu .btn-login,
     .navbar__menu #balance-n button,
     .navbar__menu #navbar-chart button,
     .navbar__menu #order-hist button {
-        flex: 1; /* Buat mereka berbagi ruang juga */
-        width: auto; /* Jangan paksa 100% */
-        white-space: nowrap; /* Mencegah "Balance: Rp..." terpotong */
-        font-size: 0.8rem; /* (Opsional) Perkecil font agar muat */
-        padding: 0.4rem 0.6rem; /* (Opsional) Perkecil padding */
+        flex: 1; 
+        width: auto;
+        white-space: nowrap;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
     }
 }

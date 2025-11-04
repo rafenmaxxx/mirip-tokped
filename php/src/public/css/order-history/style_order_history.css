@@ -330,11 +330,6 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-
-
-
-
-
 /* Modal Base */
 .modal {
     display: none;
@@ -361,8 +356,6 @@
     box-sizing: border-box;
     overflow-y: auto;
 }
-
-
 
 /* Modal Content */
 .modal-content {
@@ -474,8 +467,6 @@
 }
 
 /* Shipping Section */
-
-
 .shipping-section {
     background: #e8f7f0;
     padding: 20px;

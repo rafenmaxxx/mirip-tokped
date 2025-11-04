@@ -243,7 +243,7 @@
   background-color: #008C4A;
 }
 
-/* Mobile - 480px ke bawah */
+
 @media (max-width: 480px) {
   .home_page {
     width: 100%;
