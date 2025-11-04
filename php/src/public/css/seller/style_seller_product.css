@@ -376,74 +376,61 @@
   background-color: #008C4A;
 }
 
-/* responsive */
 @media (max-width: 768px) {
-    /* 1. PERBAIKI PADDING/MARGIN HALAMAN UTAMA */
     body {
-        padding: 0; /* Hapus padding dari body */
+        padding: 0;
     }
 
     .main-container {
-        width: 100%; /* Paksa container mengisi 100% layar */
-        padding: 15px; /* Beri padding DI DALAM container */
-        box-sizing: border-box; /* Pastikan padding tidak merusak lebar */
-        margin-top: 5rem;  /* Kurangi margin-top untuk mobile */
+        width: 100%;
+        padding: 15px;
+        box-sizing: border-box;
+        margin-top: 5rem;
     }
 
-    /* 2. PERBAIKI GRID PRODUK (Kode Anda sudah benar) */
     .product-grid {
         grid-template-columns: 1fr;
     }
 
-    /* 3. PERBAIKI HEADER (Kode Anda sudah benar) */
     .page-header {
         flex-direction: column;
         gap: 15px;
-        /* Tambahkan ini agar filter mengisi lebar */
         align-items: stretch; 
     }
 
-    /* 4. (BARU) PERBAIKI FILTER AGAR MENUMPUK */
     .order-filter {
-        flex-direction: column; /* Tumpuk search, category, sort */
-        align-items: stretch; /* Buat semua item 100% lebar */
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    /* 5. (BARU) ATUR ULANG LEBAR ITEM FILTER */
     .search-bar,
     .custom-select {
-        flex-basis: 100%; /* Paksa 100% lebar */
-        min-width: 0; /* Hapus min-width dari desktop */
+        flex-basis: 100%;
+        min-width: 0;
     }
 
-    /* --- TAMBAHKAN BLOK INI --- */
     .btn-add {
-        /* Mengabaikan 'align-items: stretch' dari parent */
         align-self: center; 
-        
-        /* (Opsional) Beri lebar yang pas */
         width: auto; 
     }
-    
-    /* 6. (BARU) PERBAIKI TOMBOL DI DALAM KARTU PRODUK */
+
     .card-actions {
-        flex-direction: column; /* Tumpuk tombol Delete & Edit */
-        align-items: stretch; /* Buat tombol 100% lebar */
-        gap: 10px; /* Beri jarak antar tombol */
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
     }
 
-    /* 7. PERBAIKI FOOTER (Tumpuk di tengah) */
     .pagination-footer {
-        flex-direction: column; /* Tumpuk Info, Nav, Dropdown */
-        justify-content: center; /* Tengahkan */
+        flex-direction: column;
+        justify-content: center;
         align-items: center;
         gap: 15px;
     }
 
     .pagination-info {
-        flex-basis: auto; /* Hapus 'flex-basis: 100%' */
+        flex-basis: auto;
         text-align: center;
-        margin-bottom: 0; /* Hapus margin-bottom */
+        margin-bottom: 0;
         order: 1;
     }
 
@@ -458,8 +445,8 @@
     }
 }
 
+
 @media (max-width: 480px) {
-    
     .main-container {
         width: 100%;
         padding: 15px;
