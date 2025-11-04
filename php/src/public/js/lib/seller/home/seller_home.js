@@ -27,7 +27,7 @@ function LoadSellerData() {
         ChangeTextContentById("low-stock", res.low_stock_products);
         ChangeTextContentById("pending-order", res.pending_orders);
         const imgUrl = `/api/image?file=${res.store_logo_path}`;
-        console.log(imgUrl);
+
         ChangeInnerHtmlById(
           "profile-avatar",
           `<img src="${imgUrl}" alt="Gambar Profil Toko">`
@@ -102,11 +102,6 @@ export function showEditStoreModal(currentName, currentDescription) {
     const newName = newForm.querySelector("#edit-store-name").value;
     const newDesc = newForm.querySelector("#quill-desc-input").value;
     const newImageFile = newForm.querySelector("#edit-store-image").files[0];
-
-    console.log("Menyimpan data baru:");
-    console.log("Nama:", newName);
-    console.log("Deskripsi:", newDesc);
-    console.log("File Gambar:", newImageFile);
 
     const formData = new FormData();
 
