@@ -81,6 +81,33 @@
 
 }
 
+.spinner-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  margin: 1em 0;
+}
+
+.spinner-btn {
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 0.5em 1em;
+  font-size: 1.2em;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.spinner-btn:hover {
+  background-color: #ddd;
+}
+
+#spinner-field {
+  width: 60px;
+  text-align: center;
+  font-size: 1em;
+}
+
 
 
 @keyframes fadeIn {

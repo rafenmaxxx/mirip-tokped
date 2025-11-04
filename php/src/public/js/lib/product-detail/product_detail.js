@@ -3,7 +3,10 @@ import { GET, POST } from "../../api/api.js";
 import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { renderToast } from "../general/toast.js";
 import { InitCountCart } from "../general/navbar.js";
-import { showModalConfirmation } from "../general/modal.js";
+import {
+  showModalConfirmation,
+  showModalSpinnerInput,
+} from "../general/modal.js";
 
 function LoadDetail(data) {
   const res = data.data;
@@ -46,7 +49,7 @@ function LoadDetail(data) {
   }
 }
 
-function LoadAddCartBtn(id) {
+function LoadAddCartBtn(id, stock) {
   GET(
     "/api/auth",
     {},
@@ -60,25 +63,36 @@ function LoadAddCartBtn(id) {
           );
           const cartBtn = document.getElementById("cartBtn");
           cartBtn.addEventListener("click", (e) => {
-            const product_id = id;
-            console.log("Adding to cart:", product_id, data.data.id);
-            e.stopPropagation();
-            POST(
-              "/api/cart",
-              { action: "add", product_id: product_id, buyer_id: data.data.id },
-              (response) => {
-                if (response.status === "success") {
-                  renderToast(
-                    "Berhasil menambahkan produk kedalam cart",
-                    "success"
-                  );
-                  InitCountCart();
-                } else {
-                  renderToast(
-                    "Gagal menambahkan produk kedalam cart",
-                    "success"
-                  );
-                }
+            showModalSpinnerInput(
+              "Adding To Cart",
+              stock,
+              (qty) => {
+                const product_id = id;
+                e.stopPropagation();
+                POST(
+                  "/api/cart",
+                  {
+                    action: "add",
+                    product_id: product_id,
+                    buyer_id: data.data.id,
+                    quantity: qty,
+                  },
+                  (response) => {
+                    if (response.status === "success") {
+                      renderToast(
+                        `Berhasil menambahkan ${qty} produk  kedalam cart`,
+                        "success"
+                      );
+                      InitCountCart();
+                    } else {
+                      renderToast(
+                        "Gagal menambahkan produk kedalam cart",
+                        "success"
+                      );
+                    }
+                  },
+                  () => {}
+                );
               },
               () => {}
             );
@@ -118,7 +132,8 @@ export function InitProductDetail() {
     { id: param_id },
     (data) => {
       LoadDetail(data);
-      LoadAddCartBtn(param_id);
+      const stock = data.data.stock;
+      LoadAddCartBtn(param_id, stock);
     },
     IsErr
   );
