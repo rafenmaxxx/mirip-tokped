@@ -9,7 +9,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'POST':
         guard(['BUYER']);
-        $value = $_POST['value'];
+        $value = (int) $_POST['value'];
         $id = $_SESSION['user']['id'];
         $data = $model->addBalance($id, $value);
         if ($data) {
