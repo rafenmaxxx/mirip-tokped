@@ -78,7 +78,8 @@ switch ($method) {
                 $durasi = $PUT['durasi'] ?? null;
                 if ($id && $status) {
                     $result = $model->updateStatus($id, $status, $msg, $durasi);
-                    if ($result) {
+                    if ($result > 0) {
+                        http_response_code(200);
                         echo json_encode(['status' => 'success', 'data' => $result]);
                     } else {
                         http_response_code(400);

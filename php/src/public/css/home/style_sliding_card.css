@@ -45,6 +45,7 @@
   color: #00a14b;
 }
 
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero-slide img { height: 300px; }

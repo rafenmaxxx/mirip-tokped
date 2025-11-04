@@ -2,65 +2,67 @@ import { GET } from "../../api/api.js";
 import { POST } from "../../api/api.js";
 import { router } from "../../../app.js";
 import { renderToast } from "../general/toast.js";
+import { renderSkeleton } from "../../util/component_loader.js";
 
 let currentPage = 1;
 let itemsPerPage = 5;
 
 function renderPaginationButtons(totalPages) {
-    const navContainer = document.getElementById("pagination-nav-buttons");
-    if (!navContainer) return;
+  const navContainer = document.getElementById("pagination-nav-buttons");
+  if (!navContainer) return;
 
-    navContainer.innerHTML = "";
+  navContainer.innerHTML = "";
 
-    const createPageButton = (page) => {
-        const pageButton = document.createElement("a");
-        pageButton.href = "#";
-        pageButton.textContent = page;
-        pageButton.dataset.page = page;
+  const createPageButton = (page) => {
+    const pageButton = document.createElement("a");
+    pageButton.href = "#";
+    pageButton.textContent = page;
+    pageButton.dataset.page = page;
 
-        if (page === currentPage) {
-            pageButton.classList.add("active");
-        }
-
-        pageButton.addEventListener("click", (e) => {
-            e.preventDefault(); 
-            currentPage = page;
-            fetchProducts();
-        });
-        
-        return pageButton;
-    };
-
-    const createEllipsis = () => {
-        const ellipsis = document.createElement("span");
-        ellipsis.textContent = "...";
-        return ellipsis;
-    };
-
-    const pagesToShow = new Set();
-    const siblingCount = 1;
-
-    pagesToShow.add(1);
-    const startPage = Math.max(2, currentPage - siblingCount);
-    const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
-
-    for (let i = startPage; i <= endPage; i++) {
-        pagesToShow.add(i);
+    if (page === currentPage) {
+      pageButton.classList.add("active");
     }
 
-    pagesToShow.add(totalPages);
-
-    let lastPage = 0;
-    pagesToShow.forEach(page => {
-        if (lastPage !== 0 && page - lastPage > 1) {
-            navContainer.appendChild(createEllipsis());
-        }
-        
-        navContainer.appendChild(createPageButton(page));
-        lastPage = page;
+    pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      currentPage = page;
+      fetchProducts();
     });
-}
 
+    return pageButton;
+  };
+
+  const createEllipsis = () => {
+    const ellipsis = document.createElement("span");
+    ellipsis.textContent = "...";
+    return ellipsis;
+  };
+
+  const pagesToShow = new Set();
+  const siblingCount = 1;
+
+  pagesToShow.add(1);
+  const startPage = Math.max(2, currentPage - siblingCount);
+  const endPage = Math.min(totalPages - 1, currentPage + siblingCount);
+
+  for (let i = startPage; i <= endPage; i++) {
+    pagesToShow.add(i);
+  }
+
+  pagesToShow.add(totalPages);
+
+  let lastPage = 0;
+  pagesToShow.forEach((page) => {
+    if (lastPage !== 0 && page - lastPage > 1) {
+      navContainer.appendChild(createEllipsis());
+    }
+
+    navContainer.appendChild(createPageButton(page));
+    lastPage = page;
+  });
+  const footerN = document.querySelector(".pagination-footer");
+  footerN?.classList.add("visible");
+}
 
 function morphProductBtn(data) {
   if (data.status == "success" && data.data.role == "BUYER") {
@@ -176,7 +178,7 @@ function LoadProfileStore(data) {
     const html = `
           <div class="store_card">
             <div class="store_image">
-              <img src="${imageUrl}" alt="${store.store_name}">
+              <img src="${imageUrl}" alt="${store.store_name}" width=150 height=150>
             </div>
             <div class="store_desc">
               <div class="store_name">${store.store_name}</div>
@@ -214,10 +216,20 @@ function fetchProducts() {
   if (!param_id) {
     router.navigateTo("/unauthorized");
   } else {
-    GET("/api/detail_store", { store_id: param_id }, LoadProfileStore, ProfileErr);
-    GET("/api/product", { store_id: param_id, page: currentPage, limit: itemsPerPage }, LoadProduct, ProductErr);
-  } 
+    GET(
+      "/api/detail_store",
+      { store_id: param_id },
+      LoadProfileStore,
+      ProfileErr
+    );
 
+    GET(
+      "/api/product",
+      { store_id: param_id, page: currentPage, limit: itemsPerPage },
+      LoadProduct,
+      ProductErr
+    );
+  }
 }
 export async function InitDetailStore() {
   currentPage = 1;
