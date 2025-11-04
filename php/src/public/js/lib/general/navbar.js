@@ -65,19 +65,131 @@ function HandleTopUp(value) {
   );
 }
 
+export function InitDropdown() {
+  const dropdown = document.getElementById("userDropdown");
+  const toggle = document.getElementById("dropdownToggle");
+  const content = document.getElementById("dropdownContent");
+
+  if (!dropdown || !toggle || !content) return;
+
+  // Toggle dropdown
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation(); // agar klik tidak menutup langsung
+    dropdown.classList.toggle("show");
+  });
+
+  // Klik di luar dropdown → close
+  document.addEventListener("click", () => {
+    dropdown.classList.remove("show");
+  });
+
+  // Contoh event listener tombol
+  document.getElementById("btn-profile").addEventListener("click", () => {
+   router.navigateTo("/profile");
+    dropdown.classList.remove("show");
+  });
+
+  document.getElementById("btn-orders").addEventListener("click", () => {
+      router.navigateTo("/order-history");
+    dropdown.classList.remove("show");
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    console.log("Logout");
+    dropdown.classList.remove("show");
+  });
+}
+
+
 function morphAuthBtn(data) {
   const btn = document.getElementById("navbar-auth-btn");
   const chart = document.getElementById("navbar-chart");
   const balance = document.getElementById("balance-btn");
-  const orderHist = document.getElementById("order-hist");
+
   const search = document.getElementById("navbar__search");
   const filter = document.getElementById("filter-btn");
   const menu = document.getElementById("navbar-menu");
 
   if (data.status == "success") {
     // udah login
-    btn.innerHTML = `<button class="btn btn-login" id="btn-profile">Profile</button>
+   const viewportWidth = window.innerWidth;
+   console.log(viewportWidth);
+   if (data.data.role == "BUYER" && viewportWidth <= 480) {
+     document.getElementById("balance-n").innerHTML = "";
+     document.getElementById("userDropdown").innerHTML = "";
+        btn.innerHTML = ` <button class="btn btn-login" id="btn-profile">Profile</button>
+                <button class="btn btn-login" id="btn-orders">Order History</button>
+                <button class="btn btn-login" id="btn-logout">Logout</button>`;
+    document.getElementById("btn-profile").addEventListener("click", () => {
+   router.navigateTo("/profile");
+    dropdown.classList.remove("show");
+  });
+ document.getElementById("btn-orders").addEventListener("click", () => {
+      router.navigateTo("/order-history");
+    dropdown.classList.remove("show");
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    console.log("Logout");
+    dropdown.classList.remove("show");
+  });
+
+    document.getElementById("btn-profile").addEventListener("click", () => {
+   router.navigateTo("/profile");
+ 
+  });
+
+  document.getElementById("btn-orders").addEventListener("click", () => {
+      router.navigateTo("/order-history");
+
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    console.log("Logout");
+    
+  })
+ 
+    chart.addEventListener("click", () => {
+        router.navigateTo("/cart");
+      });
+      InitBalance();
+      InitCountCart();
+   }else 
+    
+    if (data.data.role == "BUYER") {
+        InitDropdown();
+      chart.addEventListener("click", () => {
+        menu.classList.remove("is-active");
+        router.navigateTo("/cart");
+      });
+      document.getElementById("balance-n").innerHTML = "";
+      document.getElementById("dropdownToggle").innerHTML = data.data.name;
+      InitBalance();
+      InitCountCart();
+    }
+   else if (data.data.role == "SELLER") {
+          document.getElementById("userDropdown").innerHTML = "";
+       btn.innerHTML = `<button class="btn btn-login" id="btn-home">Dashboard</button><button class="btn btn-login" id="btn-profile">Profile</button>
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
+      chart.innerHTML = `<button class="btn btn-login" id="chartBtn">Produk</button>`;
+      document.getElementById("for-order").innerHTML = `<div id="order-hist"> <button class="btn btn-login" id="chartBtn">Order</button></div>`
+      chart.addEventListener("click", () => {
+        menu.classList.remove("is-active");
+        router.navigateTo("/seller/products");
+      });
+
+      document.getElementById("btn-home").addEventListener("click",()=>{router.navigateTo("/seller")})
+
+        const orderHist = document.getElementById("order-hist");
+      orderHist.addEventListener("click", () => {
+        menu.classList.remove("is-active");
+        router.navigateTo("/seller/orders");
+      });
+      balance.innerHTML = ``;
+      InitBalance();
+      search.innerHTML = "";
+      filter.innerHTML = "";
+    }
     const logoutBtn = document.getElementById("btn-logout");
     logoutBtn.addEventListener("click", () => {
       showModalConfirmation(
@@ -101,51 +213,25 @@ function morphAuthBtn(data) {
         () => {}
       );
     });
-
-    const profile = document.getElementById("btn-profile");
+        const profile = document.getElementById("btn-profile");
     profile.addEventListener("click", () => {
       menu.classList.remove("is-active");
       router.navigateTo("/profile");
     });
-    if (data.data.role == "BUYER") {
-      chart.addEventListener("click", () => {
-        menu.classList.remove("is-active");
-        router.navigateTo("/cart");
-      });
-      orderHist.addEventListener("click", () => {
-        menu.classList.remove("is-active");
-        router.navigateTo("/order-history");
-      });
-      document.getElementById("balance-n").innerHTML = "";
-      InitBalance();
-      InitCountCart();
-    }
-    if (data.data.role == "SELLER") {
-      chart.innerHTML = `<button class="btn btn-login" id="chartBtn">Produk</button>`;
 
-      orderHist.innerHTML = `<button class="btn btn-login" id="chartBtn">Order</button>`;
-      chart.addEventListener("click", () => {
-        menu.classList.remove("is-active");
-        router.navigateTo("/seller/products");
-      });
-      orderHist.addEventListener("click", () => {
-        menu.classList.remove("is-active");
-        router.navigateTo("/seller/orders");
-      });
-      balance.innerHTML = ``;
-      InitBalance();
-      search.innerHTML = "";
-      filter.innerHTML = "";
-    }
   } else {
     // blom login
+
     btn.innerHTML = ` <a href="/login"><button class="btn btn-login">Login</button></a>
         <a href="/register "><button class="btn btn-register">Register</button></a>`;
     chart.innerHTML = "";
     balance.innerHTML = "";
-    orderHist.innerHTML = "";
     document.getElementById("balance-n").innerHTML = "";
+    document.getElementById("userDropdown").innerHTML = "";
   }
+  
+
+
 }
 
 function showSuggestion(query) {

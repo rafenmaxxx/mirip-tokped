@@ -18,7 +18,6 @@ function renderFilterDropdown(data) {
   const filterContainer = document.getElementById("category-filter");
   if (!filterContainer) return;
 
-  console.log("Category Data for Filter:", data);
   let categories = [];
 
   categories.push({ value: "", label: "All Categories" });
@@ -240,8 +239,6 @@ function LoadSellerProductData(data) {
   const footer = document.getElementById("pagination-container");
   if (!container) return;
 
-  console.log("Seller Product Data:", data);
-
   if (data.status === "success" && Array.isArray(data.data)) {
     allProducts = data.data;
     productCounts = data.count;
@@ -315,8 +312,6 @@ function fetchProducts() {
     params.sort = currentSort;
   }
 
-  console.log("Fetching products with params:", params);
-
   GET("/api/product", params, LoadSellerProductData, SellerProductErr);
 }
 
@@ -335,7 +330,7 @@ export async function InitSellerProductPage() {
   if (itemsPerPageSelect) {
     itemsPerPageSelect.addEventListener("change", (e) => {
       itemsPerPage = parseInt(e.target.value, 10);
-      console.log("Items per page changed to:", itemsPerPage);
+
       currentPage = 1;
       fetchProducts();
     });
@@ -354,7 +349,7 @@ export async function InitSellerProductPage() {
   if (categorySelect) {
     categorySelect.addEventListener("change", (e) => {
       currentCategory = e.target.value;
-      console.log("Category filter changed to:", currentCategory);
+
       currentPage = 1;
       fetchProducts();
     });
@@ -366,8 +361,6 @@ export async function InitSellerProductPage() {
       clearTimeout(debounceTimer);
 
       debounceTimer = setTimeout(() => {
-        console.log("Debounce selesai, mencari:", e.target.value);
-
         currentSearch = e.target.value;
         currentPage = 1;
         fetchProducts();

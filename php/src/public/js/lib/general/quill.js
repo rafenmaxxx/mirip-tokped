@@ -31,7 +31,7 @@ function setupQuill() {
   quill.on("text-change", (delta, oldDelta, source) => {
     hiddenInput.value = quill.root.innerHTML;
     let len = quill.getLength() - 1;
-    console.log(len);
+
     if (len > MAX_LENGTH) {
       let isInsert = delta.ops.some((op) => op.insert);
       if (isInsert) {

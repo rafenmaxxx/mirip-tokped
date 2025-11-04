@@ -12,8 +12,6 @@ function LoadCheckoutItems(data) {
   const container = document.getElementById("checkout-data");
   if (!container) return;
 
-  console.log("Checkout Data:", data);
-
   if (data.status === "success" && Array.isArray(data.data.stores)) {
     const cartItems = data.data.stores;
     const buyer_id = data.data.buyer_id;
@@ -74,10 +72,8 @@ function LoadCheckoutItems(data) {
       (response) => {
         if (response.status === "success" && response.data) {
           total_price = response.data.total_price || response.data || 0;
-          console.log("Total price from API:", total_price);
         } else {
           total_price = 0;
-          console.log("Failed to get total price, using 0");
         }
 
         container.innerHTML = `
@@ -123,7 +119,7 @@ function CheckoutItemsErr(err) {
 
 function LoadBalance(data) {
   const balanceContainer = document.getElementById("checkout-balance");
-  console.log("Balance Data:", data);
+
   if (!balanceContainer) return;
 
   if (data.status === "success" && data.data) {
@@ -177,7 +173,6 @@ function LoadBalance(data) {
 
     GET("/api/user", { action: "address" }, LoadAddressForm, AddressErr);
   } else {
-    console.log("Failed to load balance:", data);
     balanceContainer.innerHTML = `
       <div class="balance_card">
         <p class="balance_error">Error loading balance.</p>
@@ -222,8 +217,6 @@ function handleCheckout(balance) {
 function LoadAddressForm(data) {
   const addressContainer = document.getElementById("checkout-address-form");
   if (!addressContainer) return;
-
-  console.log("Address Data:", data);
 
   if (data.status === "success" && data.data) {
     const address = data.data.address || "";

@@ -79,7 +79,7 @@ function morphProductBtn(data) {
     cartButtons.forEach((btn, index) => {
       btn.addEventListener("click", (e) => {
         const product_id = btn.getAttribute("product-id");
-        console.log("Adding to cart:", product_id, data.data.id);
+
         e.stopPropagation();
         POST(
           "/api/cart",
@@ -241,7 +241,7 @@ export async function InitDetailStore() {
   if (itemsPerPageSelect) {
     itemsPerPageSelect.addEventListener("change", (e) => {
       itemsPerPage = parseInt(e.target.value, 10);
-      console.log("Items per page changed to:", itemsPerPage);
+
       currentPage = 1;
       fetchProducts();
     });

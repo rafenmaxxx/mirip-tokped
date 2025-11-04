@@ -71,7 +71,7 @@ function createOrderCard(order) {
         <h3 class="order-title">#${order.order_id} - ${
     order.buyer_name || "Nama Buyer"
   }</h3>
-        <span class="order-date"> ${order.created_at.split('.')[0]}</span>
+        <span class="order-date"> ${order.created_at.split(".")[0]}</span>
         <span class="order-status ${statusColorClass}">
           ${order.status.replace("_", " ")}
         </span>
@@ -110,8 +110,6 @@ function fetchOrders() {
     params.limit = itemsPerPage;
   }
 
-  console.log("Fetching products with params:", params);
-
   GET("/api/order", params, LoadOrder, SellerOrderErr);
 }
 
@@ -123,7 +121,6 @@ function SellerOrderErr(err) {
   const container = document.getElementById("og1");
   if (!container) return;
 
-  console.log("Error fetching order history:", err);
   container.innerHTML =
     "<p class='error-message'>Error loading order history. Please try again later.</p>";
 }
@@ -191,8 +188,6 @@ function LoadOrder(data) {
   const footer = document.getElementById("pagination-container");
   if (!grid) return;
 
-  console.log("Order Data:", data);
-
   if (data.status !== "success") {
     grid.innerHTML = `<p>Gagal memuat data order.</p>`;
     return;
@@ -229,7 +224,6 @@ function LoadOrder(data) {
       showModalConfirmation(
         "Approve order ?",
         () => {
-          console.log("Approve order:", e.target.dataset.id);
           PUT(
             "/api/order",
             {
@@ -262,7 +256,6 @@ function LoadOrder(data) {
       showModalTextInput(
         "Reject order ? berikan alasan !",
         (reason) => {
-          console.log("Reject order:", e.target.dataset.id);
           PUT(
             "/api/order",
             {
@@ -293,7 +286,6 @@ function LoadOrder(data) {
 
   document.querySelectorAll(".btn-deliver").forEach((btn) =>
     btn.addEventListener("click", (e) => {
-      console.log("Deliver order:", e.target.dataset.id);
       showModalNumberInput(
         "Deliver barang ? masukkan estimasi durasi",
         (durasi) => {
@@ -327,7 +319,6 @@ function LoadOrder(data) {
 
   document.querySelectorAll(".btn-detail").forEach((btn) =>
     btn.addEventListener("click", (e) => {
-      console.log("Lihat detail order:", e.target.dataset.id);
       renderOrderDetailModal(
         orders.find((o) => o.order_id == e.target.dataset.id)
       );
@@ -525,7 +516,7 @@ export function InitOrderSeller() {
   if (itemsPerPageSelect) {
     itemsPerPageSelect.addEventListener("change", (e) => {
       itemsPerPage = parseInt(e.target.value, 10);
-      console.log("Items per page changed to:", itemsPerPage);
+
       currentPage = 1;
       fetchOrders();
     });
@@ -535,7 +526,7 @@ export function InitOrderSeller() {
   if (statusSelect) {
     statusSelect.addEventListener("change", (e) => {
       currentStatus = e.target.value;
-      console.log("Status filter changed to:", currentStatus);
+
       currentPage = 1;
       fetchOrders();
     });
@@ -547,8 +538,6 @@ export function InitOrderSeller() {
       clearTimeout(debounceTimer);
 
       debounceTimer = setTimeout(() => {
-        console.log("Debounce selesai, mencari:", e.target.value);
-
         currentSearch = e.target.value;
         currentPage = 1;
         fetchOrders();
