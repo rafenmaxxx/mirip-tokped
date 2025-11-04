@@ -119,7 +119,7 @@
 }
 
 /* Tombol */
-.btn {
+.btn-profile {
     display: inline-block;
     padding: 10px 18px;
     border: none;
@@ -132,28 +132,28 @@
 }
 
 /* Hover dan efek klik */
-.btn:hover {
+.btn-profile:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
 }
 
-.btn:active {
+.btn-profile:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 /* Warna tombol */
-.btn-edit {
+.btn-profile-edit {
     background-color: #007bff;
     color: white;
 }
 
-.btn-password {
+.btn-profile-password {
     background-color: #28a745;
     color: white;
 }
 
-.btn-danger {
+.btn-profile-danger {
     background-color: #dc3545;
     color: white;
 }
@@ -321,7 +321,7 @@
 }
 
 /* Button Save */
-.btn-save {
+.btn-profile-save {
     width: 100%;
     padding: 12px;
     background-color: #007bff;
@@ -335,11 +335,11 @@
     margin-top: 10px;
 }
 
-.btn-save:hover:not(:disabled) {
+.btn-profile-save:hover:not(:disabled) {
     background-color: #0056b3;
 }
 
-.btn-save:disabled {
+.btn-profile-save:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
 }
@@ -351,7 +351,7 @@
     margin-top: 20px;
 }
 
-.modal-confirmation .button-group .btn {
+.modal-confirmation .button-group .btn-profile {
     flex: 1;
 }
 

@@ -4,9 +4,10 @@ import { ChangeInnerHtmlById } from "../../util/component_loader.js";
 import { showModalConfirmation } from "../general/modal.js";
 import { renderToast } from "../general/toast.js";
 import { Loading } from "../general/loading.js";
+import { InitCountCart } from "../general/navbar.js";
 
 let total_price = 0;
-
+let user_address = "";
 function LoadCheckoutItems(data) {
   const container = document.getElementById("checkout-data");
   if (!container) return;
@@ -206,6 +207,7 @@ function handleCheckout(balance) {
           () => {
             renderToast("Sukses Checkout", "success");
             router.navigateTo("/order-history");
+            InitCountCart();
           },
           () => {
             renderToast("Gagal Checkout", "error");
@@ -225,11 +227,17 @@ function LoadAddressForm(data) {
 
   if (data.status === "success" && data.data) {
     const address = data.data.address || "";
-    addressContainer.innerHTML = `<form id="address-form">
+    user_address = address;
+    addressContainer.innerHTML = `<div id="address-form">
         <label for="shipping-address">Shipping Address:</label>
         <textarea id="shipping-address" name="shipping-address" rows="4" cols="50" required>${address}</textarea>
-        <button type="submit" id="edit-address-btn">Edit</button>
-        </form>`;
+        <button id="edit-address-btn">My Address</button>
+        </div>`;
+    document
+      .getElementById("edit-address-btn")
+      .addEventListener("click", (e) => {
+        document.getElementById("shipping-address").value = address;
+      });
   } else {
     addressContainer.innerHTML = "Error loading address form.";
   }
@@ -244,9 +252,8 @@ function AddressErr(err) {
 
 export function InitCheckoutPage() {
   GET("/api/cart", {}, LoadCheckoutItems, CheckoutItemsErr);
-  document.addEventListener("click", (e) => {
-    if (e.target && e.target.id === "topupBtn") {
-      GET("/api/user", { action: "balance" }, LoadBalance, BalanceErr);
-    }
+
+  window.addEventListener("balanceUpdated", () => {
+    GET("/api/user", { action: "balance" }, LoadBalance, BalanceErr);
   });
 }
