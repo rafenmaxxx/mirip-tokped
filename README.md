@@ -154,33 +154,33 @@ Akses aplikasi melalui browser di `http://localhost:8000`
 ## Pembagian Tugas
 
 ### Server-side
-- Login: 13523xxx, 13523xxx
-- Register: 13523xxx
-- Product Management: 13523xxx, 13523xxx
-- Cart Management: 13523xxx
-- Checkout : 13523xxx
-- Order Management: 13523xxx, 13523xxx
-- User Profile: 13523xxx
-- Database : 13523xxx, 13523xxx
-- API Routes: 13523xxx
+- Login: 13523073, 13523025, 13523031
+- Register: 13523073,13523025
+- Product Management: 13523031
+- Cart Management: 13523073,13523025
+- Checkout : 13523073,13523025
+- Order Management: 13523073, 13523025,13523031
+- User Profile: 13523025
+- Database : 13523073, 13523025
+- API Routes: 13523073, 13523025, 13523031
 
 ### Client-side
-- Login Page: 13523xxx, 13523xxx
-- Register Page: 13523xxx
-- Home Page: 13523xxx
-- Product Detail: 13523xxx
-- Store Detail: 13523xxx
-- Shopping Cart: 13523xxx
-- Checkout Page: 13523xxx
-- Order History: 13523xxx
-- User Profile Page: 13523xxx
-- Seller Dashboard: 13523xxx, 13523xxx
-- Product Management: 13523xxx
-- Add Product: 13523xxx
-- Edit Product: 13523xxx
-- Order Management: 13523xxx, 13523xxx
-- Responsive Design: 13523xxx, 13523xxx
-- UI/UX Design: 13523xxx, 13523xxx
+- Login Page: 13523073,13523025
+- Register Page: 13523073,13523025
+- Home Page: 13523073
+- Product Detail: 13523031
+- Store Detail: 13523073,13523025
+- Shopping Cart: 13523025
+- Checkout Page: 13523025
+- Order History: 13523073,13523025
+- User Profile Page: 13523025
+- Seller Dashboard: 13523031, 13523xxx
+- Product Management: 13523031
+- Add Product: 13523031 , 13523073
+- Edit Product: 13523031 13523073
+- Order Management: 13523031
+- Responsive Design: 13523031
+- UI/UX Design: 13523031
 
 ### Additional Tasks
-- Docker Configuration: 13523xxxx
+- Docker Configuration: 13523073
