@@ -91,8 +91,8 @@ switch ($method) {
         $password = $_POST['password'] ?? null;
         $role = $_POST['role'] ?? null;
 
-
-        $data = $model->createUser($name, $email, $password, $address, $role, 0);
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $data = $model->createUser($name, $email, $hashedPassword, $address, $role, 0);
 
         if ($data['status'] && strtoupper($role) === 'SELLER') {
             $userId = $data['id'];
@@ -172,14 +172,15 @@ switch ($method) {
 
         if ($new_password) {
             $checkPass = $model->getById($id);
-            
-            if (password_verify($new_password, $checkPass['password'])) {
+            if (password_verify($new_password, $checkPass['password']) && !($new_password === $checkPass['password'])) {
                 echo json_encode(['status' => 'error', 'message' => 'Password lama salah.']);
                 exit;
             } 
+
+            $hashedPassword = password_hash($new_password, PASSWORD_BCRYPT);
         }
 
-        $data = $model->updateUser($id, $new_name, $new_address, $new_password);
+        $data = $model->updateUser($id, $new_name, $new_address, $hashedPassword);
         echo json_encode(['status' => 'success', 'data' => $data]);
         break;
 
