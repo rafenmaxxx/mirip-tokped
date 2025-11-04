@@ -106,13 +106,6 @@ function renderPasswordChangeModal() {
           return;
         }
 
-        if (verifyResult.data.password !== currentPassword) {
-          errorDiv.textContent = "Password lama salah.";
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Simpan";
-          return;
-        }
-
         // Update password baru
         Loading.show("Mengubah password...");
         PUT(
@@ -132,7 +125,10 @@ function renderPasswordChangeModal() {
             submitBtn.disabled = false;
             submitBtn.textContent = "Simpan";
           },
-          () => {}
+          (error) => {
+            Loading.hide();
+            renderToast("Terjadi kesalahan saat mengubah password.", "error");
+          }
         );
       },
       () => {}
