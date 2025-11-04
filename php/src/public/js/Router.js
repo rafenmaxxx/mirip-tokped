@@ -1,11 +1,10 @@
-import { GET, GETMODULE } from "./api/api.js";
+import { GET } from "./api/api.js";
 import { LoadComponent, RemoveComponent } from "./util/component_loader.js";
 
 export class Router {
   constructor(appElementId, devMode = true) {
-    // devMode = true untuk development
     this.app = document.getElementById(appElementId);
-    this.devMode = devMode; // REMOVE IN PRODUCTION
+    this.devMode = devMode;
     this.navBarInit = false;
     this.moduleCache = {};
     this.cssCache = new Set();
@@ -16,57 +15,45 @@ export class Router {
       "/api/path",
       { path },
       (data) => {
-        // jika route tidak ditemukan atau user tidak punya akses
         if (!data || data.status !== "success" || !data.data) {
           this.navigateTo("/unauthorized");
           return;
         }
 
-        const route = data.data;
-
+        const { html_content, metadata: route } = data.data;
         try {
-          // load HTML
-          const htmlPath = this.devMode
-            ? `${route.html}?v=${Date.now()}`
-            : route.html;
+          this.loadCSS(route.css || []);
+          this.app.innerHTML = html_content;
+          if (route.useNavbar && !this.navBarInit) {
+            this.navBarInit = true;
 
-          GETMODULE(
-            htmlPath,
-            {},
-            (html) => {
-              this.app.innerHTML = html;
-              // Navbar
-              if (route.useNavbar && !this.navBarInit) {
-                this.navBarInit = true;
-                LoadComponent(
-                  "navbar",
-                  this.devMode
-                    ? `/components/general/navbar.html?v=${Date.now()}`
-                    : "/components/general/navbar.html",
-                  () => {
-                    this.loadModuleOnce("./lib/general/navbar.js", [
-                      "InitNavbar",
-                    ]);
-                    this.loadCSS(["/css/general/style_navbar.css"]);
-                  }
-                );
-              } else if (!route.useNavbar) {
-                RemoveComponent("navbar");
-                this.navBarInit = false;
+            LoadComponent(
+              "navbar",
+              this.devMode
+                ? `/components/general/navbar.html?v=${Date.now()}`
+                : "/components/general/navbar.html",
+              () => {
+                this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
+                this.loadCSS(["/css/general/style_navbar.css"]);
               }
-              this.loadCSS(route.css || []);
-              this.handleFunc(route.js);
-            },
-            () => {
-              this.app.innerHTML = `<h1>404 - Page Not Found</h1>`;
-            }
-          );
+            );
+          } else if (!route.useNavbar) {
+            RemoveComponent("navbar");
+            this.navBarInit = false;
+          }
+
+          this.handleFunc(route.js);
         } catch (err) {
           console.error("Error loading view:", err);
           this.app.innerHTML = `<h1>Error loading page</h1>`;
         }
       },
-      () => {}
+      (error) => {
+        if (error) {
+          console.error("API call to /api/path failed:", error);
+          this.app.innerHTML = `<h1>Network Error</h1>`;
+        }
+      }
     );
   }
 
@@ -80,10 +67,8 @@ export class Router {
   }
 
   async loadModuleOnce(path, funcNames = []) {
-    // Tambahkan cache-buster untuk development
-    const importPath = this.devMode ? `${path}?v=${Date.now()}` : path; // REMOVE IN PRODUCTION
+    const importPath = this.devMode ? `${path}?v=${Date.now()}` : path;
 
-    // Reset module cache tiap loadView jika devMode
     if (!this.devMode) {
       if (!this.moduleCache[path]) {
         const module = await import(importPath);
@@ -93,10 +78,9 @@ export class Router {
         console.log(`Using cached module: ${path}`);
       }
     } else {
-      // Development: selalu import fresh
       const module = await import(importPath);
       console.log(`Loaded fresh module (devMode): ${importPath}`);
-      this.moduleCache[path] = module; // optional: bisa dihapus juga
+      this.moduleCache[path] = module;
     }
 
     const module = this.moduleCache[path];
@@ -113,21 +97,49 @@ export class Router {
     }
   }
 
-  async loadCSS(cssPaths) {
-    for (const cssPath of cssPaths) {
-      let finalPath = cssPath;
-      if (this.devMode) {
-        finalPath += `?v=${Date.now()}`; // REMOVE IN PRODUCTION
+  loadCSS(cssPaths) {
+    const app = document.getElementById("app");
+    if (!cssPaths || !cssPaths.length) return;
+
+    app?.classList.remove("visible");
+
+    let loadedCount = 0;
+    const total = cssPaths.length;
+
+    cssPaths.forEach((cssPath) => {
+      let finalPath = this.devMode ? cssPath + "?v=" + Date.now() : cssPath;
+
+      if (
+        [...document.styleSheets].some(
+          (s) => s.href && s.href.includes(cssPath)
+        )
+      ) {
+        loadedCount++;
+        if (loadedCount === total) app?.classList.add("visible");
+        return;
       }
-      if (!this.cssCache.has(finalPath)) {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = finalPath;
-        document.head.appendChild(link);
-        this.cssCache.add(finalPath);
-        console.log(`Loaded CSS: ${finalPath}`);
-      }
-    }
+
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = finalPath;
+
+      link.onload = () => {
+        loadedCount++;
+        console.log("Loaded CSS:", finalPath);
+
+        if (loadedCount === total) {
+          app?.classList.add("visible");
+        }
+      };
+
+      link.onerror = () => {
+        loadedCount++;
+        console.warn("Gagal memuat CSS:", finalPath);
+        if (loadedCount === total) app?.classList.add("visible");
+      };
+
+      document.head.appendChild(link);
+    });
   }
 
   handleRoute() {

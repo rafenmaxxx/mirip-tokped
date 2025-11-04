@@ -1,7 +1,9 @@
 import { router } from "../../../../app.js";
 import { showModalConfirmation } from "../../general/modal.js";
+import { InitQuill } from "../../general/quill.js";
 
 export function InitAddProduct() {
+  InitQuill();
   document.getElementById("harga").addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/[^0-9]/g, "");
   });
@@ -51,7 +53,7 @@ export function InitAddProduct() {
     showModalConfirmation(
       "Yakin batal? ini ga akan kesimpen lho",
       () => {
-        router.navigateTo("/");
+        router.navigateTo("/seller/products");
       },
       () => {}
     );

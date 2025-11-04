@@ -1,23 +1,29 @@
-<div class="login-card">
-    <h1>Login</h1>
-    <p>Selamat datang kembali di Mirip-Tokped</p>
+<div class="login-wrapper">
+    <div class="login-card">
+        <h1>Login</h1>
+        <p>Selamat datang kembali di Mirip-Tokped</p>
 
-    <form action="/api/login" method="POST">
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required placeholder="Masukkan email">
+        <form action="/api/login" method="POST">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Masukkan email">
+            </div>
+
+            <div class="form-group password-field">
+                <label for="password">Kata Sandi</label>
+                <input type="password" id="password" name="password" required placeholder="Masukkan kata sandi">
+                <button type="button" class="toggle-password" data-target="password">show</button>
+            </div>
+
+            <button type="submit">Masuk</button>
+        </form>
+
+        <div class="register-link">
+            Belum punya akun? <a href="/register">Daftar Sekarang</a>
         </div>
-
-        <div class="form-group password-field">
-            <label for="password">Kata Sandi</label>
-            <input type="password" id="password" name="password" required placeholder="Masukkan kata sandi">
-            <button type="button" class="toggle-password" data-target="password">show</button>
-        </div>
-
-        <button type="submit">Masuk</button>
-    </form>
-
-    <div class="register-link">
-        Belum punya akun? <a href="/register">Daftar Sekarang</a>
     </div>
+</div>
+
+<div class="no-register">
+    <a href="/">lanjut sebagai guest?</a>
 </div>

@@ -271,6 +271,15 @@ textarea {
   top: 0;
   left: 0;
 }
+.category-checkbox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+}
 
 /* Sembunyikan teks dan icon jika sudah ada gambar */
 .form-image-upload.has-image .plus-icon,

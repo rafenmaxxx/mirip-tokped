@@ -35,6 +35,15 @@ export function ChangeInnerHtmlById(tag, data) {
   el.innerHTML = data;
 }
 
+export function ChangeTextContentById(tag, data) {
+  const el = document.getElementById(tag);
+  if (!el) {
+    console.error("Element not found:", tag);
+    return;
+  }
+  el.textContent = data;
+}
+
 export function ChangeValuerById(tag, data) {
   const el = document.getElementById(tag);
   if (!el) {
@@ -42,4 +51,22 @@ export function ChangeValuerById(tag, data) {
     return;
   }
   el.value = data;
+}
+
+export function renderSkeleton(targetSelector, count = 5, type = "card") {
+  const el = document.querySelector(targetSelector);
+  if (!el) return;
+
+  if (type === "card") {
+    el.classList.add("skeleton-grid");
+    el.innerHTML = Array(count)
+      .fill('<div class="skeleton-card"></div>')
+      .join("");
+  }
+
+  if (type === "banner") {
+    el.innerHTML = Array(count)
+      .fill('<div class="skeleton-banner"></div>')
+      .join("");
+  }
 }

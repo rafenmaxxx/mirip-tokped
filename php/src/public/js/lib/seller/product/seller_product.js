@@ -1,5 +1,6 @@
 import { router } from "../../../../app.js";
 import { DELETE, GET } from "../../../api/api.js";
+import { renderSkeleton } from "../../../util/component_loader.js";
 import { showModalConfirmation } from "../../general/modal.js";
 import { renderToast } from "../../general/toast.js";
 
@@ -62,8 +63,9 @@ function renderFilteredProducts() {
     }
     return;
   } else {
+    let productHtml = "";
     filteredProducts.forEach((product) => {
-      renderProductCard(product, container);
+      productHtml += renderProductCard(product, container);
     });
   }
 
@@ -126,6 +128,9 @@ function renderPaginationButtons(totalPages) {
     navContainer.appendChild(createPageButton(page));
     lastPage = page;
   });
+
+  const footer = document.querySelector(".pagination-footer");
+  footer?.classList.add("visible");
 }
 
 function renderProductCard(product, container) {
@@ -148,7 +153,7 @@ function renderProductCard(product, container) {
   cardElement.innerHTML = `
     <div class="card-contents">
       <div class="card-image">
-        <img src="${imageUrl}" alt="${productName}">
+        <img src="${imageUrl}" alt="${productName}" width=150 height=150>
       </div>
       <div class="card-description">
           <h2 class="product-name">${productName}</h2>
@@ -208,7 +213,7 @@ function renderProductCard(product, container) {
   });
 
   cardElement.querySelector(".btn-delete").addEventListener("click", () => {
-    showModalConfirmation("Yaking menghapus product?", () => {
+    showModalConfirmation("Yakin menghapus product?", () => {
       DELETE(
         "/api/product",
         { product_id: product.product_id },
@@ -248,6 +253,7 @@ function LoadSellerProductData(data) {
                 <img src="/img/unauthorized.png" alt="Tidak ada produk">
               </div>
               <p class="no-products-message">Belum terdapat produk pada kategori ini</p>
+              <a class="btn-add-first" href="/seller/products/add">Tambah Produk Pertama +</a>
             </div>
       `;
       footer.style.display = "none";
@@ -284,6 +290,7 @@ function CategoryProductErr(err) {
 }
 
 function fetchProducts() {
+  renderSkeleton("pg1", 2);
   const params = {};
 
   const filters = {};
@@ -365,6 +372,13 @@ export async function InitSellerProductPage() {
         currentPage = 1;
         fetchProducts();
       }, 400);
+    });
+  }
+
+  const addFirstButton = document.querySelector(".btn-add-first");
+  if (addFirstButton) {
+    addFirstButton.addEventListener("click", () => {
+      router.navigateTo("/seller/products/add");
     });
   }
 }

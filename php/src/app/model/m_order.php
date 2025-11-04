@@ -138,7 +138,7 @@ class Order
             ':order_id' => $order_id
         ]);
 
-        return $stmt;
+        return $stmt->rowCount();
     }
 
 
@@ -161,25 +161,36 @@ class Order
 
     public function getOrderByStore($store_id, $page, $limit)
     {
-        $sql = "
-        SELECT 
-            o.*, 
-            u.name AS buyer_name,
-            p.product_name, p.main_image_path, 
-            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
-        FROM orders o
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.product_id
-        LEFT JOIN users u ON o.buyer_id = u.user_id
-        WHERE o.store_id = ?
-        ORDER BY o.created_at DESC
-    ";
-
+        $paginationSql = "";
         $params = [$store_id];
 
         if ($page !== null && $limit !== null) {
             $offset = ($page - 1) * $limit;
-            $sql .= " LIMIT ? OFFSET ?";
+            $paginationSql = " LIMIT ? OFFSET ?";
+        }
+
+        $sql = "
+            WITH PaginasiPesanan AS (
+                SELECT o.order_id
+                FROM orders o
+                WHERE o.store_id = ?
+                ORDER BY o.created_at DESC
+                $paginationSql 
+            )
+            SELECT 
+                o.*, 
+                u.name AS buyer_name,
+                p.product_name, p.main_image_path, 
+                oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+            FROM orders o
+            JOIN PaginasiPesanan pp ON o.order_id = pp.order_id
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            LEFT JOIN users u ON o.buyer_id = u.user_id
+            ORDER BY o.created_at DESC
+        ";
+
+        if ($page !== null && $limit !== null) {
             $params[] = $limit;
             $params[] = $offset;
         }
@@ -242,25 +253,36 @@ class Order
 
     public function getOrderByStoreAndStatus($store_id, $status, $page, $limit)
     {
-        $sql = "
-        SELECT 
-            o.*, 
-            u.name AS buyer_name,
-            p.product_name, p.main_image_path, 
-            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
-        FROM orders o
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.product_id
-        LEFT JOIN users u ON o.buyer_id = u.user_id
-        WHERE o.store_id = ? AND o.status = ?
-        ORDER BY o.created_at DESC
-    ";
-
+        $paginationSql = "";
         $params = [$store_id, $status];
 
         if ($page !== null && $limit !== null) {
             $offset = ($page - 1) * $limit;
-            $sql .= " LIMIT ? OFFSET ?";
+            $paginationSql = " LIMIT ? OFFSET ?";
+        }
+
+        $sql = "
+            WITH PaginasiPesanan AS (
+                SELECT o.order_id
+                FROM orders o
+                WHERE o.store_id = ? AND o.status = ?
+                ORDER BY o.created_at DESC
+                $paginationSql 
+            )
+            SELECT 
+                o.*, 
+                u.name AS buyer_name,
+                p.product_name, p.main_image_path, 
+                oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
+            FROM orders o
+            JOIN PaginasiPesanan pp ON o.order_id = pp.order_id
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            LEFT JOIN users u ON o.buyer_id = u.user_id
+            ORDER BY o.created_at DESC
+        ";
+
+        if ($page !== null && $limit !== null) {
             $params[] = $limit;
             $params[] = $offset;
         }
@@ -324,27 +346,56 @@ class Order
         return (int)$stmt->fetchColumn();
     }
 
-    public function getOrderByStoreAndName($store_id, $title, $page, $limit)
+    public function getOrderByStoreAndName($store_id, $title = '', $page = null, $limit = null)
     {
-        $sql = "
-        SELECT 
-            o.*, 
-            u.name AS buyer_name,
-            p.product_name, p.main_image_path, 
-            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
-        FROM orders o
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.product_id
-        LEFT JOIN users u ON o.buyer_id = u.user_id
-        WHERE o.store_id = ? AND p.product_name ILIKE ?
-        ORDER BY o.created_at DESC
-    ";
-
-        $params = [$store_id, "%$title%"];
+        $params = [$store_id];
+        $paginationSql = "";
+        $offset = 0;
 
         if ($page !== null && $limit !== null) {
             $offset = ($page - 1) * $limit;
-            $sql .= " LIMIT ? OFFSET ?";
+            $paginationSql = " LIMIT ? OFFSET ?";
+        }
+
+        $sql = "
+            WITH PaginasiPesanan AS (
+                SELECT o.order_id
+                FROM orders o
+                WHERE o.store_id = ?
+                AND (
+                    CAST(o.order_id AS VARCHAR(255)) ILIKE ? 
+                    OR EXISTS (
+                        SELECT 1 
+                        FROM users u2 
+                        WHERE u2.user_id = o.buyer_id 
+                        AND u2.name ILIKE ?
+                    )
+                )
+                ORDER BY o.created_at DESC
+                $paginationSql
+            )
+            SELECT 
+                o.*, 
+                u.name AS buyer_name,
+                p.product_name, 
+                p.main_image_path, 
+                oi.order_item_id, 
+                oi.product_id, 
+                oi.quantity, 
+                oi.price_at_order, 
+                oi.subtotal
+            FROM orders o
+            JOIN PaginasiPesanan pp ON o.order_id = pp.order_id
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            LEFT JOIN users u ON o.buyer_id = u.user_id
+            ORDER BY o.created_at DESC
+        ";
+
+        $params[] = "%$title%";
+        $params[] = "%$title%";
+
+        if ($page !== null && $limit !== null) {
             $params[] = $limit;
             $params[] = $offset;
         }
@@ -390,6 +441,7 @@ class Order
 
         return array_values($orders);
     }
+
 
     public function countOrderByStoreAndName($store_id, $title)
     {
@@ -398,39 +450,70 @@ class Order
             FROM orders o
             LEFT JOIN order_items oi ON o.order_id = oi.order_id
             LEFT JOIN products p ON oi.product_id = p.product_id
-            WHERE o.store_id = :store_id AND p.product_name ILIKE :title
+            LEFT JOIN users u ON o.buyer_id = u.user_id 
+            WHERE o.store_id = ?
+            AND (CAST(o.order_id AS VARCHAR(255)) ILIKE ? OR u.name ILIKE ?)
+
         ";
+        $params = [$store_id, "%$title%", "%$title%"];
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ':store_id' => $store_id,
-            ':title' => "%$title%"
-        ]);
+        $stmt->execute($params);
 
         return (int)$stmt->fetchColumn();
     }
 
-    public function getOrderByStoreAndStatusAndName($store_id, $status, $title, $page, $limit)
+    public function getOrderByStoreAndStatusAndName($store_id, $status, $title = '', $page = null, $limit = null)
     {
-        $sql = "
-        SELECT 
-            o.*, 
-            u.name AS buyer_name,
-            p.product_name, p.main_image_path, 
-            oi.order_item_id, oi.product_id, oi.quantity, oi.price_at_order, oi.subtotal
-        FROM orders o
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.product_id
-        LEFT JOIN users u ON o.buyer_id = u.user_id
-        WHERE o.store_id = ? AND o.status = ? AND p.product_name ILIKE ?
-        ORDER BY o.created_at DESC
-    ";
-
-        $params = [$store_id, $status, "%$title%"];
+        $params = [$store_id, $status];
+        $paginationSql = "";
+        $offset = 0;
 
         if ($page !== null && $limit !== null) {
             $offset = ($page - 1) * $limit;
-            $sql .= " LIMIT ? OFFSET ?";
+            $paginationSql = " LIMIT ? OFFSET ?";
+        }
+
+        $sql = "
+            WITH PaginasiPesanan AS (
+                SELECT o.order_id
+                FROM orders o
+                WHERE o.store_id = ? 
+                AND o.status = ?
+                AND (
+                    CAST(o.order_id AS VARCHAR(255)) ILIKE ? 
+                    OR EXISTS (
+                        SELECT 1 
+                        FROM users u2 
+                        WHERE u2.user_id = o.buyer_id 
+                        AND u2.name ILIKE ?
+                    )
+                )
+                ORDER BY o.created_at DESC
+                $paginationSql
+            )
+            SELECT 
+                o.*, 
+                u.name AS buyer_name,
+                p.product_name, 
+                p.main_image_path, 
+                oi.order_item_id, 
+                oi.product_id, 
+                oi.quantity, 
+                oi.price_at_order, 
+                oi.subtotal
+            FROM orders o
+            JOIN PaginasiPesanan pp ON o.order_id = pp.order_id
+            LEFT JOIN order_items oi ON o.order_id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.product_id
+            LEFT JOIN users u ON o.buyer_id = u.user_id
+            ORDER BY o.created_at DESC
+        ";
+
+        $params[] = "%$title%";
+        $params[] = "%$title%";
+
+        if ($page !== null && $limit !== null) {
             $params[] = $limit;
             $params[] = $offset;
         }
@@ -477,6 +560,7 @@ class Order
         return array_values($orders);
     }
 
+
     public function countOrderByStoreAndStatusAndName($store_id, $status, $title)
     {
         $sql = "
@@ -484,15 +568,15 @@ class Order
             FROM orders o
             LEFT JOIN order_items oi ON o.order_id = oi.order_id
             LEFT JOIN products p ON oi.product_id = p.product_id
-            WHERE o.store_id = :store_id AND o.status = :status AND p.product_name ILIKE :title
+            LEFT JOIN users u ON o.buyer_id = u.user_id
+            WHERE o.store_id = ? AND o.status = ?
+            AND (CAST(o.order_id AS VARCHAR(255)) ILIKE ? OR u.name ILIKE ?)
+
         ";
+        $params = [$store_id, $status, "%$title%", "%$title%"];
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ':store_id' => $store_id,
-            ':status' => $status,
-            ':title' => "%$title%"
-        ]);
+        $stmt->execute($params);
 
         return (int)$stmt->fetchColumn();
     }
@@ -599,7 +683,7 @@ class Order
         if ($isValid) {
             $data = $this->updateOrderStatus($order_id, $status, $durasi);
         } else {
-            $data = false;
+            $data = 0;
         }
         return $data;
     }

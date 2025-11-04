@@ -71,6 +71,7 @@ function createOrderCard(order) {
         <h3 class="order-title">#${order.order_id} - ${
     order.buyer_name || "Nama Buyer"
   }</h3>
+        <span class="order-date"> ${order.created_at.split('.')[0]}</span>
         <span class="order-status ${statusColorClass}">
           ${order.status.replace("_", " ")}
         </span>
@@ -180,6 +181,8 @@ function renderPaginationButtons(totalPages) {
     navContainer.appendChild(createPageButton(page));
     lastPage = page;
   });
+  const footer = document.querySelector(".pagination-footer");
+  footer?.classList.add("visible");
 }
 
 // --- Loader utama ---
@@ -237,7 +240,7 @@ function LoadOrder(data) {
             (data) => {
               if (data.status == "success") {
                 renderToast("Berhasil update status", "success");
-                LoadOrder();
+                LoadOrder(data);
               } else {
                 renderToast("Gagal update status", "error");
               }
@@ -305,7 +308,7 @@ function LoadOrder(data) {
             (data) => {
               if (data.status == "success") {
                 renderToast("Berhasil update status", "success");
-                LoadOrder();
+                LoadOrder(data);
               } else {
                 renderToast("Gagal update status", "error");
               }
