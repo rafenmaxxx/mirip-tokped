@@ -47,8 +47,16 @@ switch ($method) {
             $count = $model->countProductByStoreAndName($store_id, $title);
             $data = $model->getProductByStoreAndName($store_id, $title, $page, $limit, $sort);
         } else if ($id) {
-            guard(['BUYER', 'GUEST']);
-            $data = $model->getDetailById($id);
+            guard(['BUYER', 'GUEST', 'SELLER']);
+            if (isset($_SESSION['user'])) {
+                if ($_SESSION['user']['role'] == 'SELLER') {
+                    $data = $model->getDetailById($id, $_SESSION['user']['id']);
+                } else {
+                    $data = $model->getDetailById($id);
+                }
+            } else {
+                $data = $model->getDetailById($id);
+            }
         } else if ($title) {
             guard(['BUYER', 'GUEST']);
             $data = $model->getTitle($title);
@@ -62,7 +70,7 @@ switch ($method) {
             $count = $model->countFilterProduct($categories, $minPrice, $maxPrice);
             $data = $model->getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit, $sort);
         } else if ($store_id) {
-            guard(['BUYER', 'SELLER']);
+            guard(['BUYER', 'SELLER', 'GUEST']);
             $count = $model->countByStoreId($store_id);
             $data = $model->getByStoreId($store_id, $page, $limit, $sort);
         } else {
@@ -70,8 +78,12 @@ switch ($method) {
             $count = $model->countAll();
             $data = $model->getAll($page, $limit);
         }
+        if ($data) {
+            echo json_encode(['status' => 'success', 'data' => $data, 'count' => $count ?? null]);
+        } else {
+            echo json_encode(['status' => 'failed', 'data' => $data, 'count' => $count ?? null]);
+        }
 
-        echo json_encode(['status' => 'success', 'data' => $data, 'count' => $count ?? null]);
         break;
 
     case 'POST':
@@ -98,6 +110,14 @@ switch ($method) {
         $main_image_path = null;
         if (isset($_FILES['product-img']) && $_FILES['product-img']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = __DIR__ . '/../../data/products/';
+            $maxSizeMB = 2;
+            $maxSizeBytes = $maxSizeMB * 1024 * 1024;
+
+            $fileSize = $_FILES['product-img']['size'];
+            if ($fileSize > $maxSizeBytes) {
+                warn("Ukuran file melebihi {$maxSizeMB} MB", '/seller/products/add');
+                exit;
+            }
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
@@ -158,6 +178,14 @@ switch ($method) {
             $uploadDir = __DIR__ . '/../../data/products/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
+            }
+            $maxSizeMB = 2;
+            $maxSizeBytes = $maxSizeMB * 1024 * 1024;
+
+            $fileSize = $_FILES['product-img']['size'];
+            if ($fileSize > $maxSizeBytes) {
+                warn("Ukuran file melebihi {$maxSizeMB} MB", '/seller/products/add');
+                exit;
             }
 
             $fileExt = pathinfo($_FILES['product-img']['name'], PATHINFO_EXTENSION);
