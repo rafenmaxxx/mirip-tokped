@@ -8,7 +8,7 @@ import {
 import { renderToast } from "../../general/toast.js";
 
 let currentPage = 1;
-let itemsPerPage = 2;
+let itemsPerPage = 4;
 let currentStatus = "";
 let currentSearch = "";
 let debounceTimer;
@@ -506,7 +506,7 @@ function renderOrderDetailModal(order) {
 
 export function InitOrderSeller() {
   currentPage = 1;
-  itemsPerPage = 2;
+  itemsPerPage = 4;
   currentStatus = "";
   currentSearch = "";
 

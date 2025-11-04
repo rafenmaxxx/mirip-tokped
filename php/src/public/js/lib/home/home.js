@@ -4,7 +4,7 @@ import { router } from "../../../app.js";
 import { initHeroSlider } from "../slider.js";
 
 let currentPage = 1;
-let itemsPerPage = 10;
+let itemsPerPage = 4;
 
 function renderPaginationButtons(totalPages) {
   const navContainer = document.getElementById("pagination-nav-buttons");
@@ -217,8 +217,8 @@ function fetchProducts() {
 
 export function LoadHome() {
   currentPage = 1;
-  itemsPerPage = 10;
-  renderSkeleton("#product-data", 10);
+  itemsPerPage = 4;
+  renderSkeleton("#product-data", 4);
   renderSkeleton("#slider", 1, "banner");
   fetchProducts();
   const slider = document.getElementById("slider");

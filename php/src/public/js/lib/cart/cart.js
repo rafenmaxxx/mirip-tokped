@@ -174,6 +174,11 @@ function LoadCartItems(data) {
                 <p class="cart_item_price">${price}</p>
               </div>
               <div class="cart_quantity">
+                  <button class="btn btn-remove-item" data-cart-item-id="${
+                    detail.cart_item_id
+                  }" data-store-id="${item.store_id}" >
+                    <img src="/img/trash.png" alt="Remove">
+                  </button>
                   <button class="btn btn-decreament-quantity" data-cart-item-id="${
                     detail.cart_item_id
                   }" data-store-id="${item.store_id}" >-</button>
@@ -202,6 +207,11 @@ function LoadCartItems(data) {
               </div>
 
               <div class="cart_quantity">
+                  <button class="btn btn-remove-item" data-cart-item-id="${
+                    detail.cart_item_id
+                  }" data-store-id="${item.store_id}" >
+                    <img src="/img/trash.png" alt="Remove">
+                  </button>
                   <button class="btn btn-decreament-quantity" data-cart-item-id="${
                     detail.cart_item_id
                   }" data-store-id="${item.store_id}" >-</button>
@@ -290,6 +300,15 @@ function LoadCartItems(data) {
         // Buka modal dengan type 'store'
         openModal(null, storeId, "store");
       });
+    });
+
+    const removeItemButtons = document.querySelectorAll(".btn-remove-item");
+    removeItemButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const cart_item_id = btn.getAttribute("data-cart-item-id");
+            const store_id = btn.getAttribute("data-store-id");
+            openModal(cart_item_id, store_id, "item"); 
+        });
     });
 
     // Attach quantity button listeners

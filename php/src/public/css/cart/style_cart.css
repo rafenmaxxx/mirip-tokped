@@ -285,12 +285,10 @@
   background-color: #009042;
 }
 
-
-
 .modal {
   display: none;
   position: fixed;
-  z-index: 999;
+  z-index: 10000;
   left: 0;
   top: 0;
   width: 100%;
@@ -299,6 +297,13 @@
   backdrop-filter: blur(4px);
   justify-content: center;
   align-items: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
 }
 
 /* Wrapper card modal */
@@ -367,7 +372,25 @@
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
+.cart_quantity .btn-remove-item {
+  background-color: transparent;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
 
+.cart_quantity .btn-remove-item img {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.cart_quantity .btn-remove-item:hover {
+  background-color: #fbeeee;
+}
 
 @keyframes modalFadeIn {
   from {
