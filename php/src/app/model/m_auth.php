@@ -49,6 +49,7 @@ function warn($message, $href)
         });
     </script>
     ";
+    exit;
 }
 
 
