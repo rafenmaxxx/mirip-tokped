@@ -43,7 +43,7 @@ function renderPasswordChangeModal() {
                 </div>
                 
                 <div id="error-message" class="error-message"></div>
-                <button type="submit" class="btn btn-save" id="save-password-btn">Simpan</button>
+                <button type="submit" class="btn-profile btn-profile-save" id="save-password-btn-profile">Simpan</button>
             </form>
         </div>
     </div>
@@ -67,7 +67,7 @@ function renderPasswordChangeModal() {
     });
   });
 
-  const submitBtn = document.getElementById("save-password-btn");
+  const submitBtn = document.getElementById("save-password-btn-profile");
   const errorDiv = document.getElementById("error-message");
 
   submitBtn.addEventListener("click", (e) => {
@@ -86,8 +86,7 @@ function renderPasswordChangeModal() {
     }
 
     if (!ValidatePassword(newPassword)) {
-      errorDiv.textContent =
-        "Password baru tidak valid.";
+      errorDiv.textContent = "Password baru tidak valid.";
       return;
     }
 
@@ -166,8 +165,8 @@ function renderConfirmationModal(nama, alamat, onConfirm) {
                 <p><strong>Alamat:</strong> ${alamat || "(tidak diubah)"}</p>
             </div>
             <div class="button-group">
-                <button class="btn btn-edit" id="confirm-save">Ya, Simpan</button>
-                <button class="btn btn-danger" id="cancel-save">Batal</button>
+                <button class="btn-profile btn-profile-edit" id="confirm-save">Ya, Simpan</button>
+                <button class="btn-profile btn-profile-danger" id="cancel-save">Batal</button>
             </div>
         </div>
     </div>
@@ -229,8 +228,8 @@ function renderProfile(data) {
             </div>
 
             <div class="button-group">
-                <button type="submit" id="edit-profile-btn" class="btn btn-edit">Edit Profil</button>
-                <button type="button" id="change-password-btn" class="btn btn-password">Ubah Password</button>
+                <button type="submit" id="edit-profile-btn-profile" class="btn-profile btn-profile-edit">Edit Profil</button>
+                <button type="button" id="change-password-btn-profile" class="btn-profile btn-profile-password">Ubah Password</button>
             </div>
         </form>
     </div>
@@ -242,7 +241,7 @@ function renderProfile(data) {
   document.getElementById("nama").value = data.name || "";
   document.getElementById("email").value = data.email || "";
   document.getElementById("alamat").value = data.address || "";
- 
+
   // Isi form edit juga
   document.getElementById("nama-edit").value = data.name || "";
   document.getElementById("alamat-edit").value = data.address || "";
@@ -250,8 +249,10 @@ function renderProfile(data) {
 
 // --- Setup event listener tombol edit/simpan/batal ---
 function setupEditHandlers(userId) {
-  const editBtn = document.getElementById("edit-profile-btn");
-  const changePasswordBtn = document.getElementById("change-password-btn");
+  const editBtn = document.getElementById("edit-profile-btn-profile");
+  const changePasswordBtn = document.getElementById(
+    "change-password-btn-profile"
+  );
 
   // --- Tombol Edit ---
   editBtn.addEventListener("click", (e) => {
@@ -275,7 +276,7 @@ function setupEditHandlers(userId) {
         (response) => {
           if (response.status === "success") {
             Loading.hide();
-            renderToast("Profil berhasil diperbarui!", "success");          
+            renderToast("Profil berhasil diperbarui!", "success");
             location.reload();
           } else {
             Loading.hide();
