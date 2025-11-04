@@ -170,6 +170,15 @@ switch ($method) {
             break;
         }
 
+        if ($new_password) {
+            $checkPass = $model->getById($id);
+            
+            if (password_verify($new_password, $checkPass['password'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Password lama salah.']);
+                exit;
+            } 
+        }
+
         $data = $model->updateUser($id, $new_name, $new_address, $new_password);
         echo json_encode(['status' => 'success', 'data' => $data]);
         break;
