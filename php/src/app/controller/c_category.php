@@ -14,10 +14,6 @@ switch ($method) {
         }
         echo json_encode(['status' => 'success', 'data' => $data]);
         break;
-
-    case 'POST':
-        
-        break;
     default:
         http_response_code(405);
         echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
