@@ -236,7 +236,6 @@ function renderProfile(data) {
 
   document.getElementById("profile-content").innerHTML = html;
 
-  console.log("Rendering profile data:", data);
   document.getElementById("nama").value = data.name || "";
   document.getElementById("email").value = data.email || "";
   document.getElementById("alamat").value = data.address || "";
@@ -256,8 +255,8 @@ function setupEditHandlers(userId) {
   editBtn.addEventListener("click", (e) => {
     e.preventDefault();
 
-    const nama = document.getElementById("nama-edit").value.trim() || null;
-    const alamat = document.getElementById("alamat-edit").value.trim() || null;
+    const nama = sanitizeHTML(document.getElementById("nama-edit").value.trim()) || null;
+    const alamat = sanitizeHTML(document.getElementById("alamat-edit").value.trim()) || null;
 
     if (!nama && !alamat) {
       renderToast("Tidak ada perubahan yang dilakukan.", "warning");
@@ -266,7 +265,7 @@ function setupEditHandlers(userId) {
 
     // Tampilkan modal konfirmasi
     renderConfirmationModal(nama, alamat, () => {
-      console.log("Submitting edit:", nama, alamat);
+
       PUT(
         "/api/user",
         { nama: nama, alamat: alamat },
@@ -305,6 +304,13 @@ function showPendingToast() {
     sessionStorage.removeItem('pendingToast');
     renderToast(message, type);
   }
+}
+
+function sanitizeHTML(str) {
+  if (typeof str !== 'string') return '';
+  var temp = document.createElement('div');
+  temp.textContent = str;
+  return temp.innerHTML;
 }
 
 export function InitProfilePage() {
