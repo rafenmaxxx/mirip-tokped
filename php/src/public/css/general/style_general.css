@@ -580,11 +580,14 @@ to { transform: rotate(360deg); }
 /* Responsif */
 @media (max-width: 768px) {
     .toast {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-        min-width: auto;
-        max-width: none;
+        top: auto; 
+        bottom: 20px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%), translateY(-50%);
+        width: auto;
+        max-width: 80%; 
+        max-height: 50px;
     }
 }
 

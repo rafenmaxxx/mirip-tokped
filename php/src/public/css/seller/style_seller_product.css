@@ -417,3 +417,44 @@
         order: 3;
     }
 }
+
+@media (max-width: 480px) {
+    
+    .main-container {
+        width: 100%;
+        padding: 15px;
+        margin-top: 5rem;
+        box-sizing: border-box;
+    }
+
+    .order-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar,
+    .custom-select {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .pagination-footer {
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .pagination-info {
+        flex-basis: auto; 
+        margin-bottom: 0;
+    }
+}
