@@ -235,6 +235,7 @@ function LoadOrder(data) {
               if (data.status == "success") {
                 renderToast("Berhasil update status", "success");
                 LoadOrder(data);
+                fetchOrders();
               } else {
                 renderToast("Gagal update status", "error");
               }
@@ -268,6 +269,7 @@ function LoadOrder(data) {
               if (data.status == "success") {
                 renderToast("Berhasil update status", "success");
                 LoadOrder(data);
+                fetchOrders();
               } else {
                 renderToast("Gagal update status", "error");
               }
