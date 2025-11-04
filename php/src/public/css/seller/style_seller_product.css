@@ -376,34 +376,61 @@
   background-color: #008C4A;
 }
 
-/* responsive */
 @media (max-width: 768px) {
     body {
-        padding: 15px;
+        padding: 0;
     }
+
+    .main-container {
+        width: 100%;
+        padding: 15px;
+        box-sizing: border-box;
+        margin-top: 5rem;
+    }
+
     .product-grid {
         grid-template-columns: 1fr;
     }
+
     .page-header {
         flex-direction: column;
         gap: 15px;
+        align-items: stretch; 
     }
-    .main-container {
-        margin-top: 9rem;
+
+    .order-filter {
+        flex-direction: column;
+        align-items: stretch;
     }
+
+    .search-bar,
+    .custom-select {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .btn-add {
+        align-self: center; 
+        width: auto; 
+    }
+
+    .card-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
     .pagination-footer {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        flex-direction: column;
+        justify-content: center;
         align-items: center;
         gap: 15px;
-        position: relative;
     }
 
     .pagination-info {
-        flex-basis: 100%;
+        flex-basis: auto;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 0;
         order: 1;
     }
 
@@ -415,5 +442,46 @@
     
     .items-per-page {
         order: 3;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .main-container {
+        width: 100%;
+        padding: 15px;
+        margin-top: 5rem;
+        box-sizing: border-box;
+    }
+
+    .order-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar,
+    .custom-select {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .pagination-footer {
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .pagination-info {
+        flex-basis: auto; 
+        margin-bottom: 0;
     }
 }

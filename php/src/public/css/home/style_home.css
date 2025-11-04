@@ -241,6 +241,26 @@
   background-color: #008C4A;
 }
 
+@media (max-width: 900px) {
+    .pagination-footer {
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 1.5rem;
+    }
+
+    .pagination-info {
+        order: 1;
+    }
+    
+    .pagination-nav {
+        order: 2;
+    }
+    
+    .items-per-page {
+        order: 3;
+    }
+}
 
 @media (max-width: 480px) {
   .home_page {
