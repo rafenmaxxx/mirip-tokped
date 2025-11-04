@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../model/m_user.php';
 require_once __DIR__ . '/../model/m_store.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
 $model = new User();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -167,6 +168,15 @@ switch ($method) {
         if (!$new_name && !$new_address && !$new_password) {
             echo json_encode(['status' => 'error', 'message' => 'Tidak ada data yang diubah']);
             break;
+        }
+
+        if ($new_password) {
+            $checkPass = $model->getById($id);
+            
+            if (password_verify($new_password, $checkPass['password'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Password lama salah.']);
+                exit;
+            } 
         }
 
         $data = $model->updateUser($id, $new_name, $new_address, $new_password);
