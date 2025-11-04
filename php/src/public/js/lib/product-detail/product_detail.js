@@ -64,7 +64,7 @@ function LoadAddCartBtn(id, stock) {
           const cartBtn = document.getElementById("cartBtn");
           cartBtn.addEventListener("click", (e) => {
             showModalSpinnerInput(
-              "Adding To Cart",
+              "Tambahkan ke keranjang",
               stock,
               (qty) => {
                 const product_id = id;
