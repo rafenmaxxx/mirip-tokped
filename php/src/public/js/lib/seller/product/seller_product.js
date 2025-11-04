@@ -213,7 +213,7 @@ function renderProductCard(product, container) {
   });
 
   cardElement.querySelector(".btn-delete").addEventListener("click", () => {
-    showModalConfirmation("Yaking menghapus product?", () => {
+    showModalConfirmation("Yakin menghapus product?", () => {
       DELETE(
         "/api/product",
         { product_id: product.product_id },
@@ -253,6 +253,7 @@ function LoadSellerProductData(data) {
                 <img src="/img/unauthorized.png" alt="Tidak ada produk">
               </div>
               <p class="no-products-message">Belum terdapat produk pada kategori ini</p>
+              <a class="btn-add-first" href="/seller/products/add">Tambah Produk Pertama +</a>
             </div>
       `;
       footer.style.display = "none";
@@ -371,6 +372,13 @@ export async function InitSellerProductPage() {
         currentPage = 1;
         fetchProducts();
       }, 400);
+    });
+  }
+
+  const addFirstButton = document.querySelector(".btn-add-first");
+  if (addFirstButton) {
+    addFirstButton.addEventListener("click", () => {
+      router.navigateTo("/seller/products/add");
     });
   }
 }

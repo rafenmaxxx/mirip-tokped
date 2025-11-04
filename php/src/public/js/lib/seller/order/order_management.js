@@ -71,6 +71,7 @@ function createOrderCard(order) {
         <h3 class="order-title">#${order.order_id} - ${
     order.buyer_name || "Nama Buyer"
   }</h3>
+        <span class="order-date"> ${order.created_at.split('.')[0]}</span>
         <span class="order-status ${statusColorClass}">
           ${order.status.replace("_", " ")}
         </span>
