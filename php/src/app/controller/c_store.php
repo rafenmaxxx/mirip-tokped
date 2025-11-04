@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../model/m_store.php';
 require_once __DIR__ . '/../model/m_product.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
+
 $model = new Store();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -28,6 +30,9 @@ switch ($method) {
         $store_name = $_POST['store_name'] ?? null;
         $store_description = $_POST['store_description'] ?? null;
 
+        $store_name = sanitizePlainText($nama_produk);
+        $store_description   = sanitizeRTEInput($deskripsi);
+
         if (isset($_FILES['gambar_toko']) && $_FILES['gambar_toko']['error'] == 0) {
             $maxSizeMB = 2;
             $maxSizeBytes = $maxSizeMB * 1024 * 1024;
@@ -40,7 +45,7 @@ switch ($method) {
             // validasi tipe file
             $temp_file_path = $_FILES['gambar_toko']['tmp_name'];
             $allowed_mime_types = [
-                'image/jpeg', // .jpg dan .jpeg
+                'image/jpeg',
                 'image/png',
                 'image/webp'
             ];
