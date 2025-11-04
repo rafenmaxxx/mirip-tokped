@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../model/m_product.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
+
 $model = new Product();
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'POST' && isset($_POST['_method'])) {
@@ -99,6 +101,8 @@ switch ($method) {
         $stok        = (int) ($_POST['stok'] ?? 0);
         $categories  = $_POST['categories'] ?? [];
 
+        $nama_produk = sanitizePlainText($nama_produk);
+        $deskripsi   = sanitizeRTEInput($deskripsi);
 
 
         if (empty($nama_produk) || $harga < 0 || $stok < 0) {
@@ -166,6 +170,9 @@ switch ($method) {
         $harga       = (int) ($_POST['harga'] ?? 0);
         $stok        = (int) ($_POST['stok'] ?? 0);
         $categories  = $_POST['categories'] ?? [];
+
+        $nama_produk = sanitizePlainText($nama_produk);
+        $deskripsi   = sanitizeRTEInput($deskripsi);
 
         if (!$product_id) {
             warn('Gaada product id', '/seller/products');

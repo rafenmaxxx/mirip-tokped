@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../model/m_order.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
+
 $model = new Order();
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -54,7 +56,7 @@ switch ($method) {
                 $store_id = $_POST['store_id'] ?? null;
                 $total_price = $_POST['total_price'] ?? null;
                 $shipping_address = $_POST['shipping_address'] ?? null;
-
+                $shipping_address = sanitizePlainText($shipping_address);
                 $result = $model->createOrder($buyer_id, $store_id, $total_price, $shipping_address);
                 echo json_encode(['status' => 'success', 'data' => $result]);
                 break;
@@ -76,6 +78,7 @@ switch ($method) {
                 $status = $PUT['status'] ?? null;
                 $msg = $PUT['msg'] ?? null;
                 $durasi = $PUT['durasi'] ?? null;
+                $msg = sanitizePlainText($msg);
                 if ($id && $status) {
                     $result = $model->updateStatus($id, $status, $msg, $durasi);
                     if ($result > 0) {
