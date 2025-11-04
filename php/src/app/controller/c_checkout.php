@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../model/m_cart.php';
 require_once __DIR__ . '/../model/m_auth.php';
-
+require_once __DIR__ . '/../model/m_sanitizer.php';
 
 $model = new Cart();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -11,6 +11,7 @@ switch ($method) {
     case 'POST':
         $buyer_id = $_SESSION['user']['id'] ?? null;
         $address = $_POST['address'] ?? null;
+        $address = sanitizePlainText($address);
         if (!$address) {
             http_response_code(400);
             echo json_encode([
