@@ -56,6 +56,7 @@ function HandleTopUp(value) {
       if (data.status == "success") {
         renderToast("Sukses Top Up", "success");
         InitBalance();
+        window.dispatchEvent(new CustomEvent("balanceUpdated"));
       } else {
         renderToast("Gagal Top Up", "error");
       }
@@ -271,11 +272,14 @@ export function InitNavbar() {
         const submitBtn = document.getElementById("topupBtn");
 
         submitBtn.addEventListener("click", (e) => {
-          const amount = parseFloat(topupInput.value);
+          if (!/^\d+$/.test(topupInput.value)) {
+            renderToast("Masukkan nominal Top Up yang valid!", "error");
+            return;
+          }
+          const amount = parseInt(topupInput.value);
           if (!amount || amount <= 0) {
             e.preventDefault();
             renderToast("Masukkan nominal Top Up yang valid!", "error");
-            return;
           } else {
             HandleTopUp(amount);
           }
