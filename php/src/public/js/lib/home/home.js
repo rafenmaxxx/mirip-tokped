@@ -115,15 +115,32 @@ function LoadProduct(data) {
             ? `/api/image?file=${p.main_image_path}`
             : `https://picsum.photos/200/200?random=${index + 1}`;
 
+        let stockText = "";
+        let productCardClass = "product_card";
+        let productImageClass = "product_image";
+        let productNameClass = "product_name";
+        let productPriceClass = "product_price";
+        let stockClass = "product_stock";
+
+        if (p.stock === 0) {
+          stockText = "Habis";
+          productCardClass += " out_of_stock";
+          productImageClass += " out_of_stock";
+          productNameClass += " out_of_stock";
+          productPriceClass += " out_of_stock";
+          stockClass += " out_of_stock";
+        } else {
+          stockText = `Stok : ${p.stock}`;
+        }
         return `
-                <div class="product_card" >
-                  <div class="product_image">
+                <div class="${productCardClass}">
+                  <div class="${productImageClass}">
                     <img src="${imageUrl}" alt="${p.product_name}">
                   </div>
                   <div class="product_desc">
-                    <div class="product_name">${p.product_name}</div>
-                    <div class="product_price">${price}</div>
-                    <div class="product_stock">Stok : ${p.stock}</div>
+                    <div class="${productNameClass}">${p.product_name}</div>
+                    <div class="${productPriceClass}">${price}</div>
+                    <div class="${stockClass}">${stockText}</div>
                     <div class="product_store">${p.store_name}</div>
                   </div>
                 </div>

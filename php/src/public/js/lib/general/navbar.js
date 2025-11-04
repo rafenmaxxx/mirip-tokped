@@ -72,6 +72,7 @@ function morphAuthBtn(data) {
   const orderHist = document.getElementById("order-hist");
   const search = document.getElementById("navbar__search");
   const filter = document.getElementById("filter-btn");
+  const menu = document.getElementById("navbar-menu");
 
   if (data.status == "success") {
     // udah login
@@ -103,13 +104,16 @@ function morphAuthBtn(data) {
 
     const profile = document.getElementById("btn-profile");
     profile.addEventListener("click", () => {
+      menu.classList.remove("is-active");
       router.navigateTo("/profile");
     });
     if (data.data.role == "BUYER") {
       chart.addEventListener("click", () => {
+        menu.classList.remove("is-active");
         router.navigateTo("/cart");
       });
       orderHist.addEventListener("click", () => {
+        menu.classList.remove("is-active");
         router.navigateTo("/order-history");
       });
       document.getElementById("balance-n").innerHTML = "";
@@ -121,9 +125,11 @@ function morphAuthBtn(data) {
 
       orderHist.innerHTML = `<button class="btn btn-login" id="chartBtn">Order</button>`;
       chart.addEventListener("click", () => {
+        menu.classList.remove("is-active");
         router.navigateTo("/seller/products");
       });
       orderHist.addEventListener("click", () => {
+        menu.classList.remove("is-active");
         router.navigateTo("/seller/orders");
       });
       balance.innerHTML = ``;
@@ -199,21 +205,35 @@ export function InitNavbar() {
   const topupBtn = document.getElementById("balance-btn");
   const filterContainer = document.getElementById("filter-id");
   const balanceContainer = document.getElementById("balance-id");
+  const toggleBtn = document.getElementById("navbar-toggle");
+  const menu = document.getElementById("navbar-menu");
+
+  if (toggleBtn && menu) {
+    toggleBtn.addEventListener("click", () => {
+      menu.classList.toggle("is-active");
+      balanceContainer.classList.remove("active");
+      filterContainer.classList.remove("active");
+    });
+  }
 
   searchBtn.addEventListener("click", () => {
     HandleSearchNavbar(searchInput.value.trim());
+    menu.classList.remove("is-active");
   });
 
   logo.addEventListener("click", () => {
+    menu.classList.remove("is-active");
     router.navigateTo("/home");
   });
 
   searchInput.addEventListener("input", (e) => {
+    menu.classList.remove("is-active");
     showSuggestion(e.target.value);
   });
 
   // --- FILTER ---
   filterBtn.addEventListener("click", () => {
+    menu.classList.remove("is-active");
     if (topupActive) {
       RemoveComponent("balance-id");
       topupActive = false;
@@ -229,6 +249,7 @@ export function InitNavbar() {
         const maxPriceInput = document.getElementById("maxPrice");
 
         applyBtn.addEventListener("click", () => {
+          RemoveComponent("filter-id");
           const selectedCategories = Array.from(categoryCheckboxes)
             .filter((cb) => cb.checked)
             .map((cb) => cb.value);
@@ -261,6 +282,7 @@ export function InitNavbar() {
 
   // --- TOP UP BALANCE ---
   topupBtn?.addEventListener("click", () => {
+    menu.classList.remove("is-active");
     if (filterActive) {
       RemoveComponent("filter-id");
       filterActive = false;

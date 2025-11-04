@@ -208,14 +208,14 @@
     order: 3
 }
 
-/* Desktop sedang */
+
 @media (max-width: 1400px) {
   .product_catalog {
-    grid-template-columns: repeat(3, 1fr); /* 3 kolom */
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* Responsif untuk mobile */
+
 @media (max-width: 768px) {
   .detail_store_page {
     width: 95%;

@@ -28,7 +28,6 @@ body {
 
 .login-card h1 {
     color: #1a9b5b;
-    /* Hijau Tokopedia */
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
 }
@@ -52,7 +51,6 @@ body {
 
 /* Toggle Password Button */
 .toggle-password {
-    /* color : #333; */
     color : #555;
     font-weight: 500;
     position: absolute;

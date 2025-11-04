@@ -35,6 +35,10 @@
   align-items: center;
 }
 
+.product_card.out_of_stock {
+  background-color: #ecebeb;
+}
+
 .product_card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -48,17 +52,21 @@
 }
 
 .product_image {
-  width: 100%; /* PENTING: Ikuti lebar card */
-  aspect-ratio: 1 / 1; /* PENTING: Ini yang menjaga ruang */
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 8px;
-  margin-bottom: 0.5rem; /* Pastikan margin ini stabil */
+  margin-bottom: 0.5rem;
+}
+
+.product_image.out_of_stock {
+  filter: grayscale(90%);
 }
 
 .product_image img {
- width: 100%; /* PENTING: Ikuti wadah .product_image */
-  height: 100%; /* PENTING */
-  object-fit: cover; /* Gunakan ini agar gambar tidak merusak rasio */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 8px;
 
 }
@@ -71,11 +79,20 @@
   line-height: 1.4;
 }
 
+.product_name.out_of_stock {
+  color: #6a6868;
+}
+
 .product_stock {
   font-weight: 300;
   font-size: 0.85rem;
   text-align: left;
   color: #666;
+}
+
+.product_stock.out_of_stock {
+  color: rgb(231, 132, 132);
+  font-weight: bold;
 }
 
 .product_price {
@@ -84,6 +101,11 @@
   margin: 0.3rem 0;
   text-align: center;
   font-size: 1.1rem;
+}
+
+.product_price.out_of_stock {
+  color: #888888;
+  font-weight: 600;
 }
 
 .product_store {
@@ -221,7 +243,7 @@
   background-color: #008C4A;
 }
 
-/* Mobile - 480px ke bawah */
+
 @media (max-width: 480px) {
   .home_page {
     width: 100%;

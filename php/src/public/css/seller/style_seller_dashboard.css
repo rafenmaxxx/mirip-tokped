@@ -208,8 +208,8 @@
     font-size: 1.05rem;
     color: #555;
     line-height: 1.6;
-    max-height: 180;         /* batas tinggi */
-    overflow-y: auto;        /* scroll jika teks panjang */
+    max-height: 180;
+    overflow-y: auto;
     padding-right: 5px;
 }
 

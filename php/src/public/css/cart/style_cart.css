@@ -10,52 +10,43 @@
 
 .cart_page_data {
   display: flex;
-  justify-content: flex-start;  /* ⬅️ biar gap yang atur jarak */
+  justify-content: flex-start;
   align-items: flex-start;
-  gap: 50px;                    /* ⬅️ tambahkan jarak jelas */
+  gap: 50px; 
   padding: 20px 40px;
   box-sizing: border-box;
 }
 
-
-/* =======================
-   Bagian KIRI: Cart Items
-======================= */
 .cart_content {
-  flex: 3;                /* lebar 3 bagian */
+  flex: 3;              
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-width: 0;           /* biar tidak overflow */
+  min-width: 0;      
 }
 
-/* =======================
-   Bagian KANAN: Summary
-======================= */
 .cart_summary_card {
-  flex: 1;                /* lebar 1 bagian */
-  max-width: 320px;       /* batas maksimal */
+  flex: 1;               
+  max-width: 320px;     
   background: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   position: sticky;
   margin-top: 45px;
-  top: 80px;              /* jarak dari atas layar */
-  height: fit-content;    /* tinggi mengikuti isi */
+  top: 80px;            
+  height: fit-content;   
 }
 
-/* =======================
-   Responsif di HP/tablet
-======================= */
+
 @media (max-width: 900px) {
   .cart_page_data {
-    flex-direction: column;  /* ubah jadi vertikal */
+    flex-direction: column; 
     padding: 10px;
   }
 
   .cart_summary_card {
-    position: static;        /* nonaktifkan sticky di layar kecil */
+    position: static;     
     max-width: 100%;
     width: 100%;
   }
@@ -65,7 +56,7 @@
 .cart_title {
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 0;            /* hilangkan semua margin */
+  margin: 0;           
   
 }
 
@@ -84,17 +75,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px; /* opsional, buat jarak bawah */
+  margin-bottom: 8px;
   border-bottom: 1px solid #eee;
 }
 
 .cart_store_name {
-  margin: 0; /* hilangkan margin default h3 */
+  margin: 0;
   font-size: 1.1rem;
 }
 
 .btn-remove-store {
-  background-color: #e74c3c; /* warna merah */
+  background-color: #e74c3c; 
   color: white;
   border: none;
   padding: 6px 12px;
@@ -108,7 +99,7 @@
 
 .cart_subtotal {
   display: flex;
-  justify-content: flex-end; /* dorong isi ke kanan */
+  justify-content: flex-end;
   font-weight: 600;
   margin-top: 8px;
   padding: 8px 0;
@@ -130,7 +121,7 @@
 .cart_item_detail {
   display: flex;
   align-items: center;
-  gap: 16px; /* jarak antara gambar dan info */
+  gap: 16px;
   padding: 10px 0;
   /* border-bottom: 1px solid #eee; */
 }
@@ -138,7 +129,7 @@
 .cart_item_invalid {
   display: flex;
   align-items: center;
-  gap: 16px; /* jarak antara gambar dan info */
+  gap: 16px;
   padding: 10px 0;
   /* border-bottom: 1px solid #eee; */
 }
@@ -154,7 +145,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  flex: 1; /* biar lebar mengikuti sisa ruang */
+  flex: 1;
 }
 
 .cart_item_info {
@@ -164,7 +155,7 @@
 }
 
 .cart_item_warn  {
-  background-color: #f46a5b; /* warna merah */
+  background-color: #f46a5b;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -185,7 +176,7 @@
 }
 
 .cart_quantity {
-  align-self: flex-end; /* posisikan ke kanan */
+  align-self: flex-end;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -212,8 +203,8 @@
 
 .summary_item {
   display: flex;
-  justify-content: space-between; /* nama di kiri, harga di kanan */
-  align-items: center;            /* biar sejajar secara vertikal */
+  justify-content: space-between;
+  align-items: center;           
   margin-bottom: 0.5rem;
 }
 
@@ -254,8 +245,6 @@
   background-color: #009042;
 }
 
-/* Tambahkan di file CSS Anda */
-
 .empty_cart_container {
   display: flex;
   flex-direction: column;
@@ -276,13 +265,13 @@
 .empty_cart_text {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #00a14b; /* warna hijau seperti tombol checkout */
+  color: #00a14b; 
   margin-bottom: 1.5rem;
 }
 
 .btn-start-shopping {
   padding: 12px 32px;
-  background-color: #00a14b; /* hijau sama seperti checkout */
+  background-color: #00a14b;
   color: white;
   border: none;
   border-radius: 8px;
@@ -380,7 +369,6 @@
 
 
 
-/* Animasi fade in */
 @keyframes modalFadeIn {
   from {
     opacity: 0;
