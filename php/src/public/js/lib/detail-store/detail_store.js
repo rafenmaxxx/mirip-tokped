@@ -5,7 +5,7 @@ import { renderToast } from "../general/toast.js";
 import { renderSkeleton } from "../../util/component_loader.js";
 
 let currentPage = 1;
-let itemsPerPage = 5;
+let itemsPerPage = 4;
 
 function renderPaginationButtons(totalPages) {
   const navContainer = document.getElementById("pagination-nav-buttons");
@@ -233,7 +233,7 @@ function fetchProducts() {
 }
 export async function InitDetailStore() {
   currentPage = 1;
-  itemsPerPage = 5;
+  itemsPerPage = 4;
 
   fetchProducts();
 

@@ -8,7 +8,7 @@ let allProducts = [];
 let productCounts = 0;
 let productCategory = [];
 let currentPage = 1;
-let itemsPerPage = 2;
+let itemsPerPage = 4;
 let currentCategory = "";
 let currentSort = 0;
 let currentSearch = "";
@@ -326,7 +326,7 @@ export async function InitSellerProductPage() {
   allProducts = [];
   currentSearch = "";
   currentPage = 1;
-  itemsPerPage = 2;
+  itemsPerPage = 4;
 
   fetchProducts();
   GET("/api/category", {}, renderFilterDropdown, CategoryProductErr);
