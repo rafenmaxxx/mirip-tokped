@@ -102,6 +102,14 @@ switch ($method) {
             if (isset($_FILES['store-logo']) && $_FILES['store-logo']['error'] === UPLOAD_ERR_OK) {
                 $file = $_FILES['store-logo'];
                 $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                $maxSizeMB = 2;
+                $maxSizeBytes = $maxSizeMB * 1024 * 1024;
+
+                $fileSize = $_FILES['product-img']['size'];
+                if ($fileSize > $maxSizeBytes) {
+                    warn("Ukuran file melebihi {$maxSizeMB} MB", '/seller/products/add');
+                    exit;
+                }
 
                 if (in_array($file['type'], $allowedTypes)) {
                     $uploadDir = __DIR__ . '/../../data/store/logo/';
