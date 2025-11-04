@@ -6,7 +6,6 @@ import { renderToast } from "../general/toast.js";
 let allOrders = [];
 let currentFilter = "all"; // Current active filter
 
-
 function renderFilterDropdown() {
   const filterContainer = document.getElementById("order_filter");
   if (!filterContainer) return;
@@ -17,7 +16,7 @@ function renderFilterDropdown() {
     { value: "approved", label: "Approved" },
     { value: "rejected", label: "Rejected" },
     { value: "on_delivery", label: "On Delivery" },
-    { value: "received", label: "Received" }
+    { value: "received", label: "Received" },
   ];
 
   filterContainer.innerHTML = `
@@ -27,11 +26,17 @@ function renderFilterDropdown() {
       </label>
       <div class="custom-select">
         <select id="order-status-filter" class="filter-select">
-          ${statuses.map(status => `
-            <option value="${status.value}" ${status.value === currentFilter ? 'selected' : ''}>
+          ${statuses
+            .map(
+              (status) => `
+            <option value="${status.value}" ${
+                status.value === currentFilter ? "selected" : ""
+              }>
                ${status.label}
             </option>
-          `).join('')}
+          `
+            )
+            .join("")}
         </select>
         <div class="select-arrow">▼</div>
       </div>
@@ -54,9 +59,10 @@ function renderFilteredOrders(status) {
   const countElement = document.getElementById("order-count");
   if (!container) return;
 
-  const filteredOrders = status === "all" 
-    ? allOrders 
-    : allOrders.filter(order => order.status === status);
+  const filteredOrders =
+    status === "all"
+      ? allOrders
+      : allOrders.filter((order) => order.status === status);
 
   // Update count
   if (countElement) {
@@ -65,7 +71,8 @@ function renderFilteredOrders(status) {
   }
 
   if (filteredOrders.length === 0) {
-    const statusText = status === "all" ? "pesanan" : `pesanan dengan status "${status}"`;
+    const statusText =
+      status === "all" ? "pesanan" : `pesanan dengan status "${status}"`;
     container.innerHTML = `
       <div class="no-orders">
         <p>Tidak ada ${statusText}.</p>
@@ -75,7 +82,7 @@ function renderFilteredOrders(status) {
   }
 
   container.innerHTML = "";
-  filteredOrders.forEach(order => {
+  filteredOrders.forEach((order) => {
     renderOrderCard(order, container);
   });
 }
@@ -84,11 +91,11 @@ function renderOrderCard(order, container) {
   let itemsHtml = "";
 
   if (Array.isArray(order.items)) {
-    order.items.forEach(item => {
+    order.items.forEach((item) => {
       const imageUrl =
-          item.main_image_path && item.main_image_path !== ""
-            ? `/api/image?file=${item.main_image_path}`
-            : `https://picsum.photos/200/200?random=${item.product_id}`;
+        item.main_image_path && item.main_image_path !== ""
+          ? `/api/image?file=${item.main_image_path}`
+          : `https://picsum.photos/200/200?random=${item.product_id}`;
       itemsHtml += `
         <div class="order_item">
           <img src="${imageUrl}" 
@@ -111,28 +118,38 @@ function renderOrderCard(order, container) {
   else if (order.status === "rejected") statusClass = "status-rejected";
 
   // Reject info HTML (if rejected)
-  const rejectInfoHtml = order.status === "rejected" ? `
+  const rejectInfoHtml =
+    order.status === "rejected"
+      ? `
     <div class="order_reject_info">
       <div class="refund-amount">
         <span class="refund-label">Refunded:</span>
-        <span class="refund-value">Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</span>
+        <span class="refund-value">Rp ${parseInt(
+          order.total_price
+        ).toLocaleString("id-ID")}</span>
       </div>
       
       <div class="reject-reason-preview">
         <span class="reason-label">Seller's note:</span>
-        <span class="reason-text">${order.reject_reason ? order.reject_reason : "-"}</span>
+        <span class="reason-text">${
+          order.reject_reason ? order.reject_reason : "-"
+        }</span>
       </div>
       
     </div>
-  ` : '';
+  `
+      : "";
 
   // On delivery action button
-  const deliveryActionHtml = order.status === "on_delivery" ? `
+  const deliveryActionHtml =
+    order.status === "on_delivery"
+      ? `
     <button class="confirm_received_btn" 
             data-order-id="${order.order_id}">
       Konfirmasi Diterima
     </button>
-  ` : '';
+  `
+      : "";
 
   const orderElement = document.createElement("div");
   orderElement.classList.add("order");
@@ -144,7 +161,9 @@ function renderOrderCard(order, container) {
       </div>
       <div class="order_meta">
         <p class="store-name">${order.store_name}</p>
-        <p class="order-date">${new Date(order.created_at).toLocaleDateString('id-ID')}</p>
+        <p class="order-date">${new Date(order.created_at).toLocaleDateString(
+          "id-ID"
+        )}</p>
       </div>
     </div>
     <div class="order_items">
@@ -152,7 +171,9 @@ function renderOrderCard(order, container) {
     </div>
     ${rejectInfoHtml}
     <div class="order_footer">
-      <p class="total-price">Total: <strong>Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</strong></p>
+      <p class="total-price">Total: <strong>Rp ${parseInt(
+        order.total_price
+      ).toLocaleString("id-ID")}</strong></p>
       <div class="order_actions">
         ${deliveryActionHtml}
         <button class="view_details_btn" 
@@ -168,7 +189,7 @@ function renderOrderCard(order, container) {
   storeNameElem.addEventListener("click", () => {
     router.navigateTo("/store?store_id=" + order.store_id);
   });
-  
+
   const viewBtn = orderElement.querySelector(".view_details_btn");
   viewBtn.addEventListener("click", () => {
     renderOrderDetailModal(order);
@@ -193,10 +214,10 @@ function renderOrderDetailModal(order) {
   if (Array.isArray(order.items)) {
     order.items.forEach((item, index) => {
       const imageUrl =
-          item.main_image_path && item.main_image_path !== ""
-            ? `/api/image?file=${item.main_image_path}`
-            : `https://picsum.photos/200/200?random=${index + 1}`;
-      
+        item.main_image_path && item.main_image_path !== ""
+          ? `/api/image?file=${item.main_image_path}`
+          : `https://picsum.photos/200/200?random=${index + 1}`;
+
       itemsHtml += `
         <div class="detail-item">
           <img src="${imageUrl}" 
@@ -205,8 +226,12 @@ function renderOrderDetailModal(order) {
           <div class="detail-item-info">
             <h4>${item.product_name}</h4>
             <p class="item-quantity">Quantity: ${item.quantity}x</p>
-            <p class="item-price">Rp ${parseInt(item.price_at_order).toLocaleString('id-ID')}</p>
-            <p class="item-subtotal">Subtotal: Rp ${parseInt(item.subtotal).toLocaleString('id-ID')}</p>
+            <p class="item-price">Rp ${parseInt(
+              item.price_at_order
+            ).toLocaleString("id-ID")}</p>
+            <p class="item-subtotal">Subtotal: Rp ${parseInt(
+              item.subtotal
+            ).toLocaleString("id-ID")}</p>
           </div>
         </div>
       `;
@@ -221,12 +246,14 @@ function renderOrderDetailModal(order) {
   else if (order.status === "rejected") statusClass = "status-rejected";
 
   // Reject reason (jika ada)
-  const rejectReasonHtml = order.reject_reason ? `
+  const rejectReasonHtml = order.reject_reason
+    ? `
     <div class="reject-reason">
       <h4>Alasan Penolakan:</h4>
       <p>${order.reject_reason}</p>
     </div>
-  ` : '';
+  `
+    : "";
 
   modal.innerHTML = `
     <div class="modal-overlay">
@@ -252,19 +279,27 @@ function renderOrderDetailModal(order) {
           </div>
           <div class="info-row">
             <span class="info-label">Order Date:</span>
-            <span class="info-value">${new Date(order.created_at).toLocaleString('id-ID')}</span>
+            <span class="info-value">${new Date(
+              order.created_at
+            ).toLocaleString("id-ID")}</span>
           </div>
-          ${order.delivery_time ? `
+          ${
+            order.delivery_time
+              ? `
           <div class="info-row">
             <span class="info-label">Delivery Time:</span>
-            <span class="info-value">${new Date(order.delivery_time).toLocaleString('id-ID')}</span>
+            <span class="info-value">${new Date(
+              order.delivery_time
+            ).toLocaleString("id-ID")}</span>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
 
         <div class="shipping-section">
           <h3>Shipping Address</h3>
-          <p>${order.shipping_address || 'No address provided'}</p>
+          <p>${order.shipping_address || "No address provided"}</p>
         </div>
 
         ${rejectReasonHtml}
@@ -277,7 +312,9 @@ function renderOrderDetailModal(order) {
         </div>
 
         <div class="total-section">
-          <h3>Total Price: <span class="total-price">Rp ${parseInt(order.total_price).toLocaleString('id-ID')}</span></h3>
+          <h3>Total Price: <span class="total-price">Rp ${parseInt(
+            order.total_price
+          ).toLocaleString("id-ID")}</span></h3>
         </div>
       </div>
     </div>
@@ -291,7 +328,9 @@ function renderOrderDetailModal(order) {
     document.body.classList.remove("modal-open");
   };
 
-  document.getElementById("close-detail-modal").addEventListener("click", closeModal);
+  document
+    .getElementById("close-detail-modal")
+    .addEventListener("click", closeModal);
 
   modal.querySelector(".modal-overlay").addEventListener("click", (e) => {
     if (e.target.classList.contains("modal-overlay")) {
@@ -312,13 +351,12 @@ function LoadOrderHistoryData(data) {
   const container = document.getElementById("order_history-data");
   if (!container) return;
 
-  console.log("Order History Data:", data);
-
   if (data.status === "success" && Array.isArray(data.data)) {
     allOrders = data.data; // Store all orders
-    
+
     if (allOrders.length === 0) {
-      container.innerHTML = "<p class='no-orders'>Belum ada riwayat pesanan.</p>";
+      container.innerHTML =
+        "<p class='no-orders'>Belum ada riwayat pesanan.</p>";
       return;
     }
 
@@ -331,22 +369,30 @@ function LoadOrderHistoryData(data) {
 }
 
 function handleConfirmReceived(orderId) {
-  PUT(`/api/order`, { action: 'update_status', order_id: orderId, status: 'received' }, (response) => {
-    if (response.status === 'success') {
-      console.log(`Order ID ${orderId} confirmed as received.`);
-      renderToast('Order confirmed as received', 'success');
+  PUT(
+    `/api/order`,
+    { action: "update_status", order_id: orderId, status: "received" },
+    (response) => {
+      if (response.status === "success") {
+        renderToast("Order confirmed as received", "success");
 
-      const orderIndex = allOrders.findIndex(order => order.order_id === orderId);
-      if (orderIndex !== -1) {
-        allOrders[orderIndex].status = 'received';
-        renderFilteredOrders(currentFilter);
+        const orderIndex = allOrders.findIndex(
+          (order) => order.order_id === orderId
+        );
+        if (orderIndex !== -1) {
+          allOrders[orderIndex].status = "received";
+          renderFilteredOrders(currentFilter);
+        }
+      } else {
+        console.error(
+          `Failed to confirm order ID ${orderId}: ${response.message}`
+        );
       }
-    } else {
-      console.error(`Failed to confirm order ID ${orderId}: ${response.message}`);
+    },
+    (err) => {
+      renderToast("Please wait until delivery time has passed.", "error");
     }
-  }, (err) => {
-    renderToast('Please wait until delivery time has passed.', 'error');
-  });
+  );
 }
 
 // --- Error Handler ---
@@ -354,7 +400,8 @@ function OrderHistoryErr(err) {
   const container = document.getElementById("order_history-data");
   if (!container) return;
 
-  container.innerHTML = "<p class='error-message'>Error loading order history. Please try again later.</p>";
+  container.innerHTML =
+    "<p class='error-message'>Error loading order history. Please try again later.</p>";
 }
 
 // --- Init Page ---

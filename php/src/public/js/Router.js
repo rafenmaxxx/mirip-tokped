@@ -77,13 +77,11 @@ export class Router {
       if (!this.moduleCache[path]) {
         const module = await import(importPath);
         this.moduleCache[path] = module;
-        console.log(`Loaded module: ${path}`);
       } else {
-        console.log(`Using cached module: ${path}`);
       }
     } else {
       const module = await import(importPath);
-      console.log(`Loaded fresh module (devMode): ${importPath}`);
+
       this.moduleCache[path] = module;
     }
 
@@ -113,7 +111,7 @@ export class Router {
     cssPaths.forEach((cssPath) => {
       let finalPath = this.devMode ? cssPath + "?v=" + Date.now() : cssPath;
 
-      // Sudah pernah dimuat → skip
+      // dah pernah diload , skip aja
       if (
         [...document.styleSheets].some(
           (s) => s.href && s.href.includes(cssPath)
@@ -130,7 +128,7 @@ export class Router {
 
       link.onload = () => {
         loadedCount++;
-        console.log("Loaded CSS:", finalPath);
+
         if (loadedCount === total) callback?.();
       };
 
@@ -155,7 +153,7 @@ export class Router {
       history.pushState({}, "", route);
       this.handleRoute();
     } else {
-      this.handleFunc(route);
+      this.handleRoute();
     }
   }
 

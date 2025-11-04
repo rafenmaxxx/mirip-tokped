@@ -68,8 +68,6 @@ function LoadProduct(data) {
   const footer = document.getElementById("pagination-container");
   if (!container) return;
 
-  console.log(data);
-
   if (data.status !== "success") {
     container.innerHTML = `<p>Gagal memuat data produk.</p>`;
     return;
@@ -203,7 +201,6 @@ function fetchProducts() {
   params.page = currentPage;
   params.limit = itemsPerPage;
 
-  console.log("Fetching products with params:", params);
   GET("/api/product", params, LoadProduct, ProductErr);
 
   if (!params.hasOwnProperty("search") && !params.hasOwnProperty("filter")) {
@@ -237,7 +234,7 @@ export function LoadHome() {
   if (itemsPerPageSelect) {
     itemsPerPageSelect.addEventListener("change", (e) => {
       itemsPerPage = parseInt(e.target.value, 10);
-      console.log("Items per page changed to:", itemsPerPage);
+
       currentPage = 1;
       fetchProducts();
     });

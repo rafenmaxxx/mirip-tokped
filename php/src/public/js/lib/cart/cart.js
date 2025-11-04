@@ -137,7 +137,7 @@ function updateStoreSubtotal(store_id) {
 }
 
 function LoadCartItems(data) {
-  //console.log("LoadCartItems received:", data);
+  //
   const container = document.getElementById("cart-data");
   if (!container) return;
 
@@ -304,11 +304,11 @@ function LoadCartItems(data) {
 
     const removeItemButtons = document.querySelectorAll(".btn-remove-item");
     removeItemButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-            const cart_item_id = btn.getAttribute("data-cart-item-id");
-            const store_id = btn.getAttribute("data-store-id");
-            openModal(cart_item_id, store_id, "item"); 
-        });
+      btn.addEventListener("click", () => {
+        const cart_item_id = btn.getAttribute("data-cart-item-id");
+        const store_id = btn.getAttribute("data-store-id");
+        openModal(cart_item_id, store_id, "item");
+      });
     });
 
     // Attach quantity button listeners

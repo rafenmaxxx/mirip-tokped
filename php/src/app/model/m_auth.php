@@ -72,7 +72,7 @@ class Auth
     {
         try {
             $stmt = $this->conn->prepare("
-            SELECT user_id, email, password, role 
+            SELECT user_id, email, password, role,name
             FROM users 
             WHERE email = :email
             LIMIT 1
@@ -112,6 +112,7 @@ class Auth
             $_SESSION['user'] = [
                 'id' => $user['user_id'],
                 'email' => $user['email'],
+                'name' => $user['name'],
                 'role' => $user['role'],
                 'store_id' => $store_id
             ];
