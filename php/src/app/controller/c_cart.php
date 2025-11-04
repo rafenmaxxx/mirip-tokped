@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../model/m_cart.php';
 require_once __DIR__ . '/../model/m_auth.php';
+require_once __DIR__ . '/../model/m_sanitizer.php';
+
 $model = new Cart();
 $method = $_SERVER['REQUEST_METHOD'];
 
