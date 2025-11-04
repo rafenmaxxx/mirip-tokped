@@ -12,12 +12,12 @@ class Database
 
     private function __construct()
     {
-        // Ambil dari environment (docker-compose)
-        $this->host = getenv('DB_HOST') ?: 'db';
-        $this->port = getenv('DB_PORT') ?: '5432';
-        $this->db_name = getenv('DB_NAME') ?: 'Tokped';
-        $this->username = getenv('DB_USER') ?: 'Minped';
-        $this->password = getenv('DB_PASSWORD') ?: 'semogatubesinilancarselalu';
+
+        $this->host = getenv('DB_HOST');
+        $this->port = getenv('DB_PORT');
+        $this->db_name = getenv('DB_NAME');
+        $this->username = getenv('DB_USER');
+        $this->password = getenv('DB_PASSWORD');
 
         try {
             $this->conn = new PDO(
