@@ -124,15 +124,14 @@
 
 .order-header {
   display: flex;
-  /* Hapus 'space-between' */
   align-items: center;
-  gap: 15px; /* Tambahkan 'gap' untuk spasi yang konsisten */
+  gap: 15px;
 }
 
 .order-title {
-  flex-grow: 1; /* PENTING: Paksa judul mengambil semua ruang kosong */
-  margin: 0;    /* Hapus margin default dari h3 */
-  font-size: 1.3rem; /* (Sesuaikan ukurannya) */
+  flex-grow: 1;
+  margin: 0;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #1a1a1a;
 }
