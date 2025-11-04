@@ -113,10 +113,11 @@ function renderPasswordChangeModal() {
           { password: newPassword },
           (updateResult) => {
             if (updateResult.status === "success") {
-              renderToast("Password berhasil diubah", "success");
-              modal.style.display = "none";
+              setToastAfterReload("Password berhasil diubah", "success");
               Loading.hide();
+              modal.style.display = "none";
               location.reload();
+              
             } else {
               Loading.hide();
               errorDiv.textContent =
