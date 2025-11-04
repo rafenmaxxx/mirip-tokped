@@ -3,35 +3,32 @@
     margin: 0 auto;
     padding: 0 15px;
     width: 80%;
-
-    /* --- TAMBAHKAN 3 BARIS INI --- */
     display: flex;
-    flex-direction: column; /* Menumpuk item secara vertikal */
-    align-items: center;     /* Menengahkan item secara horizontal */
-    justify-content: center;  /* BARU: Ini menengahkan vertikal */
-    flex-grow: 1;             /* BARU: Buat container mengisi sisa ruang */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
 
     min-height: calc(100vh - 100px);
 }
 
 .display img {
-    width: 250px; /* Ukuran gambar di dalam lingkaran */
+    width: 250px;
     height: auto;
 }
 
 .message {
-    font-size: 1.1rem; /* Ukuran teks pesan */
+    font-size: 1.1rem;
     margin: 0;
-    margin-bottom: 15px; /* Jarak ke tombol di bawah */
+    margin-bottom: 15px;
 }
 
 .btn-back {
-    background-color: #00AA5B; /* Warna hijau */
+    background-color: #00AA5B;
     color: white;
-    text-decoration: none; /* Menghapus garis bawah link */
-    
-    padding: 12px 35px; /* Ukuran tombol */
-    border-radius: 10px; /* Membuat tombol lonjong (pill shape) */
+    text-decoration: none;
+    padding: 12px 35px;
+    border-radius: 10px;
     
     font-size: 1rem;
     font-weight: 500;
@@ -39,5 +36,5 @@
 }
 
 .btn-back:hover {
-    background-color: #008C4A; /* Warna hijau lebih gelap saat disentuh */
+    background-color: #008C4A;
 }

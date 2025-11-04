@@ -355,7 +355,7 @@
     flex: 1;
 }
 
-/* Responsive */
+/* Responsif */
 @media (max-width: 600px) {
     .modal-content {
         padding: 20px;

@@ -92,7 +92,6 @@ display: none;
 to { transform: rotate(360deg); }
 }
 
-/* ==== RESPONSIVE ==== */
 
 @media (max-width: 768px) {
   .loading-spinner-container {
