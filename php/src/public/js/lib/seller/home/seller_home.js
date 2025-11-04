@@ -15,10 +15,15 @@ function LoadSellerData() {
     (data) => {
       if (data.status == "success") {
         const res = data.data;
+        const total_rev = res.total_revenue.toLocaleString("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        });
         ChangeTextContentById("store-name", res.store_name);
         ChangeTextContentById("store-description", res.store_description);
         ChangeTextContentById("total-product", res.total_products);
-        ChangeTextContentById("total-revenue", res.total_revenue);
+        ChangeTextContentById("total-revenue", total_rev);
         ChangeTextContentById("low-stock", res.low_stock_products);
         ChangeTextContentById("pending-order", res.pending_orders);
         const imgUrl = `/api/image?file=${res.store_logo_path}`;

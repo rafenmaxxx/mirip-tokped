@@ -3,6 +3,7 @@ import { GET } from "../../../api/api.js";
 import { ChangeInnerHtmlById } from "../../../util/component_loader.js";
 import { showModalConfirmation } from "../../general/modal.js";
 import { changePlaceHolder, InitQuill } from "../../general/quill.js";
+import { renderToast } from "../../general/toast.js";
 
 function LoadPlaceHolder(id) {
   if (!id) return;
@@ -12,7 +13,8 @@ function LoadPlaceHolder(id) {
     { id: id },
     (res) => {
       if (!res || res.status !== "success" || !res.data) {
-        console.warn("Produk tidak ditemukan");
+        router.navigateTo("/seller/products");
+        renderToast("Gagal Memuat Produk", "error");
         return;
       }
 
@@ -39,10 +41,12 @@ function LoadPlaceHolder(id) {
           cb.checked = data.categories.includes(labelText);
         });
       }
-      console.log("Placeholder berhasil diisi:", data);
     },
     (err) => {
-      console.error("Gagal memuat data produk:", err);
+      if (err) {
+        router.navigateTo("/seller/products");
+        renderToast("Gagal Memuat Produk", "error");
+      }
     }
   );
 }

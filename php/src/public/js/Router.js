@@ -22,25 +22,29 @@ export class Router {
 
         const { html_content, metadata: route } = data.data;
         try {
-          this.loadCSS(route.css || []);
-          this.app.innerHTML = html_content;
-          if (route.useNavbar && !this.navBarInit) {
-            this.navBarInit = true;
+          this.app?.classList.remove("visible");
+          this.loadCSS(route.css || [], () => {
+            this.app.innerHTML = html_content;
+            if (route.useNavbar && !this.navBarInit) {
+              this.navBarInit = true;
 
-            LoadComponent(
-              "navbar",
-              this.devMode
-                ? `/components/general/navbar.html?v=${Date.now()}`
-                : "/components/general/navbar.html",
-              () => {
-                this.loadModuleOnce("./lib/general/navbar.js", ["InitNavbar"]);
-                this.loadCSS(["/css/general/style_navbar.css"]);
-              }
-            );
-          } else if (!route.useNavbar) {
-            RemoveComponent("navbar");
-            this.navBarInit = false;
-          }
+              LoadComponent(
+                "navbar",
+                this.devMode
+                  ? `/components/general/navbar.html?v=${Date.now()}`
+                  : "/components/general/navbar.html",
+                () => {
+                  this.loadModuleOnce("./lib/general/navbar.js", [
+                    "InitNavbar",
+                  ]);
+                  this.loadCSS(["/css/general/style_navbar.css"]);
+                }
+              );
+            } else if (!route.useNavbar) {
+              RemoveComponent("navbar");
+              this.navBarInit = false;
+            }
+          });
 
           this.handleFunc(route.js);
         } catch (err) {
@@ -97,11 +101,11 @@ export class Router {
     }
   }
 
-  loadCSS(cssPaths) {
-    const app = document.getElementById("app");
-    if (!cssPaths || !cssPaths.length) return;
-
-    app?.classList.remove("visible");
+  loadCSS(cssPaths, callback) {
+    if (!cssPaths || !cssPaths.length) {
+      callback?.();
+      return;
+    }
 
     let loadedCount = 0;
     const total = cssPaths.length;
@@ -109,13 +113,14 @@ export class Router {
     cssPaths.forEach((cssPath) => {
       let finalPath = this.devMode ? cssPath + "?v=" + Date.now() : cssPath;
 
+      // Sudah pernah dimuat → skip
       if (
         [...document.styleSheets].some(
           (s) => s.href && s.href.includes(cssPath)
         )
       ) {
         loadedCount++;
-        if (loadedCount === total) app?.classList.add("visible");
+        if (loadedCount === total) callback?.();
         return;
       }
 
@@ -126,16 +131,13 @@ export class Router {
       link.onload = () => {
         loadedCount++;
         console.log("Loaded CSS:", finalPath);
-
-        if (loadedCount === total) {
-          app?.classList.add("visible");
-        }
+        if (loadedCount === total) callback?.();
       };
 
       link.onerror = () => {
         loadedCount++;
         console.warn("Gagal memuat CSS:", finalPath);
-        if (loadedCount === total) app?.classList.add("visible");
+        if (loadedCount === total) callback?.();
       };
 
       document.head.appendChild(link);

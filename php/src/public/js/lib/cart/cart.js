@@ -361,6 +361,7 @@ function confirmDelete() {
           closeModal();
           reloadCartPage();
           setTimeout(validateCart, 500);
+          InitCountCart();
         } else {
           Loading.hide();
           closeModal();
@@ -383,6 +384,7 @@ function confirmDelete() {
         if (response.status === "success") {
           closeModal();
           reloadCartPage();
+          InitCountCart();
         } else {
           closeModal();
           renderToast(
@@ -397,7 +399,6 @@ function confirmDelete() {
     closeModal();
     renderToast("Data tidak lengkap untuk menghapus", "error");
   }
-  InitCountCart();
 }
 
 function LoadSummary(data) {
