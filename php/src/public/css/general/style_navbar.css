@@ -15,12 +15,13 @@
   right: 0;
   z-index: 1000; 
   height: 64px;
-   min-height: 64px;
-
+  min-height: 64px;
 }
 
-
-
+.navbar.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
 
 .navbar__logo {
   font-weight: 700;
@@ -85,7 +86,7 @@
   white-space: nowrap;
 }
 
-.btn {
+.nav-btn {
   border: none;
   border-radius: 8px;
   padding: 0.4rem 1rem;
@@ -148,4 +149,79 @@
   line-height: 1;
 }
 
+.navbar__menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 
+.navbar__toggle {
+  display: none;
+  font-size: 1.5rem;
+  color: #00a14b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 960px) {
+    .navbar {
+      padding-left: 1rem; /* kurangi padding untuk layar kecil */
+      margin-left: 1rem;
+      padding-right: 1rem; /* seimbangkan dengan kanan */
+    }
+
+    .navbar__menu {
+      display: none;
+      flex-direction: row;   /* 1. Atur semua item (tombol) jadi sebaris */
+      flex-wrap: wrap;       /* 2. Izinkan item turun baris jika tidak muat */
+      justify-content: center; /* 3. Pusatkan item di dalam menu */
+      align-items: center;
+      position: absolute;
+      top: 64px;
+      right: 0;
+      width: 95%;
+      background-color: white;
+      padding: 1rem 2rem 1rem 2rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      border-radius: 0 0 0 8px;
+    }
+    
+    .navbar__menu.is-active {
+        display: flex;
+    }
+
+    .navbar__toggle {
+        display: block;
+    }
+
+    .navbar__search {
+        max-width: none;
+        width: 100%;
+    }
+    
+    .navbar__auth {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .navbar__auth a,
+    .navbar__auth button {
+        flex: 1;
+        text-align: center;
+    }
+
+    /* --- TAMBAHKAN BLOK INI (untuk tombol sisanya) --- */
+    .navbar__menu .btn-login,
+    .navbar__menu #balance-n button,
+    .navbar__menu #navbar-chart button,
+    .navbar__menu #order-hist button {
+        flex: 1; /* Buat mereka berbagi ruang juga */
+        width: auto; /* Jangan paksa 100% */
+        white-space: nowrap; /* Mencegah "Balance: Rp..." terpotong */
+        font-size: 0.8rem; /* (Opsional) Perkecil font agar muat */
+        padding: 0.4rem 0.6rem; /* (Opsional) Perkecil padding */
+    }
+}
