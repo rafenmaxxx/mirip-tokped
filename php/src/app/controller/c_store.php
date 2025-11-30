@@ -30,8 +30,8 @@ switch ($method) {
         $store_name = $_POST['store_name'] ?? null;
         $store_description = $_POST['store_description'] ?? null;
 
-        $store_name = sanitizePlainText($nama_produk);
-        $store_description   = sanitizeRTEInput($deskripsi);
+        $store_name = sanitizePlainText($store_name);
+        $store_description   = sanitizeRTEInput($store_description);
 
         if (isset($_FILES['gambar_toko']) && $_FILES['gambar_toko']['error'] == 0) {
             $maxSizeMB = 2;
