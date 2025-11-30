@@ -31,7 +31,12 @@ class Database
                 ]
             );
         } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Database connection failed: ' . $e->getMessage()
+            ]);
+            exit;
         }
     }
 
