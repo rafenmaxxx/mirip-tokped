@@ -3,11 +3,26 @@ import ChatNavbar from "./components/chat_navbar";
 import ChatBubble from "./components/chat_buble";
 import ChatSidebar from "./components/chat_sidebar";
 import AttachmentModal from "./components/attachment_modal";
+import ChatHeader from "./components/chat_header";
 
 function Chat() {
   const [selectedRoom, setSelectedRoom] = useState(1);
   const [input, setInput] = useState("");
   const [modal, setModal] = useState(false);
+  const [inputHeight] = useState("auto");
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+
+    // Reset height dulu supaya ukurannya akurat
+    e.target.style.height = "auto";
+
+    // Set height sesuai content, tapi maksimal 5 baris (5 * 24px = 120px)
+    const maxHeight = 24 * 5; // 24px ≈ tinggi 1 baris default
+    const newHeight = Math.min(e.target.scrollHeight, maxHeight);
+
+    e.target.style.height = `${newHeight}px`;
+  };
 
   // ROOM INFO
   const rooms = [
@@ -84,21 +99,26 @@ function Chat() {
   });
 
   return (
-    <div className="w-full h-screen flex bg-white">
+    <div className="w-full h-screen max-h-screen flex bg-white">
       <AttachmentModal show={modal} onClose={() => setModal(false)} />
 
-      <div>
+      <div className="flex flex-col h-full">
         <ChatNavbar onBack={() => alert("Back to main menu")} />
 
-        <ChatSidebar
-          rooms={roomsWithLastMessage}
-          selectedRoom={selectedRoom}
-          onSelect={handleSelectRoom}
-        />
+        <div className="flex-1 overflow-hidden">
+          <ChatSidebar
+            rooms={roomsWithLastMessage}
+            selectedRoom={selectedRoom}
+            onSelect={handleSelectRoom}
+          />
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-6 overflow-y-auto bg-green-50 flex flex-col">
+        <ChatHeader
+          room={roomsWithLastMessage.find((r) => r.id === selectedRoom)}
+        />
+        <div className="flex-1 p-6 overflow-y-auto bg-[url(./public/img/chat-background.png)]  flex flex-col">
           {messages.map((m, i) => (
             <ChatBubble key={i} text={m.text} mine={m.mine} />
           ))}
@@ -112,11 +132,13 @@ function Chat() {
             +
           </button>
 
-          <input
+          <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Tulis pesan..."
-            className="flex-1 p-2 border border-gray-400 rounded-xl focus:ring-green-500"
+            className="flex-1 p-2 border border-gray-400 rounded-xl resize-none overflow-y-auto max-h-[120px] focus:outline-gray-500"
+            rows={1}
+            style={{ height: inputHeight }}
           />
 
           <button
