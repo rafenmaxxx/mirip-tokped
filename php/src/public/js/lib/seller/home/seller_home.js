@@ -21,7 +21,7 @@ function LoadSellerData() {
           minimumFractionDigits: 0,
         });
         ChangeTextContentById("store-name", res.store_name);
-        ChangeTextContentById("store-description", res.store_description);
+        ChangeInnerHtmlById("store-description", res.store_description);
         ChangeTextContentById("total-product", res.total_products);
         ChangeTextContentById("total-revenue", total_rev);
         ChangeTextContentById("low-stock", res.low_stock_products);
