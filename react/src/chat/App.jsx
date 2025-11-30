@@ -9,6 +9,20 @@ function Chat() {
   const [selectedRoom, setSelectedRoom] = useState(1);
   const [input, setInput] = useState("");
   const [modal, setModal] = useState(false);
+  const [inputHeight] = useState("auto");
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+
+    // Reset height dulu supaya ukurannya akurat
+    e.target.style.height = "auto";
+
+    // Set height sesuai content, tapi maksimal 5 baris (5 * 24px = 120px)
+    const maxHeight = 24 * 5; // 24px ≈ tinggi 1 baris default
+    const newHeight = Math.min(e.target.scrollHeight, maxHeight);
+
+    e.target.style.height = `${newHeight}px`;
+  };
 
   // ROOM INFO
   const rooms = [
@@ -25,63 +39,6 @@ function Chat() {
       lastMessage: "Kak ukurannya...",
       time: "12:10",
       status: "sent",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
     },
     {
       id: 3,
@@ -175,11 +132,13 @@ function Chat() {
             +
           </button>
 
-          <input
+          <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Tulis pesan..."
-            className="flex-1 p-2 border border-gray-400 rounded-xl focus:ring-green-500"
+            className="flex-1 p-2 border border-gray-400 rounded-xl resize-none overflow-y-auto max-h-[120px] focus:outline-gray-500"
+            rows={1}
+            style={{ height: inputHeight }}
           />
 
           <button
