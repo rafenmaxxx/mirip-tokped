@@ -29,7 +29,7 @@ const IconCheckCheck = ({ className }) => (
 
 function ChatSidebar({ rooms, selectedRoom, onSelect }) {
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
       <div className="flex items-center gap-3 p-4 border-b bg-green-50">
         <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
           <IconUser className="w-6 h-6 text-gray-500" />
