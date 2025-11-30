@@ -8,7 +8,7 @@ function Check() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/api/product") // pastikan backend kamu benar-benar ada di path ini
+    fetch("/api/product")
       .then((res) => {
         if (!res.ok) throw new Error("HTTP Error: " + res.status);
         return res.json();
@@ -28,7 +28,7 @@ function Check() {
 
   return (
     <>
-      <h1>Halo dari check</h1>
+      <h1 >Halo dari check</h1>
       <h2>Data Product dari php api:</h2>
 
       <pre>{JSON.stringify(data, null, 2)}</pre>
