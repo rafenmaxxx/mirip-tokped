@@ -6,6 +6,13 @@
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
   },
+  "": {
+    "html": "/pages/home.html",
+    "js": [{ "path": "./lib/home/home.js", "func": ["LoadHome"] }],
+    "css": ["/css/home/style_sliding_card.css", "/css/home/style_home.css"],
+    "useNavbar": true,
+    "access": ["GUEST", "BUYER"]
+  },
   "/home": {
     "html": "/pages/home.html",
     "js": [{ "path": "./lib/home/home.js", "func": ["LoadHome"] }],
@@ -18,6 +25,7 @@
     "useNavbar": true,
     "access": ["GUEST", "BUYER"]
   },
+
   "/product-detail": {
     "html": "/pages/product_detail.html",
     "js": [
