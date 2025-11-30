@@ -1,37 +1,84 @@
 version: '3.9'
 
 services:
-  php:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    env_file:
+      - .env
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
-      - ./php/src:/var/www/html/
-      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./php/src:/var/www/html:ro       # Aplikasi existing
+      - ./react/dist:/usr/share/nginx/html/react:ro
     depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: Tokped
-      DB_USER: Minped
-      DB_PASSWORD: semogatubesinilancarselalu
+      - php
+      - node
     restart: always
 
-  db:
-    image: postgres:16
-    restart: always
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: php
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: Minped
-      POSTGRES_PASSWORD: semogatubesinilancarselalu
-      POSTGRES_DB: Tokped
+      DB_HOST: ${PHP_DB_HOST}
+      DB_PORT: ${PHP_DB_PORT}
+      DB_NAME: ${PHP_DB_NAME}
+      DB_USER: ${PHP_DB_USER}
+      DB_PASSWORD: ${PHP_DB_PASSWORD}
+    volumes:
+      - ./php/src:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    expose:
+      - "9000"
+    restart: always
+
+  node:
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    container_name: node
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${NODE_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    volumes:
+      - ./node:/usr/src/app
+    expose:
+      - "3000"
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    restart: always
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+      - ./postgres/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+    restart: always
 
-volumes:   
+volumes:
   pgdata:
