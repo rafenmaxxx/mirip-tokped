@@ -3,6 +3,7 @@ import ChatNavbar from "./components/chat_navbar";
 import ChatBubble from "./components/chat_buble";
 import ChatSidebar from "./components/chat_sidebar";
 import AttachmentModal from "./components/attachment_modal";
+import ChatHeader from "./components/chat_header";
 
 function Chat() {
   const [selectedRoom, setSelectedRoom] = useState(1);
@@ -24,6 +25,63 @@ function Chat() {
       lastMessage: "Kak ukurannya...",
       time: "12:10",
       status: "sent",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
+    },
+    {
+      id: 3,
+      name: "Official Store ABC",
+      lastMessage: "Terima kasih...",
+      time: "Kemarin",
+      status: "unread",
     },
     {
       id: 3,
@@ -84,21 +142,26 @@ function Chat() {
   });
 
   return (
-    <div className="w-full h-screen flex bg-white">
+    <div className="w-full h-screen max-h-screen flex bg-white">
       <AttachmentModal show={modal} onClose={() => setModal(false)} />
 
-      <div>
+      <div className="flex flex-col h-full">
         <ChatNavbar onBack={() => alert("Back to main menu")} />
 
-        <ChatSidebar
-          rooms={roomsWithLastMessage}
-          selectedRoom={selectedRoom}
-          onSelect={handleSelectRoom}
-        />
+        <div className="flex-1 overflow-hidden">
+          <ChatSidebar
+            rooms={roomsWithLastMessage}
+            selectedRoom={selectedRoom}
+            onSelect={handleSelectRoom}
+          />
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 p-6 overflow-y-auto bg-green-50 flex flex-col">
+        <ChatHeader
+          room={roomsWithLastMessage.find((r) => r.id === selectedRoom)}
+        />
+        <div className="flex-1 p-6 overflow-y-auto bg-[url(./public/img/chat-background.png)]  flex flex-col">
           {messages.map((m, i) => (
             <ChatBubble key={i} text={m.text} mine={m.mine} />
           ))}
