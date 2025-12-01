@@ -49,6 +49,11 @@ services:
       PORT: ${NODE_PORT}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_DB: ${POSTGRES_DB}
     volumes:
       - ./node:/usr/src/app
     expose:

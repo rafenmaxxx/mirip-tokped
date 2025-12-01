@@ -118,7 +118,7 @@ function Chat() {
         <ChatHeader
           room={roomsWithLastMessage.find((r) => r.id === selectedRoom)}
         />
-        <div className="flex-1 p-6 overflow-y-auto bg-[url(./public/img/chat-background.png)]  flex flex-col">
+        <div className="flex-1 p-6 overflow-y-auto bg-[url(/img/chat-background.png)] flex flex-col">
           {messages.map((m, i) => (
             <ChatBubble key={i} text={m.text} mine={m.mine} />
           ))}
