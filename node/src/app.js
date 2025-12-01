@@ -1,21 +1,25 @@
 import express from "express";
-import dotenv from "dotenv";
-
-dotenv.config();
+import routes from "./routes/index.js";
+import { notFound, errorHandler } from "./middleware/ErrorHandler.js";
+import { UserService } from "./service/s_user.js";
 
 const app = express();
 
-const PORT = process.env.NODE_PORT || 3000;
-const REDIS_HOST = process.env.REDIS_HOST;
-const REDIS_PORT = process.env.REDIS_PORT;
+// Middleware dasar
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get("node/api/hello", (req, res) => {
-  res.json({
-    message: "Hello from Node!",
-    redis: `${REDIS_HOST}:${REDIS_PORT}`,
-  });
+// Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", timestamp: Date.now() });
 });
 
-app.listen(PORT, () => {
-  console.log(`Node API running on port ${PORT}`);
-});
+
+// Routes utama
+app.use(routes);
+
+// Error middleware
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;
