@@ -1,4 +1,4 @@
-import AuctionTimer from "./AuctionTimer";
+import AuctionTimer from "./auction_timer";
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat("id-ID", {
