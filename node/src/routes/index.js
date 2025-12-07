@@ -6,5 +6,4 @@ const router = Router();
 
 router.use("/", helloRoute);
 router.use("/user", userRoutes);
-
 export default router;
