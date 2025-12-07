@@ -11,6 +11,11 @@ export const UserController = {
     res.json(user);
   },
 
+  async getMe(req, res) {
+    const user = await UserService.getMe(req.params.sessid);
+    res.json(user);
+  },
+
   async create(req, res) {
     const newUser = await UserService.create(req.body);
     res.json(newUser);
