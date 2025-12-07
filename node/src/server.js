@@ -5,14 +5,12 @@ import { ENV } from "./config/env.js";
 import { initializeSocketEvents } from "./routes/r_socket.js";
 
 const httpServer = http.createServer(app);
-
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
-
 initializeSocketEvents(io);
 
 httpServer.listen(ENV.PORT, () => {
