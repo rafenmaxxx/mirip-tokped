@@ -44,6 +44,20 @@ export default function Check() {
       <button onClick={() => showToast("Hello", "Ini toast!")}>
         Test Toast
       </button>
+      <button
+        onClick={async () => {
+          const res = await fetch("http://localhost:80/node/api/user/me", {
+            method: "GET",
+            credentials: "include",
+          });
+
+          const data = await res.json();
+          console.log("TEST SESSION:", data);
+          showToast("Test", JSON.stringify(data));
+        }}
+      >
+        Test Session
+      </button>
     </div>
   );
 }
