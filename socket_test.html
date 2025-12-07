@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Test Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .chat-message {
+        max-width: 80%;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-8 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+      <h1 class="text-3xl font-bold text-gray-800 mb-4 border-b pb-2">
+        Socket.IO Tester (Port 3000)
+      </h1>
+
+      <div
+        id="connection-status"
+        class="mb-4 text-sm font-medium p-2 rounded-lg transition-all duration-300"
+      >
+        Status: Menunggu koneksi...
+      </div>
+
+      <div class="space-y-4">
+        <!-- Form Pengiriman Pesan -->
+        <div class="flex flex-col space-y-2">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Ketik pesan Anda..."
+            class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          />
+          <button
+            id="send-button"
+            class="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-150 shadow-md"
+          >
+            Kirim Pesan (Event: chat_message)
+          </button>
+        </div>
+
+        <!-- Log Pesan -->
+        <div>
+          <h2 class="text-xl font-semibold mb-2 text-gray-700">
+            Log Event Server:
+          </h2>
+          <div
+            id="messages"
+            class="bg-gray-50 h-64 overflow-y-auto p-4 border rounded-lg space-y-2 text-sm"
+          >
+            <!-- Pesan dari server akan muncul di sini -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Ganti dengan port yang Anda gunakan
+      const SERVER_URL = "http://localhost:80";
+
+      // Inisialisasi koneksi Socket.IO
+      const socket = io(SERVER_URL, {
+        path: "/node/api/socket.io/",
+      });
+
+      const statusElement = document.getElementById("connection-status");
+      const messagesLog = document.getElementById("messages");
+      const messageInput = document.getElementById("message-input");
+      const sendButton = document.getElementById("send-button");
+
+      // Fungsi utilitas untuk menambahkan pesan ke log
+      function logMessage(event, data, type = "info") {
+        const time = new Date().toLocaleTimeString();
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `p-2 rounded-lg ${
+          type === "inbound"
+            ? "bg-green-100 border-l-4 border-green-500"
+            : type === "outbound"
+            ? "bg-yellow-100 border-l-4 border-yellow-500"
+            : "bg-gray-200"
+        }`;
+        messageDiv.innerHTML = `
+                <span class="text-xs text-gray-500 mr-2">[${time}]</span>
+                <strong class="text-gray-900">${event}</strong>: 
+                <span class="text-gray-700 break-words">${JSON.stringify(
+                  data,
+                  null,
+                  2
+                )}</span>
+            `;
+        messagesLog.prepend(messageDiv);
+      }
+
+      // --- Event Listener Socket.IO ---
+
+      socket.on("connect", () => {
+        statusElement.className =
+          "mb-4 text-sm font-medium p-2 rounded-lg bg-green-200 text-green-800";
+        statusElement.textContent = `Status: TERHUBUNG! ID Socket: ${socket.id}`;
+        logMessage("connect", { id: socket.id }, "info");
+
+        // Contoh otomatis bergabung ke ruangan 'general'
+        socket.emit("join_room", "general");
+        logMessage("emit", { event: "join_room", room: "general" }, "outbound");
+      });
+
+      socket.on("disconnect", () => {
+        statusElement.className =
+          "mb-4 text-sm font-medium p-2 rounded-lg bg-red-200 text-red-800";
+        statusElement.textContent = `Status: TERPUTUS!`;
+        logMessage("disconnect", {}, "info");
+      });
+
+      // Listener untuk event dari c_socket.js
+      socket.on("user_connected", (data) => {
+        logMessage("user_connected", data, "inbound");
+      });
+
+      socket.on("user_disconnected", (data) => {
+        logMessage("user_disconnected", data, "inbound");
+      });
+
+      socket.on("room_joined", (room) => {
+        logMessage("room_joined", { room: room }, "inbound");
+      });
+
+      // Listener utama untuk pesan obrolan
+      socket.on("chat_message", (data) => {
+        logMessage("chat_message", data, "inbound");
+      });
+
+      // --- Event Listener Tombol ---
+
+      sendButton.addEventListener("click", () => {
+        const message = messageInput.value.trim();
+        if (!message || !socket.connected) {
+          alert("Pesan kosong atau koneksi terputus!");
+          return;
+        }
+
+        const data = {
+          message: message,
+          room: "general", // Default ke ruangan 'general'
+        };
+
+        // Mengirim event 'chat_message' ke server
+        socket.emit("chat_message", data);
+
+        logMessage("emit", { event: "chat_message", data: data }, "outbound");
+        messageInput.value = "";
+      });
+    </script>
+  </body>
+</html>
