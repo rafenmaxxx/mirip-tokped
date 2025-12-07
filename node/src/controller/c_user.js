@@ -12,7 +12,10 @@ export const UserController = {
   },
 
   async getMe(req, res) {
-    const user = await UserService.getMe(req.params.sessid);
+    const user = await UserService.getMe(
+      req.params.sessid || req.cookies.PHPSESSID
+    );
+
     res.json(user);
   },
 
