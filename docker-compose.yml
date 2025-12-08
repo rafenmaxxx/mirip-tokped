@@ -10,8 +10,8 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./php/src:/var/www/html:ro       # Aplikasi existing
-      - ./react/dist:/usr/share/nginx/html/react:ro
+      - ./php/src:/var/www/html # Aplikasi existing
+      - ./react/dist:/usr/share/nginx/html/react
     depends_on:
       - php
       - node
