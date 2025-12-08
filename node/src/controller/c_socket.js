@@ -92,20 +92,38 @@ class SocketController {
     }
   }
 
+  // Di dalam class SocketController
   async handleTyping(socket, data) {
-    const { storeId, buyerId, userId } = data;
-    const roomKey = `${storeId}-${buyerId}`;
+    const { store_id, buyer_id, user_id, user_name } = data;
+    const roomKey = `${store_id}-${buyer_id}`;
 
-    // Broadcast to others in room
+    console.log(`User ${user_id} typing in room ${roomKey}`);
+
+    // Broadcast ke semua client di room kecuali pengirim
     socket.to(roomKey).emit("typing", {
-      store_id: storeId,
-      buyer_id: buyerId,
-      user_id: userId,
+      store_id,
+      buyer_id,
+      user_id,
+      user_name,
       timestamp: new Date().toISOString(),
     });
   }
 
-  // Register in registerSocketListeners
+  async handleStopTyping(socket, data) {
+    const { store_id, buyer_id, user_id, user_name } = data;
+    const roomKey = `${store_id}-${buyer_id}`;
+
+    console.log(`User ${user_id} stopped typing in room ${roomKey}`);
+
+    // Broadcast ke semua client di room kecuali pengirim
+    socket.to(roomKey).emit("stop_typing", {
+      store_id,
+      buyer_id,
+      user_id,
+      user_name,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   handleJoinRoom(socket, { storeId, buyerId }) {
     const roomKey = `${storeId}-${buyerId}`;
@@ -120,6 +138,7 @@ class SocketController {
     socket.on("join_room", (room) => this.handleJoinRoom(socket, room));
     socket.on("disconnect", () => this.handleDisconnect(socket));
     socket.on("typing", (data) => this.handleTyping(socket, data));
+    socket.on("stop_typing", (data) => this.handleStopTyping(socket, data));
   }
 }
 
