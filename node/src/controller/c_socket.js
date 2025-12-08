@@ -23,14 +23,17 @@ class SocketController {
     this.io.emit("user_disconnected", { id: socket.id, userId: socket.userId });
   }
 
+  // c_socket.js - bagian handleChatMessage
   async handleChatMessage(socket, data) {
-    const { storeId, buyerId, message, message_type } = data;
+    const { storeId, buyerId, message, message_type, product_id } = data;
 
-    // Validasi
+    // Validasi lebih ketat
     if (!storeId || !buyerId || !message) {
+      console.error("[Controller] Incomplete message data:", data);
       socket.emit("error_message", {
         type: "chat",
         message: "Data pesan tidak lengkap",
+        data: data,
       });
       return;
     }
@@ -59,18 +62,22 @@ class SocketController {
     }
 
     const sender_id = user.user_id;
-
     const roomKey = `${storeId}-${buyerId}`;
 
-    // Pastikan socket sudah join room
+    // Join room jika belum
     if (!socket.rooms.has(roomKey)) {
-      console.warn(
-        `[socket] ${socket.userId} belum join room ${roomKey}, join dulu`
-      );
+      console.log(`[Controller] ${socket.id} joining room ${roomKey}`);
       socket.join(roomKey);
     }
 
-    console.log(`[socket] Pesan baru dari ${sender_id} di room ${roomKey}`);
+    console.log(
+      `[Controller] New message from ${sender_id} in room ${roomKey}`,
+      {
+        message_type,
+        product_id,
+        content_length: message.length,
+      }
+    );
 
     try {
       const saved = await SocketService.saveMessage({
@@ -78,20 +85,29 @@ class SocketController {
         buyerId,
         sender_id,
         message,
-        message_type,
+        message_type: message_type || "text",
+        product_id: product_id || null,
       });
 
+      // Debug log
+      console.log(
+        `[Controller] Message saved, broadcasting to room ${roomKey}:`,
+        {
+          message_id: saved.message_id,
+          message_type: saved.message_type,
+        }
+      );
+
+      // Broadcast ke semua di room termasuk sender
       this.io.to(roomKey).emit("new_message", saved);
-      console.log("bagi-bagi message ke ", roomKey, " -> ", saved);
     } catch (error) {
-      console.error("[socket] Error:", error);
+      console.error("[Controller] Error handling chat message:", error);
       socket.emit("error_message", {
         type: "chat",
-        message: "Gagal mengirim pesan",
+        message: "Gagal mengirim pesan: " + error.message,
       });
     }
   }
-
   // Di dalam class SocketController
   async handleTyping(socket, data) {
     const { store_id, buyer_id, user_id, user_name } = data;
