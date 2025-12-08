@@ -43,7 +43,6 @@ body {
     margin-bottom: 1.2rem;
 }
 
-
 /* Khusus untuk form-group yang punya password */
 .form-group.password-field {
     position: relative;
@@ -54,7 +53,7 @@ body {
     color : #555;
     font-weight: 500;
     position: absolute;
-    right: -22px;
+    right: 8px;
     bottom: 7px;
     background: transparent !important;
     border: none !important;
@@ -98,6 +97,7 @@ input[type="text"] {
     border-radius: 8px;
     font-size: 0.95rem;
     transition: border-color 0.2s ease;
+    box-sizing: border-box;
 }
 
 input:focus {
@@ -117,6 +117,7 @@ button {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
+    box-sizing: border-box;
 }
 
 button:hover {
@@ -143,6 +144,7 @@ button:hover {
     margin-top: 1rem;
     text-align: center;
     font-size: 0.7rem;
+    font-family: inherit;
 }
 
 .no-register a {
@@ -150,8 +152,22 @@ button:hover {
     font-weight: 600;
     text-decoration: none;
     transition: color 0.2s;
+    cursor: default; 
 }
 
-.no-register a:hover {
+.no-register span {
+    color: #666;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: default; 
+}
+
+.no-register a[href] {
+    cursor: pointer;
+}
+
+.no-register a[href]:hover {
     text-decoration: underline;
+    color: #000;
 }

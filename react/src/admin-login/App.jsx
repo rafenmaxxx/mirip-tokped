@@ -1,7 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const LoginPage = () => {
+const AdminLogin = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -9,52 +14,98 @@ const LoginPage = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data:", formData);
-    // Logika login di sini
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:80/node/api/auth/login", {
+
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        credentials: "include", 
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Login berhasil", data);
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const checkRes = await fetch("http://localhost:80/node/api/auth/me", {
+          credentials: "include",
+        });
+
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          console.log("Cek data user setelah login:", checkData);
+          navigate("/admin", { replace: true }); 
+
+        } else {
+        console.error("Session not found after login");
+        setError("Login berhasil tapi session gagal. Silakan coba lagi.");
+        }
+        
+      } else {
+        const errData = await res.json();
+        setError(errData.message || "Email atau kata sandi salah.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Terjadi kesalahan jaringan. Coba lagi nanti.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center font-sans">
-      {/* Card Container */}
       <div className="bg-white p-8 md:p-10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-[420px] border border-gray-100">
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-[#00AA5B] font-bold text-3xl mb-2 tracking-tight">
             Login as Admin
           </h1>
           <p className="text-gray-500 text-sm">
-            Selamat datang kembali,{" "}
-            <span className="font-medium text-gray-700">Minped!</span>
+            Selamat datang kembali, <span className="font-medium text-gray-700">Minped!</span>
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          
+          {/* Menampilkan Error jika ada */}
+          {error && (
+            <div className="bg-red-50 text-red-600 text-xs p-3 rounded-lg border border-red-100">
+              {error}
+            </div>
+          )}
+
           {/* Email Input */}
           <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">
-              Email
-            </label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Masukkan email"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00AA5B] focus:border-transparent transition-all placeholder-gray-400 text-sm"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00AA5B] transition-all text-sm"
               required
             />
           </div>
 
           {/* Password Input */}
           <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">
-              Kata Sandi
-            </label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">Kata Sandi</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -62,13 +113,13 @@ const LoginPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Masukkan kata sandi"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00AA5B] focus:border-transparent transition-all placeholder-gray-400 text-sm pr-12"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#00AA5B] transition-all text-sm pr-12"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-semibold select-none"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-semibold"
               >
                 {showPassword ? "hide" : "show"}
               </button>
@@ -78,22 +129,23 @@ const LoginPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-[#00AA5B] hover:bg-[#03924e] text-white font-bold py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg active:scale-[0.98] mt-4"
+            disabled={loading}
+            className={`w-full text-white font-bold py-3 rounded-lg transition-all duration-300 shadow-md ${
+              loading 
+                ? "bg-gray-400 cursor-not-allowed" 
+                : "bg-[#00AA5B] hover:bg-[#03924e] hover:shadow-lg active:scale-[0.98]"
+            }`}
           >
-            Masuk
+            {loading ? "Memproses..." : "Masuk"}
           </button>
         </form>
 
-        {/* Footer Link */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          Bukan Admin?{" "}
-          <a href="#" className="text-[#00AA5B] font-bold hover:underline">
-            Kembali ke Default Login
-          </a>
+          Bukan Admin? <a href="/login" className="text-[#00AA5B] font-bold hover:underline">Kembali</a>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default AdminLogin;
