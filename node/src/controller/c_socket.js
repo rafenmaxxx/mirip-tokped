@@ -1,10 +1,5 @@
-/**
- * src/controller/c_socket.js
- * Controller yang menangani event spesifik dari klien.
- * Menerima instance 'io' (untuk siaran global) dan 'socket' (untuk komunikasi spesifik).
- */
-
 import SocketService from "../service/s_socket.js";
+import { UserService } from "../service/s_user.js"; // pastikan ada UserService
 
 class SocketController {
   constructor(io) {
@@ -29,42 +24,85 @@ class SocketController {
   }
 
   async handleChatMessage(socket, data) {
-    console.log(
-      `[Controller] Pesan diterima dari ${socket.userId}: ${data.message}`
-    );
+    const { storeId, buyerId, message, message_type } = data;
 
-    try {
-      const processedData = await SocketService.handleNewMessage({
-        userId: socket.userId,
-        message: data.message,
-        room: data.room || "general",
-      });
-
-      this.io.to(processedData.room).emit("chat_message", processedData);
-    } catch (error) {
-      console.error("[Controller] Gagal memproses pesan:", error);
-
+    // Validasi
+    if (!storeId || !buyerId || !message) {
       socket.emit("error_message", {
         type: "chat",
-        message: "Gagal mengirim pesan.",
+        message: "Data pesan tidak lengkap",
+      });
+      return;
+    }
+
+    // Ambil PHPSESSID dari cookie handshake
+    const cookie = socket.handshake.headers.cookie || "";
+    const match = cookie.match(/PHPSESSID=([^;]+)/);
+    const phpSessionId = match ? match[1] : null;
+
+    if (!phpSessionId) {
+      socket.emit("error_message", {
+        type: "chat",
+        message: "Tidak ada sesi login",
+      });
+      return;
+    }
+
+    // Ambil user dari session
+    const user = await UserService.getMe(phpSessionId);
+    if (!user) {
+      socket.emit("error_message", {
+        type: "chat",
+        message: "User tidak ditemukan / tidak login",
+      });
+      return;
+    }
+
+    const sender_id = user.user_id;
+
+    const roomKey = `${storeId}-${buyerId}`;
+
+    // Pastikan socket sudah join room
+    if (!socket.rooms.has(roomKey)) {
+      console.warn(
+        `[socket] ${socket.userId} belum join room ${roomKey}, join dulu`
+      );
+      socket.join(roomKey);
+    }
+
+    console.log(`[socket] Pesan baru dari ${sender_id} di room ${roomKey}`);
+
+    try {
+      const saved = await SocketService.saveMessage({
+        storeId,
+        buyerId,
+        sender_id,
+        message,
+        message_type,
+      });
+
+      this.io.to(roomKey).emit("new_message", saved);
+    } catch (error) {
+      console.error("[socket] Error:", error);
+      socket.emit("error_message", {
+        type: "chat",
+        message: "Gagal mengirim pesan",
       });
     }
   }
 
-  handleJoinRoom(socket, room) {
-    socket.join(room);
-    console.log(`[Controller] ${socket.userId} bergabung ke ruangan: ${room}`);
-    socket.emit("room_joined", room);
+  handleJoinRoom(socket, { storeId, buyerId }) {
+    const roomKey = `${storeId}-${buyerId}`;
+    socket.join(roomKey);
+
+    console.log(`[socket] ${socket.userId} join room ${roomKey}`);
+    socket.emit("room_joined", roomKey);
   }
 
   registerSocketListeners(socket) {
-    const onChatMessage = (data) => this.handleChatMessage(socket, data);
-    const onJoinRoom = (room) => this.handleJoinRoom(socket, room);
-    const onDisconnect = () => this.handleDisconnect(socket);
-
-    socket.on("chat_message", onChatMessage);
-    socket.on("join_room", onJoinRoom);
-    socket.on("disconnect", onDisconnect);
+    socket.on("chat_message", (data) => this.handleChatMessage(socket, data));
+    socket.on("join_room", (room) => this.handleJoinRoom(socket, room));
+    socket.on("disconnect", () => this.handleDisconnect(socket));
   }
 }
 
