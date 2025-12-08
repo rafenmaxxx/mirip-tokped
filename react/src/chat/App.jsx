@@ -13,16 +13,18 @@ function Chat() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [roomMessages, setRoomMessages] = useState({});
-  const [isLoadingMessages, setIsLoadingMessages] = useState({}); // Per room loading state
+  const [isLoadingMessages, setIsLoadingMessages] = useState({});
   const [hasMoreMessages, setHasMoreMessages] = useState({});
-  const [isTyping, setIsTyping] = useState(false);
-  const typingTimeoutRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false); // Simple typing state
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const messageListRef = useRef(null);
   const hasJoinedRoomsRef = useRef(false);
-  const initialLoadDoneRef = useRef({}); // Track initial load per room
-  const fetchMessagesAbortRef = useRef({}); // Untuk abort fetch jika ada yang baru
+  const initialLoadDoneRef = useRef({});
+  const fetchMessagesAbortRef = useRef({});
+
+  // Simple typing timeout ref
+  const typingTimeoutRef = useRef(null);
 
   // Helper: buat room key unik
   const getRoomKey = (room) => {
@@ -48,7 +50,7 @@ function Chat() {
     fetchUser();
   }, []);
 
-  // Ambil daftar room user - HANYA SEKALI
+  // Ambil daftar room user
   useEffect(() => {
     if (!user) return;
 
@@ -74,14 +76,29 @@ function Chat() {
     fetchRooms();
   }, [user]);
 
-  // Socket.IO setup - HANYA SATU KALI
+  useEffect(() => {
+    // Saat selectedRoom berubah, pastikan stop typing di room sebelumnya
+    return () => {
+      if (socketRef.current && user && selectedRoom) {
+        console.log("🔄 Room changed, stopping typing in previous room");
+        socketRef.current.emit("stop_typing", {
+          store_id: selectedRoom.store_id,
+          buyer_id: selectedRoom.buyer_id,
+          user_id: user.user_id,
+          user_name: user.name || "User",
+        });
+      }
+    };
+  }, [selectedRoom, user]);
+
+  // Socket.IO setup
   useEffect(() => {
     if (!user) return;
 
     const SERVER_URL = "http://localhost:80";
 
     if (!socketRef.current) {
-      console.log(" Creating new socket connection...");
+      console.log("Creating new socket connection...");
       const socket = io(SERVER_URL, {
         path: "/node/api/socket.io/",
         withCredentials: true,
@@ -98,31 +115,83 @@ function Chat() {
       });
 
       socket.on("connect_error", (err) => {
-        console.error(" Socket connection error:", err.message);
+        console.error("Socket connection error:", err.message);
       });
 
       socket.on("disconnect", (reason) => {
-        console.log(" Socket disconnected:", reason);
+        console.log("Socket disconnected:", reason);
       });
 
       // Message event handler
       socket.on("new_message", handleNewMessage);
 
-      // Typing event handler
-      socket.on("typing", handleTyping);
+      // **SIMPLE TYPING EVENT HANDLER**
+      socket.on("typing", (data) => {
+        console.log("Typing event received:", data);
+
+        if (!selectedRoom || !user) return;
+
+        // Cek apakah typing dari room yang sama dan bukan dari diri sendiri
+        if (
+          data.store_id === selectedRoom.store_id &&
+          data.buyer_id === selectedRoom.buyer_id &&
+          data.user_id !== user.user_id
+        ) {
+          // Set typing indicator
+          setIsTyping(true);
+
+          // Clear existing timeout
+          if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+
+          // Set timeout untuk menghilangkan indicator setelah 3 detik
+          typingTimeoutRef.current = setTimeout(() => {
+            console.log("Typing timeout - clearing indicator");
+            setIsTyping(false);
+            typingTimeoutRef.current = null;
+          }, 50000);
+        }
+      });
+
+      // **STOP TYPING EVENT HANDLER**
+      socket.on("stop_typing", (data) => {
+        console.log("Stop typing event received:", data);
+
+        if (!selectedRoom || !user) return;
+
+        // Cek apakah stop typing dari room yang sama dan bukan dari diri sendiri
+        if (
+          data.store_id === selectedRoom.store_id &&
+          data.buyer_id === selectedRoom.buyer_id &&
+          data.user_id !== user.user_id
+        ) {
+          setIsTyping(false);
+
+          if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+        }
+      });
     }
+
+    
 
     // Cleanup
     return () => {
-      console.log(" Cleaning up socket...");
+      console.log("Cleaning up socket...");
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
-    };
-  }, [user]);
 
-  // Join rooms ketika rooms berubah
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [user, selectedRoom]);
+
+  // Join rooms
   useEffect(() => {
     if (!socketRef.current || rooms.length === 0 || hasJoinedRoomsRef.current)
       return;
@@ -130,7 +199,7 @@ function Chat() {
     const socket = socketRef.current;
 
     if (!socket.connected) {
-      console.log(" Socket not connected yet, waiting...");
+      console.log("Socket not connected yet, waiting...");
       const onConnect = () => {
         joinRooms(socket);
         socket.off("connect", onConnect);
@@ -144,7 +213,7 @@ function Chat() {
 
   // Join rooms function
   const joinRooms = (socket) => {
-    console.log(" Joining rooms...");
+    console.log("Joining rooms...");
 
     rooms.forEach((room) => {
       if (room && room.store_id && room.buyer_id) {
@@ -158,66 +227,66 @@ function Chat() {
     hasJoinedRoomsRef.current = true;
   };
 
-  // Handler untuk new message - REAL TIME ONLY
-  // Handler untuk new message - REAL TIME ONLY
-  // Handler untuk new message - REAL TIME ONLY
-  // Tambahkan ref untuk scroll tracking
-  // const scrollPositionRef = useRef(null);
-  const isUserScrollingRef = useRef(false);
-  const scrollDebounceRef = useRef(null);
+  // **SIMPLE TYPING EMITTER - Jika input box ada isinya**
+  const handleTypingIndicator = useCallback(
+    (isTypingNow) => {
+      console.log(" handleTypingIndicator called with:", isTypingNow);
 
-  // Effect untuk auto scroll ketika ada pesan baru di room aktif
-  useEffect(() => {
-    if (!selectedRoom || !messagesEndRef.current) return;
-
-    // const roomKey = getRoomKey(selectedRoom);
-    // const currentMessages = roomMessages[roomKey] || [];
-
-    // Hanya auto-scroll jika:
-    // 1. Ada pesan baru ditambahkan
-    // 2. User tidak sedang scroll manual
-    // 3. User sudah dekat dengan bottom (dalam 200px)
-
-    if (!isUserScrollingRef.current) {
-      // Scroll ke bottom dengan smooth animation
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
+      if (!selectedRoom || !socketRef.current || !user) {
+        console.log("Missing requirements:", {
+          selectedRoom: !!selectedRoom,
+          socket: !!socketRef.current,
+          user: !!user,
         });
-      }, 100);
-    }
-  }, [roomMessages, selectedRoom]);
+        return;
+      }
 
-  // Handler untuk new message - PERBAIKAN AUTO-SCROLL
+      if (isTypingNow) {
+        // Emit typing event
+        console.log(
+          "Emitting typing event for room:",
+          selectedRoom.store_id,
+          selectedRoom.buyer_id
+        );
+        socketRef.current.emit("typing", {
+          store_id: selectedRoom.store_id,
+          buyer_id: selectedRoom.buyer_id,
+          user_id: user.user_id,
+          user_name: user.name || "User",
+        });
+      } else {
+        // Emit stop typing event
+        console.log(
+          "Emitting stop typing event for room:",
+          selectedRoom.store_id,
+          selectedRoom.buyer_id
+        );
+        socketRef.current.emit("stop_typing", {
+          store_id: selectedRoom.store_id,
+          buyer_id: selectedRoom.buyer_id,
+          user_id: user.user_id,
+          user_name: user.name || "User",
+        });
+      }
+    },
+    [selectedRoom, user]
+  );
+
+  // Handler untuk new message
   const handleNewMessage = useCallback(
     (msg) => {
       if (!msg || !msg.store_id || !msg.buyer_id || !user) {
-        console.log(" Invalid message received:", msg);
+        console.log("Invalid message received:", msg);
         return;
       }
 
       const roomKey = `${msg.store_id.toString()}-${msg.buyer_id.toString()}`;
       const isMyMessage = msg.sender_id === user.user_id;
-      const isActiveRoom =
-        selectedRoom &&
-        selectedRoom.store_id === msg.store_id &&
-        selectedRoom.buyer_id === msg.buyer_id;
 
-      console.log(" New real-time message:", {
-        room: roomKey,
-        sender: msg.sender_id,
-        isMyMessage,
-        isActiveRoom,
-        content: msg.content?.substring(0, 50) + "...",
-      });
-
-      // Update messages state
       setRoomMessages((prev) => {
         const currentMessages = prev[roomKey] || [];
 
         if (isMyMessage) {
-          // PESAN SAYA SENDIRI
           const optimisticIndex = currentMessages.findIndex(
             (m) =>
               m.status === "sending" &&
@@ -229,9 +298,7 @@ function Chat() {
           );
 
           if (optimisticIndex !== -1) {
-            console.log(
-              "🔄 Found optimistic message, updating with server data"
-            );
+            console.log("Found optimistic message, updating with server data");
             const updatedMessages = [...currentMessages];
             updatedMessages[optimisticIndex] = {
               id: msg.message_id || updatedMessages[optimisticIndex].id,
@@ -262,7 +329,6 @@ function Chat() {
             ],
           };
         } else {
-          // PESAN DARI ORANG LAIN
           const messageExists = currentMessages.some(
             (m) =>
               m.id === msg.message_id ||
@@ -295,23 +361,15 @@ function Chat() {
         }
       });
 
-      // **AUTO-SCROLL KE BOTTOM JIKA INI ROOM AKTIF**
-      if (isActiveRoom) {
-        // Clear debounce jika ada
-        if (scrollDebounceRef.current) {
-          clearTimeout(scrollDebounceRef.current);
-        }
-
-        // Debounce scroll untuk mencegah terlalu sering
-        scrollDebounceRef.current = setTimeout(() => {
-          if (messagesEndRef.current && !isUserScrollingRef.current) {
-            console.log(" Auto-scrolling to bottom for active room");
-            messagesEndRef.current.scrollIntoView({
-              behavior: "smooth",
-              block: "end",
-            });
-          }
-        }, 50); // Delay kecil untuk memastikan DOM sudah update
+      // Auto scroll jika room aktif
+      if (
+        selectedRoom &&
+        selectedRoom.store_id === msg.store_id &&
+        selectedRoom.buyer_id === msg.buyer_id
+      ) {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       }
 
       // Update room list untuk sidebar
@@ -332,7 +390,11 @@ function Chat() {
           room.last_message_content = msg.content;
 
           if (!isMyMessage) {
-            if (!isActiveRoom) {
+            if (
+              !selectedRoom ||
+              selectedRoom.store_id !== msg.store_id ||
+              selectedRoom.buyer_id !== msg.buyer_id
+            ) {
               room.unread_count = (room.unread_count || 0) + 1;
             }
           } else {
@@ -349,130 +411,25 @@ function Chat() {
     [user, selectedRoom]
   );
 
-  // Handler untuk sendMessage - PERBAIKAN AUTO-SCROLL
-  const sendMessage = useCallback(
-    (input) => {
-      if (!input.trim() || !user || !selectedRoom || !socketRef.current) return;
-
-      const { store_id, buyer_id } = selectedRoom;
-      const roomKey = getRoomKey(selectedRoom);
-
-      // Optimistic update
-      const optimisticMessage = {
-        id: Date.now(),
-        text: input,
-        mine: true,
-        type: "text",
-        timestamp: new Date().toISOString(),
-        status: "sending",
-      };
-
-      setRoomMessages((prev) => ({
-        ...prev,
-        [roomKey]: [...(prev[roomKey] || []), optimisticMessage],
-      }));
-
-      // Optimistic sidebar update
-      setRooms((prev) => {
-        const roomIndex = prev.findIndex(
-          (r) => r.store_id === store_id && r.buyer_id === buyer_id
-        );
-
-        if (roomIndex > -1) {
-          const updatedRooms = [...prev];
-          const room = { ...updatedRooms[roomIndex] };
-          room.last_message_at = new Date().toISOString();
-          room.last_message = {
-            content: input,
-            created_at: new Date().toISOString(),
-          };
-          room.last_message_content = input;
-          room.unread_count = 0;
-          updatedRooms.splice(roomIndex, 1);
-          updatedRooms.unshift(room);
-          return updatedRooms;
-        }
-        return prev;
-      });
-
-      // Kirim via socket
-      socketRef.current.emit("chat_message", {
-        storeId: store_id,
-        buyerId: buyer_id,
-        message: input,
-        message_type: "text",
-      });
-
-      // **IMMEDIATE AUTO-SCROLL UNTUK OPTIMISTIC UPDATE**
-      setTimeout(() => {
-        if (messagesEndRef.current && !isUserScrollingRef.current) {
-          console.log(" Immediate scroll for optimistic message");
-          messagesEndRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "end",
-          });
-        }
-      }, 10);
-    },
-    [user, selectedRoom]
-  );
-
-  // Handler untuk typing indicator
-  const handleTyping = useCallback(
-    (data) => {
-      if (!selectedRoom || !data || !user) return;
-
-      if (
-        data.store_id === selectedRoom.store_id &&
-        data.buyer_id === selectedRoom.buyer_id &&
-        data.user_id !== user.user_id
-      ) {
-        setIsTyping(true);
-
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        typingTimeoutRef.current = setTimeout(() => {
-          setIsTyping(false);
-          typingTimeoutRef.current = null;
-        }, 3000);
-      }
-    },
-    [selectedRoom, user]
-  );
-
-  // Cleanup typing timeout
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Fetch initial messages HANYA SEKALI per room ketika pertama kali dipilih
+  // Fetch initial messages
   const fetchInitialMessages = useCallback(
     async (room) => {
       if (!room || !user || initialLoadDoneRef.current[getRoomKey(room)]) {
         console.log(
-          `⏭️ Skipping fetch for room ${getRoomKey(room)} - already loaded`
+          `Skipping fetch for room ${getRoomKey(room)} - already loaded`
         );
         return;
       }
 
       const roomKey = getRoomKey(room);
-      console.log(` Fetching initial messages for room: ${roomKey}`);
+      console.log(`Fetching initial messages for room: ${roomKey}`);
 
-      // Set loading state untuk room ini
       setIsLoadingMessages((prev) => ({ ...prev, [roomKey]: true }));
 
-      // Abort previous fetch jika ada
       if (fetchMessagesAbortRef.current[roomKey]) {
         fetchMessagesAbortRef.current[roomKey].abort();
       }
 
-      // Buat AbortController untuk fetch ini
       const controller = new AbortController();
       fetchMessagesAbortRef.current[roomKey] = controller;
 
@@ -490,7 +447,7 @@ function Chat() {
 
         if (res.ok) {
           const data = await res.json();
-          console.log(` Loaded ${data.length} messages for room ${roomKey}`);
+          console.log(`Loaded ${data.length} messages for room ${roomKey}`);
 
           const formattedMessages = data.map((msg) => ({
             id: msg.message_id,
@@ -511,7 +468,6 @@ function Chat() {
             [roomKey]: data.length === 50,
           }));
 
-          // Tandai bahwa initial load sudah done
           initialLoadDoneRef.current[roomKey] = true;
 
           // Clear unread count
@@ -527,7 +483,7 @@ function Chat() {
         if (err.name === "AbortError") {
           console.log(`Fetch aborted for room ${roomKey}`);
         } else {
-          console.error(` Error fetching messages for room ${roomKey}:`, err);
+          console.error(`Error fetching messages for room ${roomKey}:`, err);
         }
       } finally {
         setIsLoadingMessages((prev) => ({ ...prev, [roomKey]: false }));
@@ -537,18 +493,17 @@ function Chat() {
     [user]
   );
 
-  // Load messages ketika room BARU dipilih (belum pernah di-load sebelumnya)
+  // Load messages ketika room dipilih
   useEffect(() => {
     if (selectedRoom) {
       const roomKey = getRoomKey(selectedRoom);
 
-      // Hanya fetch jika belum pernah di-load
       if (!initialLoadDoneRef.current[roomKey]) {
         fetchInitialMessages(selectedRoom);
       } else {
-        console.log(` Room ${roomKey} already loaded, using cached messages`);
+        console.log(`Room ${roomKey} already loaded, using cached messages`);
 
-        // Clear unread count meskipun sudah loaded
+        // Clear unread count
         setRooms((prev) =>
           prev.map((r) =>
             r.store_id === selectedRoom.store_id &&
@@ -574,18 +529,65 @@ function Chat() {
     setSelectedRoom(newRoom);
   }, []);
 
-  // Handle typing indicator
-  const handleTypingIndicator = useCallback(() => {
-    if (!selectedRoom || !socketRef.current || !user) return;
+  // Handle sending message
+  const sendMessage = useCallback(
+    (input) => {
+      if (!input.trim() || !user || !selectedRoom || !socketRef.current) return;
 
-    socketRef.current.emit("typing", {
-      store_id: selectedRoom.store_id,
-      buyer_id: selectedRoom.buyer_id,
-      user_id: user.user_id,
-    });
-  }, [selectedRoom, user]);
+      const { store_id, buyer_id } = selectedRoom;
+      const roomKey = getRoomKey(selectedRoom);
 
-  // Handle load more messages (pagination)
+      // Optimistic update UI
+      const optimisticMessage = {
+        id: Date.now(),
+        text: input,
+        mine: true,
+        type: "text",
+        timestamp: new Date().toISOString(),
+        status: "sending",
+      };
+
+      setRoomMessages((prev) => ({
+        ...prev,
+        [roomKey]: [...(prev[roomKey] || []), optimisticMessage],
+      }));
+
+      // Update room list
+      setRooms((prev) => {
+        const roomIndex = prev.findIndex(
+          (r) => r.store_id === store_id && r.buyer_id === buyer_id
+        );
+
+        if (roomIndex > -1) {
+          const updatedRooms = [...prev];
+          const room = { ...updatedRooms[roomIndex] };
+          room.last_message_at = new Date().toISOString();
+
+          updatedRooms.splice(roomIndex, 1);
+          updatedRooms.unshift(room);
+
+          return updatedRooms;
+        }
+        return prev;
+      });
+
+      // Kirim via socket
+      socketRef.current.emit("chat_message", {
+        storeId: store_id,
+        buyerId: buyer_id,
+        message: input,
+        message_type: "text",
+      });
+
+      // Auto scroll
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    },
+    [user, selectedRoom]
+  );
+
+  // Handle load more messages
   const handleLoadMore = useCallback(async () => {
     if (!selectedRoom || !hasMoreMessages[getRoomKey(selectedRoom)]) return;
 
@@ -594,7 +596,7 @@ function Chat() {
     const currentMessages = roomMessages[roomKey] || [];
     const offset = currentMessages.length;
 
-    console.log(` Loading more messages for ${roomKey}, offset: ${offset}`);
+    console.log(`Loading more messages for ${roomKey}, offset: ${offset}`);
 
     setIsLoadingMessages((prev) => ({ ...prev, [roomKey]: true }));
 
@@ -634,7 +636,7 @@ function Chat() {
         }));
       }
     } catch (err) {
-      console.error(` Error loading more messages:`, err);
+      console.error(`Error loading more messages:`, err);
     } finally {
       setIsLoadingMessages((prev) => ({ ...prev, [roomKey]: false }));
     }
@@ -657,17 +659,15 @@ function Chat() {
           <ChatSidebar
             rooms={rooms.map((room) => ({
               ...room,
-              // Pastikan property ini ada
               store_name: room.store_name || "Toko",
               buyer_name: room.buyer_name || "Pembeli",
               unread_count: room.unread_count || 0,
               last_message_at:
                 room.last_message_at || room.updated_at || room.created_at,
-              // Untuk last message preview
               last_message: room.last_message || {
                 content: room.lastMessage || "",
               },
-              lastMessage: room.lastMessage || "", // Backup
+              lastMessage: room.lastMessage || "",
             }))}
             selectedRoom={selectedRoom}
             onSelect={setSelectedRoom}
@@ -731,7 +731,7 @@ function Chat() {
 
         <ChatInput
           onSendMessage={sendMessage}
-          onTyping={handleTypingIndicator}
+          onTypingChange={handleTypingIndicator} // Ganti prop name
           disabled={!selectedRoom}
         />
       </div>
