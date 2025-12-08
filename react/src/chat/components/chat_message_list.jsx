@@ -1,6 +1,5 @@
 import React, { forwardRef, useRef, useEffect } from "react";
 import ChatBubble from "./chat_buble";
-import { formatMessageTime } from "../lib/chat_utils";
 
 const ChatMessageList = forwardRef(
   ({ messages, user, onLoadMore, hasMore, isLoadingMore }, ref) => {
@@ -79,11 +78,13 @@ const ChatMessageList = forwardRef(
         {messages.map((msg) => (
           <div key={msg.id || msg.timestamp} className="mb-4">
             <ChatBubble
+              key={msg.id}
               text={msg.text}
               mine={msg.mine}
               type={msg.type}
-              time={formatMessageTime(msg.timestamp)}
+              time={msg.timestamp}
               status={msg.status}
+              product={msg.product}
             />
           </div>
         ))}
