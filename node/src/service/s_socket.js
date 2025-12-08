@@ -78,6 +78,16 @@ class SocketService {
       mine: false, // frontend akan override
     };
   }
+  // Add to SocketService class
+  static async handleTyping({ storeId, buyerId, userId }) {
+    // Broadcast typing event to room except sender
+    return {
+      store_id: storeId,
+      buyer_id: buyerId,
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+    };
+  }
 }
 
 export default SocketService;
