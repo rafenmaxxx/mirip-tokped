@@ -82,6 +82,7 @@ class SocketController {
       });
 
       this.io.to(roomKey).emit("new_message", saved);
+      console.log("bagi-bagi message ke ", roomKey, " -> ", saved);
     } catch (error) {
       console.error("[socket] Error:", error);
       socket.emit("error_message", {
