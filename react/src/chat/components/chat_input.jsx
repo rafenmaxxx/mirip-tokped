@@ -1,53 +1,52 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 
-const ChatInput = ({ onSendMessage, onTyping, disabled }) => {
+const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
   const [input, setInput] = useState("");
-  const typingTimeoutRef = useRef(null);
-  const lastTypingEmitRef = useRef(0); 
+  const isTypingRef = useRef(false); // Track typing state
 
   const handleInputChange = (e) => {
     const value = e.target.value;
+    const wasEmpty = input.trim().length === 0;
+    const isEmpty = value.trim().length === 0;
+
     setInput(value);
 
-    
+    // Auto resize
     e.target.style.height = "auto";
     const maxHeight = 24 * 5;
     e.target.style.height = `${Math.min(e.target.scrollHeight, maxHeight)}px`;
 
-    
-    if (value.trim() && onTyping) {
-      const now = Date.now();
-      const timeSinceLastEmit = now - lastTypingEmitRef.current;
-
-      
-      if (timeSinceLastEmit > 2000) {
-        
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        
-        typingTimeoutRef.current = setTimeout(() => {
-          onTyping();
-          lastTypingEmitRef.current = Date.now();
-        }, 1000);
-      }
+    // **SIMPLE TYPING LOGIC:**
+    // 1. Jika dari kosong → ada isi: start typing
+    if (wasEmpty && !isEmpty && !isTypingRef.current) {
+      console.log("🚀 Start typing");
+      isTypingRef.current = true;
+      onTypingChange?.(true);
     }
+
+    // 2. Jika dari ada isi → kosong: stop typing
+    if (!wasEmpty && isEmpty && isTypingRef.current) {
+      console.log("🛑 Stop typing (input cleared)");
+      isTypingRef.current = false;
+      onTypingChange?.(false);
+    }
+    // 3. Jika tetap ada isi: tetap dalam state typing (tidak perlu emit ulang)
   };
 
   const handleSend = () => {
     if (!input.trim() || disabled) return;
 
-    
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
+    // Stop typing sebelum kirim
+    if (isTypingRef.current) {
+      console.log("📤 Stop typing before send");
+      isTypingRef.current = false;
+      onTypingChange?.(false);
     }
 
     onSendMessage(input);
     setInput("");
 
-    
+    // Reset textarea height
     const textarea = document.querySelector("textarea");
     if (textarea) {
       textarea.style.height = "auto";
@@ -61,14 +60,11 @@ const ChatInput = ({ onSendMessage, onTyping, disabled }) => {
     }
   };
 
-  
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, []);
+  // Jika input box kehilangan fokus, tetap dalam state typing jika ada isi
+  // (tidak otomatis stop)
+  const handleBlur = () => {
+    console.log("👁️ Input blurred, typing state unchanged");
+  };
 
   return (
     <div className="p-4 border-t border-gray-200 bg-white flex gap-2 items-center">
@@ -84,6 +80,7 @@ const ChatInput = ({ onSendMessage, onTyping, disabled }) => {
         value={input}
         onChange={handleInputChange}
         onKeyPress={handleKeyPress}
+        onBlur={handleBlur}
         placeholder={
           disabled ? "Pilih percakapan terlebih dahulu" : "Tulis pesan..."
         }
