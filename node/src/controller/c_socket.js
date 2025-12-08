@@ -92,6 +92,21 @@ class SocketController {
     }
   }
 
+  async handleTyping(socket, data) {
+    const { storeId, buyerId, userId } = data;
+    const roomKey = `${storeId}-${buyerId}`;
+
+    // Broadcast to others in room
+    socket.to(roomKey).emit("typing", {
+      store_id: storeId,
+      buyer_id: buyerId,
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Register in registerSocketListeners
+
   handleJoinRoom(socket, { storeId, buyerId }) {
     const roomKey = `${storeId}-${buyerId}`;
     socket.join(roomKey);
@@ -104,6 +119,7 @@ class SocketController {
     socket.on("chat_message", (data) => this.handleChatMessage(socket, data));
     socket.on("join_room", (room) => this.handleJoinRoom(socket, room));
     socket.on("disconnect", () => this.handleDisconnect(socket));
+    socket.on("typing", (data) => this.handleTyping(socket, data));
   }
 }
 
