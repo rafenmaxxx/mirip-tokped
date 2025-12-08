@@ -43,10 +43,14 @@ function ChatSidebar({ rooms, selectedRoom, onSelect }) {
       <div className="overflow-y-auto flex-1">
         {rooms.map((room) => (
           <div
-            key={room.id}
-            onClick={() => onSelect(room.id)}
+            key={`${room.store_id}-${room.buyer_id}`}
+            onClick={() => onSelect(room)}
             className={`p-4 border-b border-gray-200 cursor-pointer flex gap-3 hover:bg-green-50 ${
-              selectedRoom === room.id ? "bg-green-100" : ""
+              selectedRoom &&
+              (selectedRoom.store_id === room.store_id &&
+              selectedRoom.buyer_id === room.buyer_id
+                ? "bg-green-100"
+                : "")
             }`}
           >
             <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
@@ -54,12 +58,12 @@ function ChatSidebar({ rooms, selectedRoom, onSelect }) {
             </div>
             <div className="flex-1">
               <div className="flex justify-between items-center">
-                <p className="font-semibold text-sm">{room.name}</p>
+                <p className="font-semibold text-sm">{room.store_name}</p>
                 <span className="text-xs text-gray-400">{room.time}</span>
               </div>
               <div className="flex justify-between items-center mt-1">
                 <p className="text-xs text-gray-600 truncate max-w-[150px]">
-                  {room.lastMessage}
+                  {room.lastMessage || "Belum ada pesan"}
                 </p>
 
                 {room.status === "sent" && (
