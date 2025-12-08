@@ -5,6 +5,7 @@ import Auction from "./auction/App.jsx";
 import Check from "./check/App.jsx";
 import { useEffect } from "react";
 import { showToast } from "./lib/toast.js";
+import ProtectedRoutes from "./_components/ProtectedRoute.jsx";
 
 export default function App() {
   useEffect(() => {
@@ -95,8 +96,19 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/chat" element={<Chat />} />
-      <Route path="/admin" element={<Admin />} />
+      <Route element={<ProtectedRoutes redirectUrl="/login"></ProtectedRoutes>}>
+        {" "}
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/admin" element={<Admin />} />
+      </Route>
+      <Route
+        element={
+          <ProtectedRoutes redirectUrl="/react/admin-login"></ProtectedRoutes>
+        }
+      >
+        {" "}
+        <Route path="/admin" element={<Admin />} />
+      </Route>
       <Route path="/auction" element={<Auction />} />
       <Route path="/check" element={<Check />} />
       <Route path="/" element={<h1>Welcome</h1>} />
