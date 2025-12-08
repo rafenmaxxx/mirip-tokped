@@ -34,7 +34,8 @@ function Chat() {
   }, []);
 
   // Helper: buat room key unik
-  const getRoomKey = (room) => `${room.store_id}-${room.buyer_id}`;
+  const getRoomKey = (room) =>
+    `${room.store_id.toString()}-${room.buyer_id.toString()}`;
 
   // Ambil daftar room user
   useEffect(() => {
@@ -111,7 +112,8 @@ function Chat() {
 
     // Terima pesan realtime
     socket.on("new_message", (msg) => {
-      const roomKey = `${msg.storeId}-${msg.buyerId}`;
+      const roomKey = `${msg.store_id.toString()}-${msg.buyer_id.toString()}`;
+      console.log("new message from room -> ", roomKey);
       setRoomMessages((prev) => ({
         ...prev,
         [roomKey]: [
