@@ -109,6 +109,28 @@ function Chat() {
 
       socketRef.current = socket;
 
+      const originalOn = socket.on.bind(socket);
+      socket.on = function (event, handler) {
+        console.log(`📡 [SOCKET LISTENING] ${event}`);
+        return originalOn(event, handler);
+      };
+
+      const originalEmit = socket.emit.bind(socket);
+      socket.emit = function (event, data, callback) {
+        console.log(`📤 [SOCKET EMIT] ${event}:`, {
+          type: data?.message_type,
+          storeId: data?.storeId || data?.store_id,
+          buyerId: data?.buyerId || data?.buyer_id,
+          hasProductId: !!data?.product_id,
+          contentPreview: data?.message
+            ? typeof data.message === "string"
+              ? data.message.substring(0, 50) + "..."
+              : "Object data"
+            : "No content",
+        });
+        return originalEmit(event, data, callback);
+      };
+
       // Basic socket events
       socket.on("connect", () => {
         console.log("Socket connected:", socket.id);
@@ -123,7 +145,20 @@ function Chat() {
       });
 
       // Message event handler
-      socket.on("new_message", handleNewMessage);
+      socket.on("new_message", (msg) => {
+        console.log("📨 [SOCKET RECEIVE] new_message:", {
+          message_id: msg.message_id,
+          sender_id: msg.sender_id,
+          type: msg.message_type,
+          has_product_id: !!msg.product_id,
+          content_preview: msg.content
+            ? msg.message_type === "item_preview"
+              ? "item_preview data"
+              : msg.content.substring(0, 50) + "..."
+            : "empty",
+        });
+        handleNewMessage(msg);
+      });
 
       // **SIMPLE TYPING EVENT HANDLER**
       socket.on("typing", (data) => {
@@ -153,6 +188,9 @@ function Chat() {
           }, 50000);
         }
       });
+      socket.on("error_message", (errorData) => {
+        console.error("💥 [SOCKET] error:", errorData);
+      });
 
       // **STOP TYPING EVENT HANDLER**
       socket.on("stop_typing", (data) => {
@@ -174,8 +212,6 @@ function Chat() {
         }
       });
     }
-
-    
 
     // Cleanup
     return () => {
@@ -273,6 +309,7 @@ function Chat() {
   );
 
   // Handler untuk new message
+  // Handler untuk new message
   const handleNewMessage = useCallback(
     (msg) => {
       if (!msg || !msg.store_id || !msg.buyer_id || !user) {
@@ -281,84 +318,93 @@ function Chat() {
       }
 
       const roomKey = `${msg.store_id.toString()}-${msg.buyer_id.toString()}`;
-      const isMyMessage = msg.sender_id === user.user_id;
+      const isMyMessage = msg.sender_id === user.user_id; // Pakai sender_id dari server
+      const isItemPreview = msg.message_type === "item_preview";
+
+      console.log("📨 Received new_message:", {
+        message_id: msg.message_id,
+        sender_id: msg.sender_id,
+        my_user_id: user.user_id,
+        isMyMessage,
+        message_type: msg.message_type,
+        has_product_id: !!msg.product_id,
+      });
 
       setRoomMessages((prev) => {
         const currentMessages = prev[roomKey] || [];
 
+        // Cek apakah message sudah ada (untuk menghindari duplikat)
+        const messageExists = currentMessages.some(
+          (m) => m.id === msg.message_id
+        );
+
+        if (messageExists) {
+          console.log("Message already exists, skipping");
+          return prev;
+        }
+
+        // Untuk pesan dari user sendiri, cari optimistic message
         if (isMyMessage) {
           const optimisticIndex = currentMessages.findIndex(
-            (m) =>
-              m.status === "sending" &&
-              m.text === msg.content &&
-              Math.abs(
-                new Date(m.timestamp).getTime() -
-                  new Date(msg.created_at).getTime()
-              ) < 5000
+            (m) => m.status === "sending" && m.mine === true
           );
 
           if (optimisticIndex !== -1) {
             console.log("Found optimistic message, updating with server data");
             const updatedMessages = [...currentMessages];
+
+            // Parse content untuk item preview
+            let productData = undefined;
+            if (isItemPreview && msg.content) {
+              try {
+                productData = JSON.parse(msg.content);
+              } catch (e) {
+                console.error("Error parsing product data:", e);
+              }
+            }
+
             updatedMessages[optimisticIndex] = {
-              id: msg.message_id || updatedMessages[optimisticIndex].id,
+              id: msg.message_id,
               text: msg.content,
               mine: true,
               type: msg.message_type,
               timestamp: msg.created_at,
               status: "delivered",
+              product: productData,
             };
             return {
               ...prev,
               [roomKey]: updatedMessages,
             };
           }
-
-          return {
-            ...prev,
-            [roomKey]: [
-              ...currentMessages,
-              {
-                id: msg.message_id || Date.now(),
-                text: msg.content,
-                mine: true,
-                type: msg.message_type,
-                timestamp: msg.created_at,
-                status: "delivered",
-              },
-            ],
-          };
-        } else {
-          const messageExists = currentMessages.some(
-            (m) =>
-              m.id === msg.message_id ||
-              (m.text === msg.content &&
-                m.mine === false &&
-                Math.abs(
-                  new Date(m.timestamp).getTime() -
-                    new Date(msg.created_at).getTime()
-                ) < 1000)
-          );
-
-          if (messageExists) {
-            return prev;
-          }
-
-          return {
-            ...prev,
-            [roomKey]: [
-              ...currentMessages,
-              {
-                id: msg.message_id || Date.now(),
-                text: msg.content,
-                mine: false,
-                type: msg.message_type,
-                timestamp: msg.created_at,
-                status: "delivered",
-              },
-            ],
-          };
         }
+
+        // Parse content untuk item preview
+        let productData = undefined;
+        if (isItemPreview && msg.content) {
+          try {
+            productData = JSON.parse(msg.content);
+          } catch (e) {
+            console.error("Error parsing product data:", e);
+          }
+        }
+
+        // Tambahkan message baru
+        return {
+          ...prev,
+          [roomKey]: [
+            ...currentMessages,
+            {
+              id: msg.message_id,
+              text: msg.content,
+              mine: isMyMessage, // Gunakan sender_id untuk menentukan
+              type: msg.message_type,
+              timestamp: msg.created_at,
+              status: "delivered",
+              product: productData,
+            },
+          ],
+        };
       });
 
       // Auto scroll jika room aktif
@@ -383,11 +429,23 @@ function Chat() {
           const room = { ...updatedRooms[roomIndex] };
 
           room.last_message_at = msg.created_at || new Date().toISOString();
+
+          // Determine last message content
+          let lastMessageContent = msg.content;
+          if (isItemPreview && msg.content) {
+            try {
+              const productData = JSON.parse(msg.content);
+              lastMessageContent = `${productData.product_name}`;
+            } catch (e) {
+              console.error("Error parsing product for last message:", e);
+            }
+          }
+
           room.last_message = {
-            content: msg.content,
+            content: lastMessageContent,
             created_at: msg.created_at,
           };
-          room.last_message_content = msg.content;
+          room.last_message_content = lastMessageContent;
 
           if (!isMyMessage) {
             if (
@@ -410,6 +468,12 @@ function Chat() {
     },
     [user, selectedRoom]
   );
+
+  useEffect(() => {
+    if (selectedRoom && selectedRoom.store_id) {
+      localStorage.setItem("currentStoreId", selectedRoom.store_id.toString());
+    }
+  }, [selectedRoom]);
 
   // Fetch initial messages
   const fetchInitialMessages = useCallback(
@@ -531,20 +595,28 @@ function Chat() {
 
   // Handle sending message
   const sendMessage = useCallback(
-    (input) => {
-      if (!input.trim() || !user || !selectedRoom || !socketRef.current) return;
+    (input, messageType = "text") => {
+      if (!user || !selectedRoom || !socketRef.current) return;
 
       const { store_id, buyer_id } = selectedRoom;
       const roomKey = getRoomKey(selectedRoom);
 
+      // Untuk item preview, input adalah object product
+      // Untuk text biasa, input adalah string
+      const isItemPreview = messageType === "item_preview";
+      const content = isItemPreview ? JSON.stringify(input) : input.trim();
+
+      if (!isItemPreview && !content) return;
+
       // Optimistic update UI
       const optimisticMessage = {
         id: Date.now(),
-        text: input,
+        text: content,
         mine: true,
-        type: "text",
+        type: messageType,
         timestamp: new Date().toISOString(),
         status: "sending",
+        product: isItemPreview ? input : undefined,
       };
 
       setRoomMessages((prev) => ({
@@ -563,6 +635,13 @@ function Chat() {
           const room = { ...updatedRooms[roomIndex] };
           room.last_message_at = new Date().toISOString();
 
+          // Update last message content
+          if (isItemPreview) {
+            room.last_message_content = ` Mengirim produk: ${input.product_name}`;
+          } else {
+            room.last_message_content = content;
+          }
+
           updatedRooms.splice(roomIndex, 1);
           updatedRooms.unshift(room);
 
@@ -575,8 +654,9 @@ function Chat() {
       socketRef.current.emit("chat_message", {
         storeId: store_id,
         buyerId: buyer_id,
-        message: input,
-        message_type: "text",
+        message: content,
+        message_type: messageType,
+        product_id: isItemPreview ? input.product_id : null,
       });
 
       // Auto scroll
