@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
 import ChatNavbar from "./components/chat_navbar";
 import ChatBubble from "./components/chat_buble";
 import ChatSidebar from "./components/chat_sidebar";
@@ -6,97 +7,164 @@ import AttachmentModal from "./components/attachment_modal";
 import ChatHeader from "./components/chat_header";
 
 function Chat() {
-  const [selectedRoom, setSelectedRoom] = useState(1);
+  const [user, setUser] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [roomMessages, setRoomMessages] = useState({});
   const [input, setInput] = useState("");
   const [modal, setModal] = useState(false);
-  const [inputHeight] = useState("auto");
+  const socketRef = useRef(null);
+
+  // Ambil data user
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/node/api/user/me", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Helper: buat room key unik
+  const getRoomKey = (room) => `${room.store_id}-${room.buyer_id}`;
+
+  // Ambil daftar room user
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchRooms = async () => {
+      try {
+        const res = await fetch("/node/api/chat/rooms", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRooms(data);
+          if (data.length > 0) setSelectedRoom(data[0]); // object room
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchRooms();
+  }, [user]);
+
+  // Ambil pesan setiap room yang dipilih
+  useEffect(() => {
+    if (!selectedRoom || !user) return;
+
+    const fetchMessages = async () => {
+      try {
+        const { store_id, buyer_id } = selectedRoom;
+
+        const endpoint =
+          user.role === "BUYER"
+            ? `/node/api/chat/messages/${store_id}/${user.user_id}`
+            : `/node/api/chat/messages/${user.user_id}/${buyer_id}`;
+
+        const res = await fetch(endpoint, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setRoomMessages((prev) => ({
+            ...prev,
+            [getRoomKey(selectedRoom)]: data.map((msg) => ({
+              text: msg.content,
+              mine: msg.sender_id === user.user_id,
+              type: msg.message_type,
+            })),
+          }));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedRoom, user]);
+
+  // Socket.IO realtime: join room setelah rooms tersedia
+  useEffect(() => {
+    if (!user || rooms.length === 0) return;
+
+    const SERVER_URL = "http://localhost:80";
+    const socket = io(SERVER_URL, {
+      path: "/node/api/socket.io/",
+      withCredentials: true,
+    });
+    socketRef.current = socket;
+
+    // Join semua room
+    rooms.forEach((room) => {
+      socket.emit("join_room", {
+        storeId: room.store_id,
+        buyerId: room.buyer_id,
+      });
+    });
+
+    // Terima pesan realtime
+    socket.on("new_message", (msg) => {
+      const roomKey = `${msg.storeId}-${msg.buyerId}`;
+      setRoomMessages((prev) => ({
+        ...prev,
+        [roomKey]: [
+          ...(prev[roomKey] || []),
+          {
+            text: msg.content,
+            mine: msg.sender_id === user.user_id,
+            type: msg.message_type,
+          },
+        ],
+      }));
+    });
+
+    socket.on("error_message", console.error);
+
+    return () => socket.disconnect();
+  }, [user, rooms]);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-
-    // Reset height dulu supaya ukurannya akurat
     e.target.style.height = "auto";
-
-    // Set height sesuai content, tapi maksimal 5 baris (5 * 24px = 120px)
-    const maxHeight = 24 * 5; // 24px ≈ tinggi 1 baris default
-    const newHeight = Math.min(e.target.scrollHeight, maxHeight);
-
-    e.target.style.height = `${newHeight}px`;
+    const maxHeight = 24 * 5;
+    e.target.style.height = `${Math.min(e.target.scrollHeight, maxHeight)}px`;
   };
 
-  // ROOM INFO
-  const rooms = [
-    {
-      id: 1,
-      name: "Toko ElectroHub",
-      lastMessage: "Baik kak...",
-      time: "13:45",
-      status: "read",
-    },
-    {
-      id: 2,
-      name: "Seller FashionKu",
-      lastMessage: "Kak ukurannya...",
-      time: "12:10",
-      status: "sent",
-    },
-    {
-      id: 3,
-      name: "Official Store ABC",
-      lastMessage: "Terima kasih...",
-      time: "Kemarin",
-      status: "unread",
-    },
-  ];
-
-  // STORED MESSAGES PER ROOM
-  const [roomMessages, setRoomMessages] = useState({
-    1: [{ mine: false, text: "Halo kak, ada yang bisa dibantu?" }],
-    2: [{ mine: false, text: "Kak ukuran apa?" }],
-    3: [{ mine: false, text: "Terima kasih sudah order!" }],
-  });
-
-  const messages = roomMessages[selectedRoom] || [];
-
-  // SWITCH ROOM
-  const handleSelectRoom = (id) => {
-    setSelectedRoom(id);
-  };
-
-  // SEND MESSAGE
   const sendMessage = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !user || !selectedRoom) return;
 
-    setRoomMessages({
-      ...roomMessages,
-      [selectedRoom]: [...messages, { mine: true, text: input }],
-    });
+    const { store_id, buyer_id } = selectedRoom;
+
+    const payload = {
+      storeId: store_id,
+      buyerId: buyer_id,
+      message: input,
+      message_type: "text",
+    };
+
+    socketRef.current.emit("chat_message", payload);
+
+    setRoomMessages((prev) => ({
+      ...prev,
+      [getRoomKey(selectedRoom)]: [
+        ...(prev[getRoomKey(selectedRoom)] || []),
+        { text: input, mine: true, type: "text" },
+      ],
+    }));
 
     setInput("");
   };
 
-  const getLastMessageInfo = (id) => {
-    const msgs = roomMessages[id];
-    if (!msgs || msgs.length === 0)
-      return { last: "Belum ada pesan", time: "", status: "unread" };
-
-    const last = msgs[msgs.length - 1];
-    return {
-      last: last.text,
-      time: "Baru saja",
-      status: last.mine ? "sent" : "read",
-    };
-  };
-
-  const roomsWithLastMessage = rooms.map((r) => {
-    const info = getLastMessageInfo(r.id);
-    return {
-      ...r,
-      lastMessage: info.last,
-      time: info.time,
-      status: info.status,
-    };
-  });
+  const messages = selectedRoom
+    ? roomMessages[getRoomKey(selectedRoom)] || []
+    : [];
 
   return (
     <div className="w-full h-screen max-h-screen flex bg-white">
@@ -104,23 +172,31 @@ function Chat() {
 
       <div className="flex flex-col h-full">
         <ChatNavbar onBack={() => alert("Back to main menu")} />
-
         <div className="flex-1 overflow-hidden">
           <ChatSidebar
-            rooms={roomsWithLastMessage}
+            rooms={rooms.map((r) => ({
+              store_id: r.store_id,
+              buyer_id: r.buyer_id,
+              store_name: r.store_name,
+              lastMessage:
+                roomMessages[getRoomKey(r)]?.slice(-1)[0]?.text ||
+                "Belum ada pesan",
+              time: "Baru saja",
+              status: roomMessages[getRoomKey(r)]?.slice(-1)[0]?.mine
+                ? "sent"
+                : "read",
+            }))}
             selectedRoom={selectedRoom}
-            onSelect={handleSelectRoom}
+            onSelect={setSelectedRoom} // langsung object room
           />
         </div>
       </div>
 
       <div className="flex-1 flex flex-col">
-        <ChatHeader
-          room={roomsWithLastMessage.find((r) => r.id === selectedRoom)}
-        />
+        <ChatHeader room={selectedRoom} />
         <div className="flex-1 p-6 overflow-y-auto bg-[url(/img/chat-background.png)] flex flex-col">
           {messages.map((m, i) => (
-            <ChatBubble key={i} text={m.text} mine={m.mine} />
+            <ChatBubble key={i} text={m.text} mine={m.mine} type={m.type} />
           ))}
         </div>
 
@@ -138,7 +214,6 @@ function Chat() {
             placeholder="Tulis pesan..."
             className="flex-1 p-2 border border-gray-400 rounded-xl resize-none overflow-y-auto max-h-[120px] focus:outline-gray-500"
             rows={1}
-            style={{ height: inputHeight }}
           />
 
           <button
