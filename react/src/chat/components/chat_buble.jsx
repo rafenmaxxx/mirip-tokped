@@ -120,7 +120,7 @@ const ChatBubble = ({
           <div className="h-40 bg-gray-200 overflow-hidden">
             {productData.main_image_path ? (
               <img
-                src={productData.main_image_path}
+                src={"/api/image?file=" + productData.main_image_path}
                 alt={productData.product_name}
                 className="w-full h-full object-cover"
               />
@@ -188,7 +188,7 @@ const ChatBubble = ({
           <div className="h-64 bg-gray-200 overflow-hidden relative">
             {imageUrl ? (
               <img
-                src={imageUrl}
+                src={"/api/image?file=" + imageUrl}
                 alt={imageData.originalname || "Image"}
                 className="w-full h-full object-cover hover:opacity-95 transition-opacity cursor-pointer"
                 onClick={() => window.open(imageUrl, "_blank")}

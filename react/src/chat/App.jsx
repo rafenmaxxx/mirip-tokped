@@ -35,21 +35,47 @@ function Chat() {
 
   // Ambil data user
   useEffect(() => {
+    // Di App.jsx - saat setUser
     const fetchUser = async () => {
       try {
         const res = await fetch("/node/api/user/me", {
           credentials: "include",
         });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
+
+        const result = await res.json();
+        console.log("API response:", result);
+
+        // PERBAIKAN DI SINI:
+        if (result.status === "success" && result.data) {
+          setUser(result.data); // HANYA simpan data-nya
+        } else {
+          setUser(result); // Fallback jika format berbeda
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching user:", err);
       }
     };
     fetchUser();
   }, []);
+
+  const getUserData = () => {
+    if (!user) return null;
+
+    // Format 1: user sudah langsung data object
+    if (user.user_id && user.role) {
+      return user;
+    }
+
+    // Format 2: user adalah {status: 'success', data: {...}}
+    if (user.data && user.data.user_id && user.data.role) {
+      return user.data;
+    }
+
+    console.error("Unknown user format:", user);
+    return null;
+  };
+
+  const userData = getUserData();
 
   // Ambil daftar room user
   useEffect(() => {
@@ -75,7 +101,7 @@ function Chat() {
       }
     };
     fetchRooms();
-  }, [user]);
+  }, [userData]);
 
   useEffect(() => {
     // Saat selectedRoom berubah, pastikan stop typing di room sebelumnya
@@ -267,7 +293,7 @@ function Chat() {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [user, selectedRoom]);
+  }, [userData, selectedRoom]);
 
   const markMessagesAsRead = useCallback(() => {
     if (!selectedRoom || !socketRef.current || !user) return;
@@ -374,7 +400,7 @@ function Chat() {
         });
       }
     },
-    [selectedRoom, user]
+    [selectedRoom, userData]
   );
 
   // Handler untuk new message
@@ -550,7 +576,7 @@ function Chat() {
         return prev;
       });
     },
-    [user, selectedRoom]
+    [userData, selectedRoom]
   );
 
   useEffect(() => {
@@ -569,6 +595,9 @@ function Chat() {
         return;
       }
 
+      const userRole = userData.role;
+      const userId = userData.user_id;
+
       const roomKey = getRoomKey(room);
       console.log(`Fetching initial messages for room: ${roomKey}`);
 
@@ -583,11 +612,12 @@ function Chat() {
 
       try {
         const { store_id, buyer_id } = room;
+        console.log(userId, "---> user");
         const endpoint =
-          user.role === "BUYER"
-            ? `/node/api/chat/messages/${store_id}/${user.user_id}?limit=50`
-            : `/node/api/chat/messages/${user.user_id}/${buyer_id}?limit=50`;
-
+          userRole === "BUYER"
+            ? `/node/api/chat/messages/${store_id}/${userId}?limit=50`
+            : `/node/api/chat/messages/${userId}/${buyer_id}?limit=50`;
+        console.log(endpoint, "-> endpoint");
         const res = await fetch(endpoint, {
           credentials: "include",
           signal: controller.signal,
@@ -651,7 +681,7 @@ function Chat() {
         delete fetchMessagesAbortRef.current[roomKey];
       }
     },
-    [user]
+    [userData]
   );
 
   // Load messages ketika room dipilih
