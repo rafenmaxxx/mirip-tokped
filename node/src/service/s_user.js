@@ -32,16 +32,25 @@ export const UserService = {
    * Get users with pagination
    */
   async getAllPaginated(options = {}) {
-    const { page = 1, limit = 6, search = "" } = options;
+    const { page = 1, limit = 6, search = "", role = "" } = options;
     const offset = (page - 1) * limit;
 
-    let searchCondition = "";
+    let conditions = [];
     let queryParams = [];
 
+    conditions.push(`role::text != 'ADMIN'`);
+
     if (search) {
-      searchCondition = "WHERE name ILIKE $1 OR email ILIKE $1";
-      queryParams = [`%${search}%`];
+      conditions.push(`(name ILIKE $${queryParams.length + 1} OR email ILIKE $${queryParams.length + 1})`);
+      queryParams.push(`%${search}%`);
     }
+
+    if (role) {
+      conditions.push(`UPPER(role::text) = $${queryParams.length + 1}`);
+      queryParams.push(role.toUpperCase());
+    }
+
+    const searchCondition = `WHERE ${conditions.join(' AND ')}`;
 
     const countQuery = `SELECT COUNT(*) as total FROM users ${searchCondition}`;
     const countResult = await db.query(countQuery, queryParams);
