@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { showToast } from "../lib/toast";
 import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
@@ -43,14 +44,14 @@ const AdminLogin = () => {
         console.log("Token saved to localStorage");
 
         // Redirect ke halaman admin
+        showToast("Login Berhasil", "Selamat datang kembali, Minped!", "success");
         navigate("/admin", { replace: true });
       } else {
         const errData = await res.json();
-        setError(errData.message || "Email atau kata sandi salah.");
+        showToast("Login Gagal", errData.message || "Email atau kata sandi salah.", "error");
       }
     } catch (err) {
-      console.error("❌ Login error:", err);
-      setError("Terjadi kesalahan jaringan. Coba lagi nanti.");
+      showToast("Login Gagal", "Terjadi kesalahan jaringan. Coba lagi nanti.", "error");
     } finally {
       setLoading(false);
     }
@@ -135,7 +136,7 @@ const AdminLogin = () => {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          Bukan Admin?{" "}
+          Bukan Minped?{" "}
           <a href="/login" className="text-[#00AA5B] font-bold hover:underline">
             Kembali
           </a>
