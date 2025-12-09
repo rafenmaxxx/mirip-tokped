@@ -85,6 +85,8 @@ const ChatMessageList = forwardRef(
               time={msg.timestamp}
               status={msg.status}
               product={msg.product}
+              image={msg.image}
+              read={msg.read}
             />
           </div>
         ))}
