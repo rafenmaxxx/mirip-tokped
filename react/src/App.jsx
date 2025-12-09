@@ -52,14 +52,11 @@ export default function App() {
         }
 
         // Kirim subscription ke server
-        const res = await fetch(
-          "http://localhost:80/node/api/notif/subscribe",
-          {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify(subscription),
-          }
-        );
+        const res = await fetch("/node/api/notif/subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(subscription),
+        });
 
         console.log("Subscription response:", await res.json());
       } catch (err) {
