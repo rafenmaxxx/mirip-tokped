@@ -22,13 +22,11 @@ function AuctionDetail() {
   const [currentPrice, setCurrentPrice] = useState(0);
   const [lastBidTime, setLastBidTime] = useState(null);
 
-  // Fetch auction data and user (once)
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
         
-        // Fetch auction details
         const auctionRes = await fetch(`http://localhost:80/node/api/auctions/${auctionId}`);
         if (!auctionRes.ok) {
           throw new Error(`Failed to fetch auction: ${auctionRes.status}`);
@@ -36,7 +34,6 @@ function AuctionDetail() {
         const auctionData = await auctionRes.json();
         console.log("Fetched auction data:", auctionData);
         
-        // Fetch bids
         const bidsRes = await fetch(`http://localhost:80/node/api/auctionbids/${auctionId}`);
         if (!bidsRes.ok) {
           throw new Error(`Failed to fetch bids: ${bidsRes.status}`);
@@ -44,7 +41,6 @@ function AuctionDetail() {
         const bidsData = await bidsRes.json();
         console.log("Fetched bids data:", bidsData);
         
-        // Fetch current user (only once)
         const userRes = await fetch("http://localhost:80/node/api/user/me", {
           credentials: "include",
         });
@@ -54,19 +50,16 @@ function AuctionDetail() {
         const userData = await userRes.json();
         console.log("Fetched user data:", userData);
         
-        // Set all data
         setAuction(auctionData);
         const bidsArray = Array.isArray(bidsData) ? bidsData : (bidsData.bids || []);
         setBids(bidsArray);
         setCurrentUser(userData);
         
-        // Set current price: use highest bid if exists, otherwise starting price
         const initialPrice = bidsArray.length > 0 
           ? bidsArray[0].amount 
           : (auctionData.current_price || auctionData.starting_price);
         setCurrentPrice(initialPrice);
         
-        // Set last bid time if there are bids
         if (bidsArray.length > 0) {
           setLastBidTime(bidsArray[0].created_at);
         }
@@ -77,7 +70,7 @@ function AuctionDetail() {
       } catch (error) {
         console.error("Error fetching initial data:", error);
         alert(`Error loading auction: ${error.message}`);
-        // Set loading to false even on error
+
         setLoading(false);
       } finally {
         setLoading(false);
@@ -89,24 +82,19 @@ function AuctionDetail() {
     }
   }, [auctionId]);
 
-  // Real-time updates for bids and auction status
   useEffect(() => {
     const updateData = async () => {
       try {
-        // Fetch auction status (backend will auto-update status based on time)
         const auctionRes = await fetch(`http://localhost:80/node/api/auctions/${auctionId}`);
         const auctionData = await auctionRes.json();
         setAuction(auctionData);
         
-        // Update bids
         const bidsRes = await fetch(`http://localhost:80/node/api/auctionbids/${auctionId}`);
         const bidsData = await bidsRes.json();
         
-        // Handle both array and object with bids property
         const bidsArray = Array.isArray(bidsData) ? bidsData : (bidsData.bids || []);
         setBids(bidsArray);
         
-        // Update current price if there are bids
         if (bidsArray.length > 0) {
           setCurrentPrice(bidsArray[0].amount);
           setLastBidTime(bidsArray[0].created_at);
@@ -116,7 +104,6 @@ function AuctionDetail() {
       }
     };
 
-    // Start interval if auction is loaded
     if (auction) {
       const interval = setInterval(updateData, 5000);
       return () => clearInterval(interval);
@@ -137,7 +124,6 @@ function AuctionDetail() {
       const data = await response.json();
       
       if (response.ok) {
-        // Refresh data
         const bidsRes = await fetch(`http://localhost:80/node/api/auctionbids/${auctionId}`);
         const bidsData = await bidsRes.json();
         const bidsArray = Array.isArray(bidsData) ? bidsData : (bidsData.bids || []);
@@ -145,7 +131,6 @@ function AuctionDetail() {
         setCurrentPrice(amount);
         setLastBidTime(new Date().toISOString());
         
-        // Refresh user balance
         const userRes = await fetch("http://localhost:80/node/api/user/me", {
           credentials: "include",
         });
@@ -290,7 +275,7 @@ function AuctionDetail() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Product & Auction Info */}
+          {/* Product and Auction Info */}
           <div className="lg:col-span-2 space-y-6">
             <ProductInformation
               product={product}
@@ -315,7 +300,7 @@ function AuctionDetail() {
             />
           </div>
 
-          {/* Right Column - Bid Input or Seller Actions */}
+          {/* Bid Input or Seller Actions */}
           <div className="lg:col-span-1">
             {isSeller ? (
               isActive && (
