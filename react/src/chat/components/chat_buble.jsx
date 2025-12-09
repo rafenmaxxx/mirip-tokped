@@ -22,7 +22,15 @@ const IconCheckDouble = () => (
   </svg>
 );
 
-const ChatBubble = ({ text, mine, type, time, status = "sent", product }) => {
+const ChatBubble = ({
+  text,
+  mine,
+  type,
+  time,
+  status = "sent",
+  product,
+  image,
+}) => {
   const getStatusIcon = () => {
     switch (status) {
       case "read":
@@ -75,7 +83,7 @@ const ChatBubble = ({ text, mine, type, time, status = "sent", product }) => {
           <div className="h-40 bg-gray-200 overflow-hidden">
             {productData.main_image_path ? (
               <img
-                src={"/api/image?file=" + productData.main_image_path}
+                src={productData.main_image_path}
                 alt={productData.product_name}
                 className="w-full h-full object-cover"
               />
@@ -102,6 +110,67 @@ const ChatBubble = ({ text, mine, type, time, status = "sent", product }) => {
                 Stok: {productData.stock || "0"}
               </span>
             </div>
+          </div>
+
+          {/* Time and Status */}
+          <div
+            className={`px-3 pb-2 pt-1 border-t ${
+              mine ? "border-blue-100" : "border-gray-100"
+            }`}
+          >
+            <div
+              className={`flex items-center justify-end text-xs ${
+                mine ? "text-blue-300" : "text-gray-500"
+              }`}
+            >
+              <span className="mr-2">{formatTime(time)}</span>
+              {mine && getStatusIcon()}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Tampilan untuk image message
+  if (type === "image") {
+    const imageData = image || JSON.parse(text || "{}");
+    const imageUrl = imageData.url || imageData.path;
+
+    return (
+      <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
+        <div
+          className={`max-w-[320px] rounded-2xl overflow-hidden border ${
+            mine ? "border-blue-200" : "border-gray-200"
+          } ${mine ? "bg-blue-50" : "bg-white"}`}
+        >
+          {/* Image Preview */}
+          <div className="h-64 bg-gray-200 overflow-hidden relative">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={imageData.originalname || "Image"}
+                className="w-full h-full object-cover hover:opacity-95 transition-opacity cursor-pointer"
+                onClick={() => window.open(imageUrl, "_blank")}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                <span className="text-gray-500">Image not available</span>
+              </div>
+            )}
+            <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+              📷
+            </div>
+          </div>
+
+          {/* Image Info */}
+          <div className="p-3">
+            <p className="text-sm font-medium text-gray-800 mb-1 truncate">
+              {imageData.originalname || "Image"}
+            </p>
+            <p className="text-xs text-gray-600">
+              {(imageData.size / 1024).toFixed(1)} KB
+            </p>
           </div>
 
           {/* Time and Status */}
