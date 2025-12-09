@@ -5,9 +5,9 @@ export default function ToastContainer() {
   const [toasts, setToasts] = useState([]);
 
   useEffect(() => {
-    const unsub = subscribeToast(({ title, message }) => {
+    const unsub = subscribeToast(({ title, message, type = "success" }) => {
       const id = Date.now();
-      setToasts((prev) => [...prev, { id, title, message, show: false }]);
+      setToasts((prev) => [...prev, { id, title, message, type, show: false }]);
 
       // Trigger show animation
       setTimeout(() => {
@@ -34,29 +34,38 @@ export default function ToastContainer() {
 
   return (
     <div className="fixed bottom-5 right-5 z-[10000] space-y-3">
-      {toasts.map((t) => (
-        <div
-          key={t.id}
-          className={`flex items-center gap-3 min-w-[300px] max-w-[500px] px-6 py-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ${
-            t.show ? "animate-slideIn" : "opacity-0 translate-x-[400px]"
-          }`}
-          style={{
-            background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
-            borderLeftColor: "#1e7e34",
-            color: "white",
-          }}
-        >
-          <div className="flex items-center justify-center w-6 h-6 text-xl font-bold">
-            ✓
+      {toasts.map((t) => {
+        const isError = t.type === "error";
+        const bgGradient = isError
+          ? "linear-gradient(135deg, #dc3545 0%, #c82333 100%)"
+          : "linear-gradient(135deg, #28a745 0%, #20c997 100%)";
+        const borderColor = isError ? "#bd2130" : "#1e7e34";
+        const icon = isError ? "✕" : "✓";
+
+        return (
+          <div
+            key={t.id}
+            className={`flex items-center gap-3 min-w-[300px] max-w-[500px] px-6 py-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ${
+              t.show ? "animate-slideIn" : "opacity-0 translate-x-[400px]"
+            }`}
+            style={{
+              background: bgGradient,
+              borderLeftColor: borderColor,
+              color: "white",
+            }}
+          >
+            <div className="flex items-center justify-center w-6 h-6 text-xl font-bold">
+              {icon}
+            </div>
+            <div className="flex-1">
+              <div className="font-medium text-[15px]">{t.title}</div>
+              {t.message && (
+                <div className="text-sm opacity-90 mt-0.5">{t.message}</div>
+              )}
+            </div>
           </div>
-          <div className="flex-1">
-            <div className="font-medium text-[15px]">{t.title}</div>
-            {t.message && (
-              <div className="text-sm opacity-90 mt-0.5">{t.message}</div>
-            )}
-          </div>
-        </div>
-      ))}
+        );
+      })}
       <style jsx>{`
         @keyframes slideIn {
           from {
