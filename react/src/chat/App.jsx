@@ -22,6 +22,7 @@ function Chat() {
   const hasJoinedRoomsRef = useRef(false);
   const initialLoadDoneRef = useRef({});
   const fetchMessagesAbortRef = useRef({});
+  const [messageReadStatus, setMessageReadStatus] = useState({});
 
   // Simple typing timeout ref
   const typingTimeoutRef = useRef(null);
@@ -159,7 +160,48 @@ function Chat() {
         });
         handleNewMessage(msg);
       });
+      socket.on("messages_read", (data) => {
+        console.log("📖 Messages read event received:", data);
 
+        if (!selectedRoom || !user) return;
+
+        // Cek apakah ini untuk room yang sedang aktif
+        if (
+          data.store_id === selectedRoom.store_id &&
+          data.buyer_id === selectedRoom.buyer_id &&
+          data.reader_id !== user.user_id // Bukan diri sendiri
+        ) {
+          // Update read status untuk message_ids
+          setMessageReadStatus((prev) => {
+            const updated = { ...prev };
+            data.message_ids?.forEach((messageId) => {
+              updated[messageId] = true;
+            });
+            return updated;
+          });
+
+          // Update status pesan di roomMessages
+          setRoomMessages((prev) => {
+            const roomKey = `${data.store_id}-${data.buyer_id}`;
+            const currentMessages = prev[roomKey] || [];
+
+            const updatedMessages = currentMessages.map((msg) => {
+              if (data.message_ids?.includes(msg.id) && msg.mine) {
+                return {
+                  ...msg,
+                  status: "read",
+                };
+              }
+              return msg;
+            });
+
+            return {
+              ...prev,
+              [roomKey]: updatedMessages,
+            };
+          });
+        }
+      });
       // **SIMPLE TYPING EVENT HANDLER**
       socket.on("typing", (data) => {
         console.log("Typing event received:", data);
@@ -226,6 +268,33 @@ function Chat() {
       }
     };
   }, [user, selectedRoom]);
+
+  const markMessagesAsRead = useCallback(() => {
+    if (!selectedRoom || !socketRef.current || !user) return;
+
+    const { store_id, buyer_id } = selectedRoom;
+
+    console.log("📖 Marking messages as read for room:", {
+      store_id,
+      buyer_id,
+    });
+
+    socketRef.current.emit("mark_as_read", {
+      storeId: store_id,
+      buyerId: buyer_id,
+    });
+  }, [selectedRoom, user]);
+
+  useEffect(() => {
+    if (selectedRoom && user && socketRef.current?.connected) {
+      // Delay sedikit untuk memastikan UI sudah render
+      const timer = setTimeout(() => {
+        markMessagesAsRead();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedRoom, user, markMessagesAsRead]);
 
   // Join rooms
   useEffect(() => {
@@ -466,6 +535,9 @@ function Chat() {
               selectedRoom.buyer_id !== msg.buyer_id
             ) {
               room.unread_count = (room.unread_count || 0) + 1;
+              setTimeout(() => {
+                markMessagesAsRead();
+              }, 1000);
             }
           } else {
             room.unread_count = 0;
@@ -532,6 +604,19 @@ function Chat() {
             type: msg.message_type,
             timestamp: msg.created_at,
             status: msg.status || "sent",
+          }));
+
+          const readStatus = {};
+          data.forEach((msg) => {
+            if (msg.is_read && msg.sender_id === user.user_id) {
+              readStatus[msg.message_id] = true;
+            }
+          });
+          setMessageReadStatus((prev) => ({ ...prev, ...readStatus }));
+
+          setRoomMessages((prev) => ({
+            ...prev,
+            [roomKey]: formattedMessages,
           }));
 
           setRoomMessages((prev) => ({
@@ -819,7 +904,10 @@ function Chat() {
             ) : (
               <ChatMessageList
                 ref={messageListRef}
-                messages={currentMessages}
+                messages={currentMessages.map((msg) => ({
+                  ...msg,
+                  read: messageReadStatus[msg.id] || false,
+                }))}
                 user={user}
                 onLoadMore={handleLoadMore}
                 hasMore={hasMoreMessages[currentRoomKey]}
