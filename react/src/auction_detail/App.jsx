@@ -222,7 +222,7 @@ function AuctionDetail() {
 
   const handleStoreClick = () => {
     if (auction?.store_id) {
-      navigate(`/store/${auction.store_id}`);
+      window.location.href = `/store?store_id=${auction.store_id}`;
     }
   };
 
