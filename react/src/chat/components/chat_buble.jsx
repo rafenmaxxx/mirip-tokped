@@ -22,6 +22,17 @@ const IconCheckDouble = () => (
   </svg>
 );
 
+const IconCheckDoubleFilled = () => (
+  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+    <path
+      d="M3 12l4 4 4-4M13 12l4 4 4-4"
+      stroke="currentColor"
+      fill="none"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
 const ChatBubble = ({
   text,
   mine,
@@ -30,11 +41,19 @@ const ChatBubble = ({
   status = "sent",
   product,
   image,
+  read = false,
 }) => {
   const getStatusIcon = () => {
     switch (status) {
       case "read":
-        return <IconCheckDouble className="text-blue-500" />;
+        return (
+          <div className="flex items-center">
+            <IconCheckDouble className="text-blue-500" />
+            {read && (
+              <div className="ml-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+            )}
+          </div>
+        );
       case "delivered":
         return <IconCheckDouble className="text-gray-400" />;
       case "sent":
@@ -56,6 +75,24 @@ const ChatBubble = ({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Status text untuk debugging
+  const getStatusText = () => {
+    if (!mine) return "";
+
+    switch (status) {
+      case "sending":
+        return "Mengirim...";
+      case "sent":
+        return "Terkirim";
+      case "delivered":
+        return "Terkirim";
+      case "read":
+        return "Dibaca";
+      default:
+        return "";
+    }
   };
 
   if (type === "system") {
@@ -119,12 +156,15 @@ const ChatBubble = ({
             }`}
           >
             <div
-              className={`flex items-center justify-end text-xs ${
+              className={`flex items-center justify-between text-xs ${
                 mine ? "text-blue-300" : "text-gray-500"
               }`}
             >
-              <span className="mr-2">{formatTime(time)}</span>
-              {mine && getStatusIcon()}
+              <span className="text-xs opacity-75">{getStatusText()}</span>
+              <div className="flex items-center">
+                <span className="mr-2">{formatTime(time)}</span>
+                {mine && getStatusIcon()}
+              </div>
             </div>
           </div>
         </div>
@@ -180,12 +220,15 @@ const ChatBubble = ({
             }`}
           >
             <div
-              className={`flex items-center justify-end text-xs ${
+              className={`flex items-center justify-between text-xs ${
                 mine ? "text-blue-300" : "text-gray-500"
               }`}
             >
-              <span className="mr-2">{formatTime(time)}</span>
-              {mine && getStatusIcon()}
+              <span className="text-xs opacity-75">{getStatusText()}</span>
+              <div className="flex items-center">
+                <span className="mr-2">{formatTime(time)}</span>
+                {mine && getStatusIcon()}
+              </div>
             </div>
           </div>
         </div>
@@ -205,12 +248,15 @@ const ChatBubble = ({
       >
         <p className="whitespace-pre-wrap break-words">{text}</p>
         <div
-          className={`flex items-center justify-end mt-1 text-xs ${
+          className={`flex items-center justify-between mt-1 text-xs ${
             mine ? "text-blue-200" : "text-gray-500"
           }`}
         >
-          <span className="mr-2">{formatTime(time)}</span>
-          {mine && getStatusIcon()}
+          <span className="text-xs opacity-75">{getStatusText()}</span>
+          <div className="flex items-center">
+            <span className="mr-2">{formatTime(time)}</span>
+            {mine && getStatusIcon()}
+          </div>
         </div>
       </div>
     </div>
