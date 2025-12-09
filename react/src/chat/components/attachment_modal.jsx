@@ -5,7 +5,6 @@ const AttachmentModal = ({
   onClose,
   onProductSelect,
   onImageSelect,
-  onCameraSelect,
   disabled,
 }) => {
   const [activeTab, setActiveTab] = useState("images");
@@ -60,13 +59,6 @@ const AttachmentModal = ({
     fileInputRef.current?.click();
   };
 
-  const handleTakePhoto = () => {
-    if (onCameraSelect) {
-      onCameraSelect();
-      onClose();
-    }
-  };
-
   if (!show) return null;
 
   return (
@@ -110,17 +102,6 @@ const AttachmentModal = ({
           >
             Produk
           </button>
-          <button
-            className={`flex-1 py-2 text-center font-medium ${
-              activeTab === "documents"
-                ? "text-green-600 border-b-2 border-green-600"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("documents")}
-            disabled
-          >
-            Dokumen
-          </button>
         </div>
 
         {/* Hidden file input */}
@@ -161,57 +142,6 @@ const AttachmentModal = ({
                     Gallery
                   </span>
                 </button>
-
-                {/* Camera option */}
-                <button
-                  onClick={handleTakePhoto}
-                  className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
-                    <svg
-                      className="w-6 h-6 text-gray-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">
-                    Camera
-                  </span>
-                </button>
-
-                {/* Recent images (optional) */}
-                <div className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-xl bg-gray-50">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                    <svg
-                      className="w-6 h-6 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-sm text-gray-500">Recent</span>
-                </div>
               </div>
 
               <div className="text-center text-gray-500 text-sm">
@@ -243,7 +173,7 @@ const AttachmentModal = ({
                     <div className="w-16 h-16 bg-gray-300 rounded overflow-hidden flex-shrink-0">
                       {product.main_image_path ? (
                         <img
-                          src={product.main_image_path}
+                          src={"/api/image?file=" + product.main_image_path}
                           alt={product.product_name}
                           className="w-full h-full object-cover"
                         />
