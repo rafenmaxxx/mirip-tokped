@@ -131,7 +131,7 @@ export const AuthController = {
         },
       });
     } catch (error) {
-      console.error("❌ Get current user error:", error);
+      console.error("Get current user error:", error);
 
       if (error.message.includes("User tidak ditemukan")) {
         return res.status(404).json({
