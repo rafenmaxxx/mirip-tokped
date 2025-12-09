@@ -193,7 +193,7 @@ CREATE TABLE order_items (
 DROP TABLE IF EXISTS auctions CASCADE;
 CREATE TABLE auctions (
     auction_id SERIAL PRIMARY KEY,
-    product_id INT NOT NULL UNIQUE,
+    product_id INT NOT NULL,
     starting_price INT NOT NULL CHECK (starting_price >= 0),
     current_price INT NOT NULL CHECK (current_price >= 0),
     min_increment INT NOT NULL CHECK (min_increment > 0),
