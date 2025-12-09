@@ -284,7 +284,8 @@ CREATE TABLE user_feature_access (
     is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     reason TEXT DEFAULT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_feature_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_feature_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE NULLS NOT DISTINCT (user_id, feature_name)
 );
 -- SEEDER DATA TOKOPEDIA 
 
