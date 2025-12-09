@@ -234,6 +234,7 @@ CREATE TABLE chat_room (
 
 -- 13. TABEL CHAT_MESSAGES
 DROP TABLE IF EXISTS chat_messages CASCADE;
+
 CREATE TABLE chat_messages (
     message_id SERIAL PRIMARY KEY,
     store_id INT NOT NULL,
@@ -244,8 +245,11 @@ CREATE TABLE chat_messages (
     product_id INT DEFAULT NULL,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_message_buyer FOREIGN KEY (buyer_id) REFERENCES chat_room(buyer_id) ON DELETE CASCADE,
-    CONSTRAINT fk_message_store FOREIGN KEY (store_id) REFERENCES chat_room(store_id) ON DELETE CASCADE
+
+    CONSTRAINT fk_chat_room
+        FOREIGN KEY (store_id, buyer_id)
+        REFERENCES chat_room(store_id, buyer_id)
+        ON DELETE CASCADE
 );
 
 -- 14. TABEL PUSH_SUBSCRIPTIONS

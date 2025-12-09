@@ -6,6 +6,7 @@ import AuctionDetail from "./auction_detail/App.jsx";
 import Check from "./check/App.jsx";
 import { useEffect } from "react";
 import { showToast } from "./lib/toast.js";
+import ProtectedRoutes from "./_components/ProtectedRoute.jsx";
 
 export default function App() {
   useEffect(() => {
@@ -58,14 +59,11 @@ export default function App() {
         }
 
         // Kirim subscription ke server
-        const res = await fetch(
-          "http://localhost:80/node/api/notif/subscribe",
-          {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify(subscription),
-          }
-        );
+        const res = await fetch("/node/api/notif/subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(subscription),
+        });
 
         console.log("Subscription response:", await res.json());
       } catch (err) {
@@ -102,8 +100,19 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/chat" element={<Chat />} />
-      <Route path="/admin" element={<Admin />} />
+      <Route element={<ProtectedRoutes redirectUrl="/login"></ProtectedRoutes>}>
+        {" "}
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/admin" element={<Admin />} />
+      </Route>
+      <Route
+        element={
+          <ProtectedRoutes redirectUrl="/react/admin-login"></ProtectedRoutes>
+        }
+      >
+        {" "}
+        <Route path="/admin" element={<Admin />} />
+      </Route>
       <Route path="/auction" element={<Auction />} />
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
       <Route path="/check" element={<Check />} />
