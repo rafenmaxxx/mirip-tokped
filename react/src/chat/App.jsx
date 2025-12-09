@@ -318,17 +318,28 @@ function Chat() {
       }
 
       const roomKey = `${msg.store_id.toString()}-${msg.buyer_id.toString()}`;
-      const isMyMessage = msg.sender_id === user.user_id; // Pakai sender_id dari server
+      const isMyMessage = msg.sender_id === user.user_id;
       const isItemPreview = msg.message_type === "item_preview";
+      const isImage = msg.message_type === "image";
 
-      console.log("📨 Received new_message:", {
-        message_id: msg.message_id,
-        sender_id: msg.sender_id,
-        my_user_id: user.user_id,
+      console.log("📨 Received message:", {
+        type: msg.message_type,
         isMyMessage,
-        message_type: msg.message_type,
-        has_product_id: !!msg.product_id,
+        isImage,
+        isItemPreview,
+        message_id: msg.message_id,
       });
+
+      // Parse content berdasarkan type
+      let parsedContent = null;
+      if (isItemPreview || isImage) {
+        try {
+          parsedContent = JSON.parse(msg.content);
+        } catch (e) {
+          console.error("Error parsing message content:", e);
+          parsedContent = msg.content;
+        }
+      }
 
       setRoomMessages((prev) => {
         const currentMessages = prev[roomKey] || [];
@@ -353,14 +364,14 @@ function Chat() {
             console.log("Found optimistic message, updating with server data");
             const updatedMessages = [...currentMessages];
 
-            // Parse content untuk item preview
+            // Tentukan data berdasarkan type
             let productData = undefined;
-            if (isItemPreview && msg.content) {
-              try {
-                productData = JSON.parse(msg.content);
-              } catch (e) {
-                console.error("Error parsing product data:", e);
-              }
+            let imageData = undefined;
+
+            if (isItemPreview && parsedContent) {
+              productData = parsedContent;
+            } else if (isImage && parsedContent) {
+              imageData = parsedContent;
             }
 
             updatedMessages[optimisticIndex] = {
@@ -371,6 +382,7 @@ function Chat() {
               timestamp: msg.created_at,
               status: "delivered",
               product: productData,
+              image: imageData,
             };
             return {
               ...prev,
@@ -379,14 +391,14 @@ function Chat() {
           }
         }
 
-        // Parse content untuk item preview
+        // Tentukan data untuk message baru
         let productData = undefined;
-        if (isItemPreview && msg.content) {
-          try {
-            productData = JSON.parse(msg.content);
-          } catch (e) {
-            console.error("Error parsing product data:", e);
-          }
+        let imageData = undefined;
+
+        if (isItemPreview && parsedContent) {
+          productData = parsedContent;
+        } else if (isImage && parsedContent) {
+          imageData = parsedContent;
         }
 
         // Tambahkan message baru
@@ -397,11 +409,12 @@ function Chat() {
             {
               id: msg.message_id,
               text: msg.content,
-              mine: isMyMessage, // Gunakan sender_id untuk menentukan
+              mine: isMyMessage,
               type: msg.message_type,
               timestamp: msg.created_at,
               status: "delivered",
               product: productData,
+              image: imageData,
             },
           ],
         };
@@ -430,22 +443,21 @@ function Chat() {
 
           room.last_message_at = msg.created_at || new Date().toISOString();
 
-          // Determine last message content
+          // Determine last message content berdasarkan type
           let lastMessageContent = msg.content;
-          if (isItemPreview && msg.content) {
-            try {
-              const productData = JSON.parse(msg.content);
-              lastMessageContent = `${productData.product_name}`;
-            } catch (e) {
-              console.error("Error parsing product for last message:", e);
-            }
+          let lastMessageDisplay = msg.content;
+
+          if (isItemPreview && parsedContent) {
+            lastMessageDisplay = `📦 ${parsedContent.product_name}`;
+          } else if (isImage) {
+            lastMessageDisplay = "📷 Gambar";
           }
 
           room.last_message = {
             content: lastMessageContent,
             created_at: msg.created_at,
           };
-          room.last_message_content = lastMessageContent;
+          room.last_message_content = lastMessageDisplay;
 
           if (!isMyMessage) {
             if (
@@ -596,17 +608,42 @@ function Chat() {
   // Handle sending message
   const sendMessage = useCallback(
     (input, messageType = "text") => {
-      if (!user || !selectedRoom || !socketRef.current) return;
+      console.log("🚀 sendMessage called:", {
+        messageType,
+        inputType: typeof input,
+        isObject: typeof input === "object",
+      });
+
+      if (!user || !selectedRoom || !socketRef.current) {
+        console.error("❌ Cannot send - missing requirements");
+        return;
+      }
 
       const { store_id, buyer_id } = selectedRoom;
       const roomKey = getRoomKey(selectedRoom);
 
-      // Untuk item preview, input adalah object product
-      // Untuk text biasa, input adalah string
-      const isItemPreview = messageType === "item_preview";
-      const content = isItemPreview ? JSON.stringify(input) : input.trim();
+      // Tentukan content berdasarkan message type
+      let content = "";
+      let product_id = null;
+      let additionalData = {};
 
-      if (!isItemPreview && !content) return;
+      if (messageType === "item_preview") {
+        // input adalah object product
+        content = JSON.stringify(input);
+        product_id = input.product_id;
+        additionalData = { product: input };
+      } else if (messageType === "image") {
+        // input adalah object image data
+        content = JSON.stringify(input);
+        additionalData = { image: input };
+      } else {
+        // text message biasa
+        content = input.trim();
+        if (!content) {
+          console.error("❌ Empty content for text message");
+          return;
+        }
+      }
 
       // Optimistic update UI
       const optimisticMessage = {
@@ -616,7 +653,7 @@ function Chat() {
         type: messageType,
         timestamp: new Date().toISOString(),
         status: "sending",
-        product: isItemPreview ? input : undefined,
+        ...additionalData,
       };
 
       setRoomMessages((prev) => ({
@@ -635,12 +672,15 @@ function Chat() {
           const room = { ...updatedRooms[roomIndex] };
           room.last_message_at = new Date().toISOString();
 
-          // Update last message content
-          if (isItemPreview) {
-            room.last_message_content = ` Mengirim produk: ${input.product_name}`;
-          } else {
-            room.last_message_content = content;
+          // Update last message content berdasarkan type
+          let lastMessageDisplay = content;
+          if (messageType === "item_preview") {
+            lastMessageDisplay = `📦 ${input.product_name}`;
+          } else if (messageType === "image") {
+            lastMessageDisplay = "📷 Gambar";
           }
+
+          room.last_message_content = lastMessageDisplay;
 
           updatedRooms.splice(roomIndex, 1);
           updatedRooms.unshift(room);
@@ -651,13 +691,20 @@ function Chat() {
       });
 
       // Kirim via socket
-      socketRef.current.emit("chat_message", {
+      const socketData = {
         storeId: store_id,
         buyerId: buyer_id,
         message: content,
         message_type: messageType,
-        product_id: isItemPreview ? input.product_id : null,
+        product_id: product_id,
+      };
+
+      console.log("📤 Sending message via socket:", {
+        type: messageType,
+        hasProductId: !!product_id,
       });
+
+      socketRef.current.emit("chat_message", socketData);
 
       // Auto scroll
       setTimeout(() => {
