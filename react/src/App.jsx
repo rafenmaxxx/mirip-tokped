@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Chat from "./chat/App.jsx";
 import Admin from "./admin/App.jsx";
 import Auction from "./auction/App.jsx";
+import AuctionDetail from "./auction_detail/App.jsx";
 import Check from "./check/App.jsx";
 import { useEffect } from "react";
 import { showToast } from "./lib/toast.js";
@@ -41,6 +42,12 @@ export default function App() {
         if (!subscription) {
           console.log("No existing subscription, creating a new one...");
           const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+          
+          if (!publicKey) {
+            console.warn("VAPID public key not configured. Push notifications will not work.");
+            return;
+          }
+          
           subscription = await swRegistration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: publicKey,
@@ -107,6 +114,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
       </Route>
       <Route path="/auction" element={<Auction />} />
+      <Route path="/auction/:auctionId" element={<AuctionDetail />} />
       <Route path="/check" element={<Check />} />
       <Route path="/" element={<h1>Welcome</h1>} />
     </Routes>
