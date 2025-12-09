@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Chat from "./chat/App.jsx";
 import Admin from "./admin/App.jsx";
 import Auction from "./auction/App.jsx";
+import AuctionDetail from "./auction_detail/App.jsx";
 import Check from "./check/App.jsx";
 import AdminLogin from "./admin-login/App.jsx";
 import { useEffect } from "react";
@@ -43,6 +44,12 @@ export default function App() {
         if (!subscription) {
           console.log("No existing subscription, creating a new one...");
           const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+          
+          if (!publicKey) {
+            console.warn("VAPID public key not configured. Push notifications will not work.");
+            return;
+          }
+          
           subscription = await swRegistration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: publicKey,
@@ -54,14 +61,11 @@ export default function App() {
         }
 
         // Kirim subscription ke server
-        const res = await fetch(
-          "http://localhost:80/node/api/notif/subscribe",
-          {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify(subscription),
-          }
-        );
+        const res = await fetch("/node/api/notif/subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(subscription),
+        });
 
         console.log("Subscription response:", await res.json());
       } catch (err) {
@@ -111,6 +115,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
       </Route>
       <Route path="/auction" element={<Auction />} />
+      <Route path="/auction/:auctionId" element={<AuctionDetail />} />
       <Route path="/check" element={<Check />} />
       <Route path="/admin-login" element={<AdminLogin />} />
 
