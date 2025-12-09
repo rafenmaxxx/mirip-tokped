@@ -1,9 +1,6 @@
 const UserCard = ({ user, onManage }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex space-x-4">
-      <div className="w-24 h-24 bg-[#00AA5B] rounded-lg flex items-center justify-center flex-shrink-0 text-white shadow-inner">
-        <span className="font-semibold text-sm">Foto</span>
-      </div>
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">

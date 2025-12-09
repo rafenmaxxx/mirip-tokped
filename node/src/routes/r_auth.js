@@ -1,11 +1,13 @@
-import { Router } from "express";
+import express from "express";
 import { AuthController } from "../controller/c_auth.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
-const router = Router();
+const router = express.Router();
 
 router.post("/login", AuthController.login);
 router.post("/logout", AuthController.logout);
-router.get("/me", AuthController.getCurrentUser);
-router.get("/check", AuthController.checkAuth);
+router.post("/refresh", AuthController.refreshToken);
+router.get("/me", requireAdmin, AuthController.getCurrentUser);
+router.get("/check", requireAdmin, AuthController.checkAuth);
 
 export default router;

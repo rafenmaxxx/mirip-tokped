@@ -1,15 +1,31 @@
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const ProtectedAdminRoute = ({ redirectUrl = "/admin-login" }) => {
+const ProtectedAdminRoute = ({ redirectUrl = "/react/admin-login" }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAdmin = async () => {
-      try {        
-        const res = await fetch("/node/api/auth/me", {
-          credentials: "include",
+      try {
+        console.log("Checking admin authentication with JWT...");
+
+        const token = localStorage.getItem("accessToken");
+
+        if (!token) {
+          console.log("No token found in localStorage");
+          setAdmin(null);
+          setLoading(false);
+          return;
+        }
+
+        console.log("Token found, verifying...");
+
+        const res = await fetch("http://localhost:80/node/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
 
         console.log("Response status:", res.status);
@@ -19,15 +35,27 @@ const ProtectedAdminRoute = ({ redirectUrl = "/admin-login" }) => {
           console.log("Auth response:", data);
           console.log("User data:", data.data);
           console.log("User role:", data.data?.role);
-          
+
           setAdmin(data.data);
         } else {
           const errorData = await res.json();
           console.log("Auth failed:", errorData);
+
+          // Token invalid/expired, remove from localStorage
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+
           setAdmin(null);
         }
       } catch (err) {
         console.error("Admin auth check error:", err);
+
+        // Clear tokens on error
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+
         setAdmin(null);
       } finally {
         setLoading(false);
@@ -35,7 +63,45 @@ const ProtectedAdminRoute = ({ redirectUrl = "/admin-login" }) => {
     };
 
     fetchAdmin();
-  }, []);
+
+    // check token validity every 1 minute
+    const tokenCheckInterval = setInterval(async () => {
+      const token = localStorage.getItem("accessToken");
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!token || !refreshToken) {
+        console.log("No tokens found, logging out...");
+        clearInterval(tokenCheckInterval);
+        localStorage.clear();
+        window.location.href = redirectUrl;
+        return;
+      }
+
+      // verify token
+      try {
+        const res = await fetch("http://localhost:80/node/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          console.log("Token expired, logging out...");
+          clearInterval(tokenCheckInterval);
+          localStorage.clear();
+          window.location.href = redirectUrl;
+        }
+      } catch (err) {
+        console.error("Token check error:", err);
+        clearInterval(tokenCheckInterval);
+        localStorage.clear();
+        window.location.href = redirectUrl;
+      }
+    }, 60000);
+
+    return () => clearInterval(tokenCheckInterval);
+  }, [redirectUrl]);
 
   if (loading) {
     return (

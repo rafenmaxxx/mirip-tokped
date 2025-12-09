@@ -1,8 +1,9 @@
 import { AuthService } from "../service/s_auth.js";
+import { generateToken, generateRefreshToken } from "../utils/jwt.js";
 
 export const AuthController = {
   /**
-   * Handle admin login
+   * Handle admin login with JWT
    * POST /node/api/auth/login
    */
   async login(req, res, next) {
@@ -20,48 +21,44 @@ export const AuthController = {
       // Authenticate user
       const user = await AuthService.loginAdmin(email, password);
 
-      // Set session
-      req.session.user = {
+      // Generate JWT tokens
+      const tokenPayload = {
         id: user.id,
-        name: user.name,
         email: user.email,
         role: user.role,
-        address: user.address,
+        name: user.name,
       };
 
-      // Save session explicitly
-    req.session.save((err) => {
-    if (err) {
-        console.error("Session save error:", err);
-        return res.status(500).json({
-        status: "error",
-        message: "Gagal menyimpan session",
-        });
-    }
+      const accessToken = generateToken(tokenPayload);
+      const refreshToken = generateRefreshToken(tokenPayload);
 
-    console.log("Session saved:", req.session.user);
-    console.log("Session ID:", req.sessionID);
+      console.log("Login successful for:", user.email);
+      console.log("JWT token generated");
 
-    return res.status(200).json({
+      return res.status(200).json({
         status: "success",
         message: "Login berhasil",
         data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        address: user.address,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            address: user.address,
+          },
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          tokenType: "Bearer",
         },
-    });
-    });
+      });
     } catch (error) {
       console.error("Login controller error:", error);
-      
+
       // Handle specific errors
-      if (error.message.includes("Email atau password salah 1") || error.message.includes("Email atau password salah 2")) {
+      if (error.message.includes("Email atau password salah")) {
         return res.status(401).json({
           status: "error",
-          message: error.message,
+          message: "Email atau password salah",
         });
       }
 
@@ -76,22 +73,17 @@ export const AuthController = {
     }
   },
 
+  /**
+   * Handle logout with JWT -> remove token
+   * POST /node/api/auth/logout
+   */
   async logout(req, res, next) {
     try {
-      req.session.destroy((err) => {
-        if (err) {
-          console.error("Logout error:", err);
-          return res.status(500).json({
-            status: "error",
-            message: "Gagal logout",
-          });
-        }
+      console.log("Logout successful");
 
-        res.clearCookie("connect.sid"); // Clear session cookie
-        return res.status(200).json({
-          status: "success",
-          message: "Logout berhasil",
-        });
+      return res.status(200).json({
+        status: "success",
+        message: "Logout berhasil. Hapus token dari client.",
       });
     } catch (error) {
       console.error("Logout controller error:", error);
@@ -99,25 +91,24 @@ export const AuthController = {
     }
   },
 
+  /**
+   * GET /node/api/auth/me
+   * Requires Authorization: Bearer <token>
+   */
   async getCurrentUser(req, res, next) {
     try {
-    console.log("GET /auth/me called");
-    console.log("Session exists:", !!req.session);
-    console.log("Session user:", req.session?.user);
-    console.log("Session ID:", req.sessionID);
-    console.log("Cookies:", req.headers.cookie);
+      console.log("GET /auth/me called");
+      console.log("User from JWT:", req.user);
 
-    // Check if session exists
-    if (!req.session || !req.session.user || !req.session.user.id) {
-      console.log("No session or user in session");
-      return res.status(401).json({
-        status: "error",
-        message: "Tidak terautentikasi",
-      });
-    }
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({
+          status: "error",
+          message: "Tidak terautentikasi",
+        });
+      }
 
       // Get fresh user data from database
-      const user = await AuthService.getCurrentUser(req.session.user.id);
+      const user = await AuthService.getCurrentUser(req.user.id);
 
       // Check if still admin
       if (user.role !== "ADMIN") {
@@ -127,9 +118,7 @@ export const AuthController = {
         });
       }
 
-          console.log("User authenticated:", user.email);
-          console.log("Session ID:", req.sessionID);
-          console.log("Cookies:", req.headers.cookie);
+      console.log("User authenticated:", user.email);
 
       return res.status(200).json({
         status: "success",
@@ -142,8 +131,8 @@ export const AuthController = {
         },
       });
     } catch (error) {
-      console.error("Get current user error:", error);
-      
+      console.error("❌ Get current user error:", error);
+
       if (error.message.includes("User tidak ditemukan")) {
         return res.status(404).json({
           status: "error",
@@ -155,13 +144,17 @@ export const AuthController = {
     }
   },
 
+  /**
+   * GET /node/api/auth/check
+   * Requires Authorization: Bearer <token>
+   */
   async checkAuth(req, res) {
     try {
-      if (req.session.user && req.session.user.role === "ADMIN") {
+      if (req.user && req.user.role === "ADMIN") {
         return res.status(200).json({
           status: "success",
           authenticated: true,
-          data: req.session.user,
+          data: req.user,
         });
       }
 
@@ -178,5 +171,50 @@ export const AuthController = {
         message: "Terjadi kesalahan server",
       });
     }
-  }
-}
+  },
+
+  /**
+   * POST /node/api/auth/refresh
+   */
+  async refreshToken(req, res, next) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        return res.status(400).json({
+          status: "error",
+          message: "Refresh token diperlukan",
+        });
+      }
+
+      // Verify refresh token
+      const { verifyToken } = await import("../utils/jwt.js");
+      const decoded = verifyToken(refreshToken);
+
+      // Generate new access token
+      const newAccessToken = generateToken({
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+        name: decoded.name,
+      });
+
+      console.log("Token refreshed for:", decoded.email);
+
+      return res.status(200).json({
+        status: "success",
+        message: "Token berhasil di-refresh",
+        data: {
+          accessToken: newAccessToken,
+          tokenType: "Bearer",
+        },
+      });
+    } catch (error) {
+      console.error("Refresh token error:", error);
+      return res.status(401).json({
+        status: "error",
+        message: "Refresh token tidak valid atau expired",
+      });
+    }
+  },
+};

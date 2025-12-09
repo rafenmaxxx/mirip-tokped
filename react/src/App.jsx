@@ -104,7 +104,7 @@ export default function App() {
       </Route>
       <Route
         element={
-          <ProtectedAdminRoute redirectUrl="/admin-login"></ProtectedAdminRoute>
+          <ProtectedAdminRoute redirectUrl="/react/admin-login"></ProtectedAdminRoute>
         }
       >
         {" "}
