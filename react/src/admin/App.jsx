@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
 
   const isModalOpen = Boolean(selectedUser);
 
@@ -35,12 +36,13 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("accessToken");
-
         const params = new URLSearchParams({
           page: currentPage,
           limit: usersPerPage,
           search: debouncedSearchQuery,
+          role: roleFilter,
         });
+        console.log("Fetching users with params:", params.toString());
 
         const response = await fetch(
           `http://localhost:80/node/api/user?${params}`,
@@ -98,7 +100,7 @@ const Dashboard = () => {
     };
 
     fetchUsers();
-  }, [currentPage, usersPerPage, debouncedSearchQuery]);
+  }, [currentPage, usersPerPage, debouncedSearchQuery, roleFilter]);
 
   // Debounce search query (300ms delay)
   useEffect(() => {
@@ -124,9 +126,19 @@ const Dashboard = () => {
     setSearchQuery(query);
   };
 
+  const handleRoleChange = (role) => {
+    setRoleFilter(role);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-[#F0F3F7] font-sans">
-      <Header searchQuery={searchQuery} onSearchChange={handleSearchChange} />
+      <Header 
+        searchQuery={searchQuery} 
+        onSearchChange={handleSearchChange}
+        roleFilter={roleFilter}
+        onRoleChange={handleRoleChange}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
