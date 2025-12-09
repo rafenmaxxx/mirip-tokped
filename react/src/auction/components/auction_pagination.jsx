@@ -12,7 +12,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
       </button>
 
       <div className="flex gap-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
           <button
             key={page}
             onClick={() => onPageChange(page)}
