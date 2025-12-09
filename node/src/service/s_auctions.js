@@ -176,5 +176,18 @@ export const AuctionsService = {
     );
     
     return updateRes.rows[0];
+  },
+
+  async cancel(id) {
+
+    const updateRes = await db.query(
+      `UPDATE auctions 
+       SET status_auction = 'cancelled', end_time = NOW()
+       WHERE auction_id = $1 
+       RETURNING *`,
+      [id]
+    ); 
+    return updateRes.rows[0];
   }
+
 };

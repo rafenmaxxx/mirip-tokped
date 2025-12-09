@@ -8,5 +8,6 @@ router.get("/:id", AuctionsController.getById);
 router.post("/", AuctionsController.create);
 router.post("/:id/stop", AuctionsController.stop);
 router.delete("/:id", AuctionsController.remove);
+router.post("/:id/cancel", AuctionsController.cancel);
 
 export default router;

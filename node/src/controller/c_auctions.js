@@ -54,5 +54,17 @@ export const AuctionsController = {
         message: error.message || 'Failed to stop auction' 
       });
     }
+  },
+
+  async cancel(req, res) {
+    try {
+      const auction = await AuctionsService.cancel(req.params.id);
+      res.json(auction);
+    } catch (error) {
+      console.error('Error canceling auction:', error);
+      res.status(500).json({ 
+        message: error.message || 'Failed to cancel auction' 
+      });
+    }
   }
 };
