@@ -195,10 +195,6 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
     e.target.value = "";
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
   // Reset selected items jika disabled
   useEffect(() => {
     if (disabled) {
@@ -234,7 +230,7 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
             <div className="w-10 h-10 bg-gray-300 rounded overflow-hidden flex-shrink-0">
               {selectedProduct.main_image_path ? (
                 <img
-                  src={selectedProduct.main_image_path}
+                  src={"/api/image?file=" + selectedProduct.main_image_path}
                   alt={selectedProduct.product_name}
                   className="w-full h-full object-cover"
                 />
@@ -348,7 +344,6 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
         onClose={() => setShowAttachmentModal(false)}
         onProductSelect={handleProductSelect}
         onImageSelect={handleImageSelect}
-        onCameraSelect={triggerFileInput}
         disabled={disabled}
       />
     </>
