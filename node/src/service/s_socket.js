@@ -196,6 +196,55 @@ class SocketService {
       throw error;
     }
   }
+  // Di s_socket.js, tambahkan fungsi ini ke class SocketService
+
+  static async markMessagesAsRead(storeId, buyerId, readerId) {
+    console.log("[Service] Marking messages as read:", {
+      storeId,
+      buyerId,
+      readerId,
+    });
+
+    try {
+      // Update semua pesan dari orang lain yang belum dibaca
+      const result = await db.query(
+        `UPDATE chat_messages 
+       SET is_read = TRUE 
+       WHERE store_id = $1 
+         AND buyer_id = $2 
+         AND sender_id != $3 
+         AND is_read = FALSE
+       RETURNING message_id, sender_id`,
+        [storeId, buyerId, readerId]
+      );
+
+      console.log(`[Service] Marked ${result.rowCount} messages as read`);
+
+      return {
+        count: result.rowCount,
+        message_ids: result.rows.map((row) => row.message_id),
+      };
+    } catch (error) {
+      console.error("[Service] Error marking messages as read:", error);
+      throw error;
+    }
+  }
+
+  static async getMessageStatus(messageId) {
+    try {
+      const result = await db.query(
+        `SELECT message_id, is_read, created_at 
+       FROM chat_messages 
+       WHERE message_id = $1`,
+        [messageId]
+      );
+
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error("[Service] Error getting message status:", error);
+      throw error;
+    }
+  }
 }
 
 export default SocketService;
