@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Icons from "./icons";
 
-const Header = ({ searchQuery, onSearchChange }) => {
+const Header = ({ searchQuery, onSearchChange, roleFilter, onRoleChange }) => {
   const [adminName, setAdminName] = useState("Admin");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -56,25 +56,36 @@ const Header = ({ searchQuery, onSearchChange }) => {
       </div>
 
       {/* Search Bar */}
-      <div className="flex-1 max-w-xl mx-8 relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icons.Search className="text-gray-400 w-4 h-4" />
+      <div className="flex-1 max-w-xl mx-8 flex items-center gap-3">
+        <div className="flex-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Icons.Search className="text-gray-400 w-4 h-4" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Cari nama atau email pengguna..."
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#00AA5B] focus:border-[#00AA5B] sm:text-sm transition duration-150 ease-in-out"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchChange("")}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+            >
+              <Icons.X className="w-4 h-4" />
+            </button>
+          )}
         </div>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Cari nama atau email pengguna..."
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#00AA5B] focus:border-[#00AA5B] sm:text-sm transition duration-150 ease-in-out"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => onSearchChange("")}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-          >
-            <Icons.X className="w-4 h-4" />
-          </button>
-        )}
+        <select
+          value={roleFilter}
+          onChange={(e) => onRoleChange(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-700 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#00AA5B] focus:border-[#00AA5B] transition duration-150 ease-in-out"
+        >
+          <option value="">Semua Role</option>
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+        </select>
       </div>
 
       {/* User Actions */}
