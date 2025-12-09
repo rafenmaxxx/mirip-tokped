@@ -149,12 +149,74 @@ class SocketController {
     socket.emit("room_joined", roomKey);
   }
 
+  async handleMarkAsRead(socket, data) {
+    const { storeId, buyerId } = data;
+
+    // Ambil user dari session
+    const cookie = socket.handshake.headers.cookie || "";
+    const match = cookie.match(/PHPSESSID=([^;]+)/);
+    const phpSessionId = match ? match[1] : null;
+
+    if (!phpSessionId) {
+      socket.emit("error_message", {
+        type: "read_status",
+        message: "Tidak ada sesi login",
+      });
+      return;
+    }
+
+    const user = await UserService.getMe(phpSessionId);
+    if (!user) {
+      socket.emit("error_message", {
+        type: "read_status",
+        message: "User tidak ditemukan",
+      });
+      return;
+    }
+
+    const readerId = user.user_id;
+    const roomKey = `${storeId}-${buyerId}`;
+
+    console.log(
+      `[Controller] Marking messages as read in room ${roomKey} by ${readerId}`
+    );
+
+    try {
+      const result = await SocketService.markMessagesAsRead(
+        storeId,
+        buyerId,
+        readerId
+      );
+
+      // Broadcast ke semua di room bahwa pesan telah dibaca
+      this.io.to(roomKey).emit("messages_read", {
+        store_id: storeId,
+        buyer_id: buyerId,
+        reader_id: readerId,
+        message_ids: result.message_ids,
+        count: result.count,
+        timestamp: new Date().toISOString(),
+      });
+
+      console.log(
+        `[Controller] Broadcast read status for ${result.count} messages`
+      );
+    } catch (error) {
+      console.error("[Controller] Error marking messages as read:", error);
+      socket.emit("error_message", {
+        type: "read_status",
+        message: "Gagal update status baca",
+      });
+    }
+  }
+
   registerSocketListeners(socket) {
     socket.on("chat_message", (data) => this.handleChatMessage(socket, data));
     socket.on("join_room", (room) => this.handleJoinRoom(socket, room));
     socket.on("disconnect", () => this.handleDisconnect(socket));
     socket.on("typing", (data) => this.handleTyping(socket, data));
     socket.on("stop_typing", (data) => this.handleStopTyping(socket, data));
+    socket.on("mark_as_read", (data) => this.handleMarkAsRead(socket, data));
   }
 }
 
