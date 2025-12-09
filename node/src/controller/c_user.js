@@ -4,6 +4,7 @@ export const UserController = {
   async getAll(req, res, next) {
     try {
       const search = req.query.search || "";
+      const role = req.query.role || "";
       const hasPage = req.query.page !== undefined;
       const hasLimit = req.query.limit !== undefined;
 
@@ -33,6 +34,7 @@ export const UserController = {
           page,
           limit,
           search,
+          role,
         });
 
         return res.status(200).json({
