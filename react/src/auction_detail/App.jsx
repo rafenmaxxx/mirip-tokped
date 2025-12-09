@@ -53,7 +53,7 @@ function AuctionDetail() {
         setAuction(auctionData);
         const bidsArray = Array.isArray(bidsData) ? bidsData : (bidsData.bids || []);
         setBids(bidsArray);
-        setCurrentUser(userData);
+        setCurrentUser(userData.data);
         
         const initialPrice = bidsArray.length > 0 
           ? bidsArray[0].amount 
@@ -223,6 +223,8 @@ function AuctionDetail() {
   }
 
   const isSeller = currentUser.user_id === auction.seller_id;
+  // console.log("currentUser user_id:", currentUser.user_id);
+  // console.log("auction seller_id:", auction.seller_id);
   const isActive = auction.status_auction === "active";
   const isScheduled = auction.status_auction === "scheduled";
   const hasBids = bids.length > 0;
