@@ -4,9 +4,11 @@ import Admin from "./admin/App.jsx";
 import Auction from "./auction/App.jsx";
 import AuctionDetail from "./auction_detail/App.jsx";
 import Check from "./check/App.jsx";
+import AdminLogin from "./admin-login/App.jsx";
 import { useEffect, useState } from "react";
 import { showToast } from "./lib/toast.js";
 import ProtectedRoutes from "./_components/ProtectedRoute.jsx";
+import ProtectedAdminRoute from "./_components/ProtectedAdminRoute.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -236,11 +238,10 @@ export default function App() {
     <Routes>
       <Route element={<ProtectedRoutes redirectUrl="/login"></ProtectedRoutes>}>
         <Route path="/chat" element={<Chat />} />
-        <Route path="/admin" element={<Admin />} />
       </Route>
       <Route
         element={
-          <ProtectedRoutes redirectUrl="/react/admin-login"></ProtectedRoutes>
+          <ProtectedAdminRoute redirectUrl="/react/admin-login"></ProtectedAdminRoute>
         }
       >
         <Route path="/admin" element={<Admin />} />
@@ -248,6 +249,9 @@ export default function App() {
       <Route path="/auction" element={<Auction />} />
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
       <Route path="/check" element={<Check />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
+
+      {/* Optional: default home */}
       <Route path="/" element={<h1>Welcome</h1>} />
     </Routes>
   );
