@@ -122,7 +122,7 @@ class Product
         return $stmt->fetchAll();
     }
 
-    public function getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit)
+    public function getFilterProduct($categories, $minPrice, $maxPrice, $page, $limit, $sort)
     {
         $query = "SELECT DISTINCT p.*, s.store_name
                 FROM products p
