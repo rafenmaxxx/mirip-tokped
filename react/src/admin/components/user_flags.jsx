@@ -326,24 +326,29 @@ const UserFlags = ({ isOpen, onClose, user }) => {
               </div>
             )}
 
-            <Toggle
-              label="Checkout Process"
-              checked={flags.checkout_enabled}
-              onChange={() => handleToggle("checkout_enabled")}
-            />
+            {/* Only show Checkout Process for BUYER role */}
+            {user?.role !== "SELLER" && (
+              <>
+                <Toggle
+                  label="Checkout Process"
+                  checked={flags.checkout_enabled}
+                  onChange={() => handleToggle("checkout_enabled")}
+                />
 
-            {!flags.checkout_enabled && (
-              <div className="mb-4 animate-fadeIn">
-                <textarea
-                  className="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-xs text-gray-600 focus:ring-1 focus:ring-[#00AA5B] focus:outline-none"
-                  rows="3"
-                  placeholder="Berikan alasan penonaktifan user-specific..."
-                  value={reasons.checkout_enabled}
-                  onChange={(e) =>
-                    handleReasonChange("checkout_enabled", e.target.value)
-                  }
-                ></textarea>
-              </div>
+                {!flags.checkout_enabled && (
+                  <div className="mb-4 animate-fadeIn">
+                    <textarea
+                      className="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-xs text-gray-600 focus:ring-1 focus:ring-[#00AA5B] focus:outline-none"
+                      rows="3"
+                      placeholder="Berikan alasan penonaktifan user-specific..."
+                      value={reasons.checkout_enabled}
+                      onChange={(e) =>
+                        handleReasonChange("checkout_enabled", e.target.value)
+                      }
+                    ></textarea>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

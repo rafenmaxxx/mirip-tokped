@@ -8,6 +8,46 @@ import {
   showModalSpinnerInput,
 } from "../general/modal.js";
 
+// Check if checkout feature is enabled for current user
+async function checkCheckoutFeatureFlag() {
+  try {
+    const userResponse = await fetch("/node/api/user/me", {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (!userResponse.ok) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const userData = await userResponse.json();
+    
+    if (userData.status === "error") {
+      return { isAllowed: true, reason: null };
+    }
+
+    const userId = userData.data?.user_id || userData.user_id;
+
+    if (!userId) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const flagResponse = await fetch(`/node/api/flags/checkout/allowed/${userId}`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
+
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking checkout access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
+
 function LoadDetail(data) {
   const res = data.data;
   const price = res.price.toLocaleString("id-ID", {
@@ -49,26 +89,47 @@ function LoadDetail(data) {
   }
 }
 
-function LoadAddCartBtn(id, stock) {
+async function LoadAddCartBtn(id, stock) {
   GET(
     "/api/auth",
     {},
-    (data) => {
+    async (data) => {
       if (data.status == "success") {
         const res = data.data;
         if (res.role == "BUYER") {
+          // Check checkout feature flag for logged-in user
+          const checkoutAccess = await checkCheckoutFeatureFlag();
+          
+          // disable button if checkout not allowed
+          const buttonStyle = !checkoutAccess.isAllowed
+            ? 'style="background-color: #9CA3AF !important; cursor: not-allowed; opacity: 0.6;"' 
+            : '';
+          
           ChangeInnerHtmlById(
             "add-cart",
-            `<button class="visit-store-btn" id="cartBtn">Add To Cart</button>`
+            `<button class="visit-store-btn" id="cartBtn" ${buttonStyle}>Add To Cart</button>`
           );
+          
           const cartBtn = document.getElementById("cartBtn");
           cartBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            
+            // Check if checkout is disabled
+            if (!checkoutAccess.isAllowed) {
+              const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
+              const scope = reason.toLowerCase().includes("maintenance") || reason.toLowerCase().includes("global") 
+                ? "global" 
+                : "user";
+              
+              window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}&scope=${scope}`;
+              return;
+            }
+            
             showModalSpinnerInput(
               "Tambahkan ke keranjang",
               stock,
               (qty) => {
                 const product_id = id;
-                e.stopPropagation();
                 POST(
                   "/api/cart",
                   {

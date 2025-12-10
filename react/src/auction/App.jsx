@@ -37,6 +37,58 @@ function Auction() {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 4;
 
+  // Check auction feature flag
+  useEffect(() => {
+    const checkAuctionAccess = async () => {
+      try {
+        // Get current user
+        const userResponse = await fetch("http://localhost:80/node/api/user/me", {
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (!userResponse.ok) {
+          console.error("Failed to get user data");
+          return;
+        }
+
+        const userData = await userResponse.json();
+        const userId = userData.data?.user_id || userData.user_id;
+
+        if (!userId) {
+          console.error("User ID not found in response");
+          return;
+        }
+
+        // Check if auction is allowed for this user
+        const flagResponse = await fetch(`http://localhost:80/node/api/flags/auction/allowed/${userId}`, {
+          method: "GET",
+          credentials: "include"
+        });
+
+        const flagData = await flagResponse.json();
+
+        // Handle both error response and success response structure
+        const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+        const reason = flagData.data?.reason || flagData.reason || "Fitur Lelang Produk sedang tidak tersedia";
+        
+        if (!isAllowed) {
+          // Determine scope: check if this is global or user-specific
+          const scope = reason.toLowerCase().includes("global") 
+            ? "global" 
+            : "user";
+          
+          // Navigate to feature-disabled page with query params
+          navigate(`/feature-disabled?feature=auction&reason=${encodeURIComponent(reason)}&scope=${scope}`);
+        }
+      } catch (error) {
+        console.error("Error checking auction access:", error);
+      }
+    };
+
+    checkAuctionAccess();
+  }, [navigate]);
+
   useEffect(() => {
     let isMounted = true;
     

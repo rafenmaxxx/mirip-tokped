@@ -129,7 +129,6 @@ switch ($method) {
                     echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
                 }
                 exit;
-                break;
 
             case 'clear':
                 if ($buyer_id) {
