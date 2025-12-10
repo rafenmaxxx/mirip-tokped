@@ -108,6 +108,17 @@ export const useChat = (user) => {
           }
         }
 
+        if (selectedRoom) {
+          if (
+            selectedRoom.buyer_id == msg.buyer_id &&
+            selectedRoom.store_id == msg.store_id &&
+            user.user_id != msg.sender_id
+          ) {
+            console.log("MASHOOOK");
+            markAsRead();
+          }
+        }
+
         return {
           ...prev,
           [roomKey]: [...currentMessages, formattedMessage],
