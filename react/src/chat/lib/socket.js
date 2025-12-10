@@ -58,7 +58,7 @@ class SocketManager {
     });
 
     this.socket.on("connect_error", (error) => {
-      console.error("🔥 Socket connection error:", error.message);
+      console.error(" Socket connection error:", error.message);
       this.connectionStatus = "error";
       this.onStatusChange?.(this.connectionStatus);
 
