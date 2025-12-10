@@ -156,42 +156,60 @@ export const useChat = (user) => {
     };
 
     const handleMessagesRead = (data) => {
-      if (!selectedRoom || !user) return;
+      console.log(" Messages read event received:", data);
 
-      // Cek apakah ini untuk room yang sedang aktif
-      if (
-        data.store_id === selectedRoom.store_id &&
-        data.buyer_id === selectedRoom.buyer_id &&
-        data.reader_id !== user.user_id
-      ) {
-        // Update read status
-        setMessageReadStatus((prev) => {
-          const updated = { ...prev };
-          data.message_ids?.forEach((messageId) => {
-            updated[messageId] = true;
-          });
-          return updated;
+      if (!user) return;
+
+      setRoomMessages((prev) => {
+        const updated = { ...prev };
+
+        // Loop melalui semua rooms
+        Object.keys(updated).forEach((roomKey) => {
+          const [storeId, buyerId] = roomKey.split("-");
+
+          // Cek apakah ini room yang benar
+          if (
+            parseInt(storeId) === data.store_id &&
+            parseInt(buyerId) === data.buyer_id
+          ) {
+            const messages = updated[roomKey];
+
+            const updatedMessages = messages.map((msg) => {
+              // Jika ini pesan SENDER yang dibaca oleh RECEIVER
+              if (
+                msg.mine && // Hanya pesan kita sendiri
+                data.reader_id !== user.user_id && // Dibaca oleh orang lain
+                data.message_ids?.includes(msg.id) // ID pesan ada di list
+              ) {
+                console.log(` Marking message ${msg.id} as read`);
+                return {
+                  ...msg,
+                  status: "read",
+                  read: true,
+                };
+              }
+              return msg;
+            });
+
+            updated[roomKey] = updatedMessages;
+          }
         });
 
-        // Update messages
-        setRoomMessages((prev) => {
-          const roomKey = `${data.store_id}-${data.buyer_id}`;
-          const currentMessages = prev[roomKey] || [];
+        return updated;
+      });
 
-          const updatedMessages = currentMessages.map((msg) => {
-            if (data.message_ids?.includes(msg.id) && msg.mine) {
-              return { ...msg, status: "read", read: true };
-            }
-            return msg;
-          });
-
-          return { ...prev, [roomKey]: updatedMessages };
+      // Update messageReadStatus untuk tracking
+      setMessageReadStatus((prev) => {
+        const updated = { ...prev };
+        data.message_ids?.forEach((messageId) => {
+          updated[messageId] = true;
         });
-      }
+        return updated;
+      });
     };
 
     const handleError = (errorData) => {
-      console.error("💥 Socket error:", errorData);
+      console.error(" Socket error:", errorData);
     };
 
     // Register listeners
@@ -372,7 +390,7 @@ export const useChat = (user) => {
   const sendMessage = useCallback(
     (input, messageType = "text") => {
       if (!user || !selectedRoom) {
-        console.error("❌ Cannot send - missing requirements");
+        console.error("Cannot send - missing requirements");
         return false;
       }
 
@@ -394,7 +412,7 @@ export const useChat = (user) => {
       } else {
         content = input.trim();
         if (!content) {
-          console.error("❌ Empty content for text message");
+          console.error(" Empty content for text message");
           return false;
         }
       }
