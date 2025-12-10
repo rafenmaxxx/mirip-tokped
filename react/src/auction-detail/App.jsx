@@ -135,7 +135,10 @@ function AuctionDetail() {
           credentials: "include",
         });
         const userData = await userRes.json();
-        setCurrentUser(userData);
+        setCurrentUser(userData.data);
+        console.log("Updated user data after bid:", userData);
+
+        // window.location.reload(); // Refresh the page to reflect updated auction status
         
         alert("Bid berhasil dipasang!");
       } else {
@@ -162,7 +165,7 @@ function AuctionDetail() {
 
       if (response.ok) {
         alert("Lelang berhasil dibatalkan");
-        navigate("/auction");
+        window.location.reload();
       } else {
         const data = await response.json();
         alert(data.message || "Gagal membatalkan lelang");
