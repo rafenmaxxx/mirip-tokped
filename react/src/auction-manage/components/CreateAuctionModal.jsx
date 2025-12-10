@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import ProductSelector from "./ProductSelector";
 
+const getImageUrl = (path) => {
+  return path && path !== "" ? `/api/image?file=${path}` : "no-image.png";
+};
+
 function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
   const [step, setStep] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -139,7 +143,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                 <p className="text-sm text-gray-600 mb-2">Produk yang dipilih:</p>
                 <div className="flex items-center gap-4">
                   <img
-                    src={selectedProduct?.main_image_path || "/img/placeholder.png"}
+                    src={getImageUrl(selectedProduct?.main_image_path) || "/img/placeholder.png"}
                     alt={selectedProduct?.product_name}
                     className="w-20 h-20 object-cover rounded-lg"
                     onError={(e) => {
@@ -148,7 +152,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                   />
                   <div>
                     <h3 className="font-bold text-gray-900">{selectedProduct?.product_name}</h3>
-                    <p className="text-sm text-gray-600">Stok: {selectedProduct?.quantity}</p>
+                    <p className="text-sm text-gray-600">Stok: {selectedProduct?.stock}</p>
                     <p className="text-sm text-green-600 font-semibold">
                       {formatCurrency(selectedProduct?.price)}
                     </p>
