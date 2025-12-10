@@ -302,7 +302,7 @@ INSERT INTO users (email, password, role, name, address, balance) VALUES
     ('buyer3@mail.com', 'pw8', 'BUYER', 'Buyer 3', 'Jl. Teratai No.8', 300000),
     ('buyer4@mail.com', 'pw9', 'BUYER', 'Buyer 4', 'Jl. Sakura No.9', 250000),
     ('buyer5@mail.com', 'pw10', 'BUYER', 'Buyer 5', 'Jl. Melur No.10', 1000000),
-    ('admin@mail.com', 'adminpw', 'ADMIN', 'Admin', 'Jl. Admin No.1', 0);
+    ('admin@mail.com', '$2b$10$wqQE3slqcCeyCHyIliN/ieEFMixpDZitb/7gEVBIUjintneWzeTMO', 'ADMIN', 'Admin', 'Jl. Admin No.1', 0);
 
 -- STORES
 INSERT INTO stores (user_id, store_name, store_description, store_logo_path, balance) VALUES
