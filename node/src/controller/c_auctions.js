@@ -24,6 +24,16 @@ export const AuctionsController = {
     }
   },
 
+  async getByStoreId(req, res) {
+    try {
+      const auctions = await AuctionsService.getByStoreId(req.params.storeId);
+      res.json(auctions);
+    } catch (error) {
+      console.error('Error getting auctions by store id:', error);
+      res.status(500).json({ message: 'Failed to fetch auctions for store' });
+    }
+  },
+
   async create(req, res) {
     try {
       const auction = await AuctionsService.create(req.body);
