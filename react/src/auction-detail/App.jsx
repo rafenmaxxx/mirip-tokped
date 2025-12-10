@@ -135,7 +135,10 @@ function AuctionDetail() {
           credentials: "include",
         });
         const userData = await userRes.json();
-        setCurrentUser(userData);
+        setCurrentUser(userData.data);
+        console.log("Updated user data after bid:", userData);
+
+        // window.location.reload(); // Refresh the page to reflect updated auction status
         
         alert("Bid berhasil dipasang!");
       } else {
@@ -162,7 +165,7 @@ function AuctionDetail() {
 
       if (response.ok) {
         alert("Lelang berhasil dibatalkan");
-        navigate("/auction");
+        window.location.reload();
       } else {
         const data = await response.json();
         alert(data.message || "Gagal membatalkan lelang");
@@ -228,13 +231,22 @@ function AuctionDetail() {
   const isActive = auction.status_auction === "active";
   const isScheduled = auction.status_auction === "scheduled";
   const hasBids = bids.length > 0;
-  const canBid = !isSeller && isActive;
+  const isHighestBidder = hasBids && bids[0].bidder_id === currentUser.user_id;
+  const canBid = !isSeller && isActive && !isHighestBidder;
 
   const product = {
     name: auction.product_name,
     image: auction.main_image_path,
     description: auction.product_description,
     quantity: auction.quantity,
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
   const winner = auction.status_auction === "ended" && bids.length > 0 
@@ -314,6 +326,32 @@ function AuctionDetail() {
                   isLoading={actionLoading}
                 />
               )
+            ) : isScheduled ? (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="text-center text-gray-600">
+                  <p className="mb-2">Lelang belum dimulai</p>
+                  <p className="text-sm">Tunggu hingga lelang aktif untuk memasang bid</p>
+                </div>
+              </div>
+            ) : isHighestBidder ? (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="text-center">
+                  <div className="mb-4">
+                    <svg className="w-16 h-16 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Anda Penawar Tertinggi!</h3>
+                  <p className="text-gray-600 mb-4">
+                    Bid Anda saat ini: <span className="font-bold text-green-600">{formatCurrency(currentPrice)}</span>
+                  </p>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800">
+                      Anda tidak dapat memasang bid lagi sampai ada penawar lain yang melebihi bid Anda
+                    </p>
+                  </div>
+                </div>
+              </div>
             ) : canBid ? (
               <BidInput
                 currentPrice={currentPrice}
@@ -322,13 +360,6 @@ function AuctionDetail() {
                 onPlaceBid={handlePlaceBid}
                 isLoading={actionLoading}
               />
-            ) : isScheduled ? (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="text-center text-gray-600">
-                  <p className="mb-2">Lelang belum dimulai</p>
-                  <p className="text-sm">Tunggu hingga lelang aktif untuk memasang bid</p>
-                </div>
-              </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="text-center text-gray-600">
