@@ -195,23 +195,15 @@ const Dashboard = () => {
                   </div>
                 </div>
               ) : users.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <Icons.Search className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-500 font-medium">
-                      {debouncedSearchQuery
-                        ? `Tidak ada user dengan "${debouncedSearchQuery}"`
-                        : "Tidak ada user ditemukan"}
-                    </p>
-                    {debouncedSearchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="mt-4 px-4 py-2 bg-[#00AA5B] text-white rounded-lg hover:bg-[#008F4D] transition"
-                      >
-                        Clear Search
-                      </button>
-                    )}
-                  </div>
+                <div className="flex flex-col items-center justify-center py-16">
+                  <img 
+                    src="/react/img/empty-state.png" 
+                    alt="Empty state" 
+                    className="w-40 h-auto mb-6"
+                  />
+                  <h2 className="text-lg font-bold text-[#00AA5B] mb-2">
+                    Tidak ada user yang cocok
+                  </h2>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

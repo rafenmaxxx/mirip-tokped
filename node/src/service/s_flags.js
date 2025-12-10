@@ -251,4 +251,97 @@ export const FlagsService = {
       return [];
     }
   },
+
+  async isAllowedAuction(userId) {
+    try {
+      const userQuery = `
+        SELECT is_enabled 
+        FROM user_feature_access 
+        WHERE feature_name = 'auction_enabled' AND user_id = $1
+      `;
+      const userResult = await db.query(userQuery, [userId]);
+
+      if (userResult.rows.length > 0) {
+        return userResult.rows[0].is_enabled;
+      }
+
+      const globalQuery = `
+        SELECT is_enabled 
+        FROM user_feature_access 
+        WHERE feature_name = 'auction_enabled' AND user_id IS NULL
+      `;
+      const globalResult = await db.query(globalQuery);
+
+      if (globalResult.rows.length === 0) {
+        return true;
+      }
+
+      return globalResult.rows[0].is_enabled;
+    } catch (error) {
+      console.error("Error checking auction permission:", error);
+      return false;
+    }
+  },
+
+  async isAllowedChat(userId) {
+    try {
+      const userQuery = `
+        SELECT is_enabled 
+        FROM user_feature_access 
+        WHERE feature_name = 'chat_enabled' AND user_id = $1
+      `;
+      const userResult = await db.query(userQuery, [userId]);
+
+      if (userResult.rows.length > 0) {
+        return userResult.rows[0].is_enabled;
+      }
+
+      const globalQuery = `
+        SELECT is_enabled 
+        FROM user_feature_access 
+        WHERE feature_name = 'chat_enabled' AND user_id IS NULL
+      `;
+      const globalResult = await db.query(globalQuery);
+
+      if (globalResult.rows.length === 0) {
+        return true;
+      }
+
+      return globalResult.rows[0].is_enabled;
+    } catch (error) {
+      console.error("Error checking chat permission:", error);
+      return false;
+    }
+  },
+
+  async isAllowedCheckout(userId) {
+    try {
+      const userQuery = `
+        SELECT is_enabled 
+        FROM user_feature_access 
+        WHERE feature_name = 'checkout_enabled' AND user_id = $1
+      `;
+      const userResult = await db.query(userQuery, [userId]);
+
+      if (userResult.rows.length > 0) {
+        return userResult.rows[0].is_enabled;
+      }
+
+      const globalQuery = `
+        SELECT is_enabled 
+        FROM user_feature_access 
+        WHERE feature_name = 'checkout_enabled' AND user_id IS NULL
+      `;
+      const globalResult = await db.query(globalQuery);
+
+      if (globalResult.rows.length === 0) {
+        return true;
+      }
+
+      return globalResult.rows[0].is_enabled;
+    } catch (error) {
+      console.error("Error checking checkout permission:", error);
+      return false;
+    }
+  },
 };

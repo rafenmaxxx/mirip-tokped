@@ -284,7 +284,8 @@ CREATE TABLE user_feature_access (
     is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     reason TEXT DEFAULT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_feature_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_feature_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE NULLS NOT DISTINCT (user_id, feature_name)
 );
 -- SEEDER DATA TOKOPEDIA 
 
@@ -420,33 +421,7 @@ INSERT INTO chat_room (store_id, buyer_id, last_message_at, created_at, updated_
 (3, 10, NOW() - INTERVAL '3 hours', NOW() - INTERVAL '7 days', NOW() - INTERVAL '3 hours');
 
 -- 12. CHAT_MESSAGES
-INSERT INTO chat_messages (store_id, buyer_id, sender_id, message_type, content, product_id, is_read, created_at) VALUES
--- Chat antara store 1 dan buyer 6
-(1, 6, 6, 'text', 'Halo, produk ini masih ready?', NULL, TRUE, NOW() - INTERVAL '10 days'),
-(1, 6, 1, 'text', 'Halo! Ya masih ready kak', NULL, TRUE, NOW() - INTERVAL '10 days' + INTERVAL '5 minutes'),
-(1, 6, 6, 'item_preview', 'Bagaimana dengan produk ini?', 3, TRUE, NOW() - INTERVAL '9 days'),
-(1, 6, 1, 'text', 'Produk itu juga tersedia, harga 250rb', NULL, TRUE, NOW() - INTERVAL '9 days' + INTERVAL '10 minutes'),
-(1, 6, 6, 'text', 'Oke sip, nanti saya order ya', NULL, FALSE, NOW() - INTERVAL '1 hour'),
 
--- Chat antara store 1 dan buyer 7
-(1, 7, 7, 'text', 'Min, bisa nego ga harganya?', NULL, TRUE, NOW() - INTERVAL '8 days'),
-(1, 7, 1, 'text', 'Maaf kak harga sudah nett', NULL, TRUE, NOW() - INTERVAL '8 days' + INTERVAL '3 minutes'),
-(1, 7, 7, 'image', '/uploads/chat/img_buyer7_001.jpg', NULL, FALSE, NOW() - INTERVAL '5 hours'),
-
--- Chat antara store 2 dan buyer 8
-(2, 8, 8, 'text', 'Ada varian warna lain?', NULL, TRUE, NOW() - INTERVAL '15 days'),
-(2, 8, 8, 'text', 'Halo min?', NULL, FALSE, NOW() - INTERVAL '2 days'),
-
--- Chat antara store 2 dan buyer 9
-(2, 9, 9, 'text', 'Pengiriman ke luar kota bisa?', NULL, TRUE, NOW() - INTERVAL '5 days'),
-(2, 9, 2, 'text', 'Bisa kak, kemana tujuannya?', NULL, TRUE, NOW() - INTERVAL '5 days' + INTERVAL '2 minutes'),
-(2, 9, 9, 'text', 'Ke Surabaya min', NULL, TRUE, NOW() - INTERVAL '4 days'),
-(2, 9, 2, 'text', 'Oke bisa, ongkir sekitar 25rb', NULL, FALSE, NOW() - INTERVAL '30 minutes'),
-
--- Chat antara store 3 dan buyer 10
-(3, 10, 10, 'item_preview', 'Produk ini masih ada ga?', 2, TRUE, NOW() - INTERVAL '7 days'),
-(3, 10, 3, 'text', 'Masih ada kak, stok tinggal 2 pcs', NULL, TRUE, NOW() - INTERVAL '7 days' + INTERVAL '1 minute'),
-(3, 10, 10, 'text', 'Mantap, saya ambil 1 ya', NULL, FALSE, NOW() - INTERVAL '3 hours');
 
 -- 13. PUSH_SUBSCRIPTIONS
 INSERT INTO push_subscriptions (user_id, endpoints, p256dh_key, auth_key, created_at) VALUES

@@ -47,6 +47,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${NODE_PORT}
+      TZ: Asia/Jakarta
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       PG_HOST: postgres

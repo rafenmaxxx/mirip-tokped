@@ -6,13 +6,50 @@ import AuctionDetail from "./auction-detail/App.jsx";
 import AuctionManage from "./auction-manage/App.jsx";
 import Check from "./check/App.jsx";
 import AdminLogin from "./admin-login/App.jsx";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { showToast } from "./lib/toast.js";
 import ProtectedRoutes from "./_components/ProtectedRoute.jsx";
 import ProtectedAdminRoute from "./_components/ProtectedAdminRoute.jsx";
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user data (sama seperti ProtectedRoutes)
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/node/api/user/me", {
+          credentials: "include",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+
+          // Simpan userId di localStorage untuk akses mudah
+          if (data.user_id) {
+            localStorage.setItem("userId", data.user_id.toString());
+            localStorage.setItem("userRole", data.role);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.log("Error fetching user:", err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  // Initialize Push Notifications setelah user data tersedia
+  useEffect(() => {
+    if (!user || !user.user_id) return;
+
     if (!("serviceWorker" in navigator)) {
       console.error("Service Worker not supported");
       return;
@@ -23,9 +60,7 @@ export default function App() {
         // Minta izin notifikasi
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
-          alert(
-            "Notifications are not allowed. Please enable notifications in your browser settings."
-          );
+          console.warn("Notifications not allowed");
           return;
         }
 
@@ -61,32 +96,84 @@ export default function App() {
           console.log("Using existing subscription:", subscription);
         }
 
-        // Kirim subscription ke server
+        // Kirim subscription ke server DENGAN userId dari user data
         const res = await fetch("/node/api/notif/subscribe", {
           method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(subscription),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Kirim session cookie
+          body: JSON.stringify({
+            ...subscription,
+            userId: user.user_id, // Pakai user_id dari response API
+          }),
         });
 
-        console.log("Subscription response:", await res.json());
+        const result = await res.json();
+        console.log("Subscription response:", result);
+
+        // Beritahu SW bahwa user online
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: "USER_ONLINE",
+            payload: { userId: user.user_id },
+          });
+        }
+
+        // Check queued notifications setelah subscribe
+        setTimeout(() => {
+          checkQueuedNotifications(user.user_id);
+        }, 2000);
       } catch (err) {
         console.error("Push setup failed:", err);
-        alert("Push setup failed: " + err.message);
       }
     };
 
     initPush();
-  }, []);
+  }, [user]); // Jalankan ketika user data tersedia
 
+  // Fungsi untuk check queued notifications
+  const checkQueuedNotifications = async (userId) => {
+    try {
+      const response = await fetch(
+        `/node/api/notif/queue/check?userId=${userId}`,
+        {
+          method: "GET",
+          credentials: "include", // Kirim session cookie
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Queue check result:", result);
+      }
+    } catch (err) {
+      console.error("Error checking queue:", err);
+    }
+  };
+
+  // Event listener untuk messages dari Service Worker
   useEffect(() => {
     const handleMessage = (event) => {
       console.log("Menerima pesan dari SW:", event.data);
 
       if (event.data && event.data.type === "PUSH_NOTIFICATION") {
         const { title, body } = event.data.payload;
-
         // Panggil toast custom
         showToast(title, body);
+      }
+
+      // Handle queue check request dari SW
+      if (
+        event.data &&
+        (event.data.type === "CHECK_QUEUE" ||
+          event.data.type === "INITIAL_QUEUE_CHECK")
+      ) {
+        console.log("SW requesting queue check");
+
+        if (user && user.user_id) {
+          checkQueuedNotifications(user.user_id);
+        }
       }
     };
 
@@ -99,12 +186,58 @@ export default function App() {
         navigator.serviceWorker.removeEventListener("message", handleMessage);
       }
     };
-  }, []);
+  }, [user]); // Depend on user
+
+  // Event listener untuk network online
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("Network online, checking queued notifications...");
+
+      if (user && user.user_id) {
+        // Beritahu SW
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: "USER_ONLINE",
+            payload: { userId: user.user_id },
+          });
+        }
+
+        // Check queue
+        setTimeout(() => {
+          checkQueuedNotifications(user.user_id);
+        }, 1000);
+      }
+    };
+
+    window.addEventListener("online", handleOnline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [user]);
+
+  // Periodic queue check (setiap 10 menit)
+  useEffect(() => {
+    if (!user || !user.user_id) return;
+
+    // Check sekarang
+    checkQueuedNotifications(user.user_id);
+
+    // Set interval untuk check periodic
+    const interval = setInterval(() => {
+      checkQueuedNotifications(user.user_id);
+    }, 10 * 60 * 1000); // 10 menit
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Routes>
       <Route element={<ProtectedRoutes redirectUrl="/login"></ProtectedRoutes>}>
-        {" "}
         <Route path="/chat" element={<Chat />} />
       </Route>
       <Route
@@ -112,7 +245,6 @@ export default function App() {
           <ProtectedAdminRoute redirectUrl="/react/admin-login"></ProtectedAdminRoute>
         }
       >
-        {" "}
         <Route path="/admin" element={<Admin />} />
       </Route>
       <Route path="/auction" element={<Auction />} />
