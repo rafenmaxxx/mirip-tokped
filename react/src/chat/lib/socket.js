@@ -16,7 +16,7 @@ class SocketManager {
       return this.socket;
     }
 
-    console.log("🔄 Membuat koneksi socket baru...");
+    console.log("Membuat koneksi socket baru...");
 
     const defaultOptions = {
       path: "/node/api/socket.io/",
@@ -40,14 +40,14 @@ class SocketManager {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log("✅ Socket connected:", this.socket.id);
+      console.log("Socket connected:", this.socket.id);
       this.connectionStatus = "connected";
       this.reconnectAttempts = 0;
       this.onStatusChange?.(this.connectionStatus);
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log("❌ Socket disconnected:", reason);
+      console.log("Socket disconnected:", reason);
       this.connectionStatus = "disconnected";
       this.onStatusChange?.(this.connectionStatus);
 
@@ -65,30 +65,30 @@ class SocketManager {
       this.reconnectAttempts++;
       if (this.reconnectAttempts <= this.maxReconnectAttempts) {
         console.log(
-          `🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`
+          `Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`
         );
       }
     });
 
     this.socket.on("reconnect", (attemptNumber) => {
-      console.log(`✅ Reconnected on attempt ${attemptNumber}`);
+      console.log(` Reconnected on attempt ${attemptNumber}`);
       this.connectionStatus = "connected";
       this.onStatusChange?.(this.connectionStatus);
     });
 
     this.socket.on("reconnect_error", (error) => {
-      console.error("🔥 Reconnect error:", error.message);
+      console.error("Reconnect error:", error.message);
     });
 
     this.socket.on("reconnect_failed", () => {
-      console.error("🔥 Reconnect failed after all attempts");
+      console.error("Reconnect failed after all attempts");
       this.connectionStatus = "failed";
       this.onStatusChange?.(this.connectionStatus);
     });
 
     // Custom heartbeat event
     this.socket.on("pong", () => {
-      console.log("❤️ Heartbeat received");
+      console.log("Heartbeat received");
     });
   }
 
@@ -100,7 +100,7 @@ class SocketManager {
     this.heartbeatInterval = setInterval(() => {
       if (this.socket?.connected) {
         this.socket.emit("ping", { timestamp: Date.now() });
-        console.log("❤️ Heartbeat sent");
+        console.log("Heartbeat sent");
       }
     }, 30000); // Kirim ping setiap 30 detik
   }
@@ -185,7 +185,7 @@ class SocketManager {
     this.connectionStatus = "disconnected";
     this.onStatusChange?.(this.connectionStatus);
 
-    console.log("🔌 Socket disconnected");
+    console.log("Socket disconnected");
   }
 
   getStatus() {
