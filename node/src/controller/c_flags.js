@@ -225,14 +225,15 @@ export const FlagsController = {
         });
       }
 
-      const isAllowed = await FlagsService.isAllowedAuction(userId);
+      const result = await FlagsService.isAllowedAuction(userId);
 
       return res.status(200).json({
         status: "success",
         data: {
           userId,
           feature: "auction",
-          isAllowed,
+          isAllowed: result.isAllowed,
+          reason: result.reason,
         },
       });
     } catch (error) {
@@ -252,14 +253,15 @@ export const FlagsController = {
         });
       }
 
-      const isAllowed = await FlagsService.isAllowedChat(userId);
+      const result = await FlagsService.isAllowedChat(userId);
 
       return res.status(200).json({
         status: "success",
         data: {
           userId,
           feature: "chat",
-          isAllowed,
+          isAllowed: result.isAllowed,
+          reason: result.reason,
         },
       });
     } catch (error) {
@@ -279,14 +281,15 @@ export const FlagsController = {
         });
       }
 
-      const isAllowed = await FlagsService.isAllowedCheckout(userId);
+      const result = await FlagsService.isAllowedCheckout(userId);
 
       return res.status(200).json({
         status: "success",
         data: {
           userId,
           feature: "checkout",
-          isAllowed,
+          isAllowed: result.isAllowed,
+          reason: result.reason,
         },
       });
     } catch (error) {

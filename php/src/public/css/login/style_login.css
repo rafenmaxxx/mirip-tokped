@@ -148,7 +148,7 @@ button:hover {
 }
 
 .no-register a {
-    color: #666;
+    color: #1a9b5b;
     font-weight: 600;
     text-decoration: none;
     transition: color 0.2s;
@@ -163,11 +163,8 @@ button:hover {
     cursor: default; 
 }
 
-.no-register a[href] {
+.no-register a:hover {
     cursor: pointer;
-}
-
-.no-register a[href]:hover {
     text-decoration: underline;
-    color: #000;
+    color: #148a4e;
 }

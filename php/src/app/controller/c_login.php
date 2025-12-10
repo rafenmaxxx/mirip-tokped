@@ -22,7 +22,11 @@ switch ($method) {
             exit;
         } else {
             $msg = $result['message'];
-            warn("Gagal login $email! Email atau password yang Anda masukkan salah.", "/login");
+            if ($msg == "Admin tidak dapat login lewat sini!") {
+                warn($msg, "/login");
+            } else {
+                warn("Gagal login $email! Email atau password yang Anda masukkan salah.", "/login");
+            }
             exit;
         }
     default:
