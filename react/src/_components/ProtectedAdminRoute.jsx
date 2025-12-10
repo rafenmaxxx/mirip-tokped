@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const ProtectedAdminRoute = ({ redirectUrl = "/react/admin-login" }) => {
+const ProtectedAdminRoute = ({ redirectUrl = "/unauthorized" }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
 
