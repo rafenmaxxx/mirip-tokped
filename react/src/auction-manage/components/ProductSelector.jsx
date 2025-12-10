@@ -43,8 +43,8 @@ function ProductSelector({ onSelectProduct, storeId }) {
       }
 
       const products = await response.json();
-      // console.log("Raw response:", products);
-      // console.log("Is array:", Array.isArray(products));
+      console.log("Raw response:", products);
+      console.log("Is array:", Array.isArray(products));
       
       const availableProducts = Array.isArray(products) 
         ? products.filter(product => {
