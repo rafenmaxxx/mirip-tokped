@@ -24,13 +24,6 @@ export const AuctionBidsService = {
             [auctionId]
         );
         
-        await db.query(
-            `UPDATE users 
-             SET balance = balance - $1 
-             WHERE user_id = $2`,
-            [bidAmount, userId]
-        );
-        
         if (previousBidQuery.rows.length > 0) {
             const previousBidder = previousBidQuery.rows[0];
             await db.query(
@@ -40,6 +33,13 @@ export const AuctionBidsService = {
                 [previousBidder.bid_amount, previousBidder.bidder_id]
             );
         }
+
+        await db.query(
+            `UPDATE users 
+             SET balance = balance - $1 
+             WHERE user_id = $2`,
+            [bidAmount, userId]
+        );
         
         const result = await db.query(
             `INSERT INTO auction_bids (auction_id, bidder_id, bid_amount, bid_time)
