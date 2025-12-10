@@ -124,6 +124,10 @@ class SocketController {
       timestamp: new Date().toISOString(),
     });
   }
+  async handlePing(socket, data) {
+    console.log(`[Controller] Ping received from ${socket.id}`);
+    socket.emit("pong", { timestamp: Date.now(), received: data.timestamp });
+  }
 
   async handleStopTyping(socket, data) {
     const { store_id, buyer_id, user_id, user_name } = data;
@@ -217,6 +221,7 @@ class SocketController {
     socket.on("typing", (data) => this.handleTyping(socket, data));
     socket.on("stop_typing", (data) => this.handleStopTyping(socket, data));
     socket.on("mark_as_read", (data) => this.handleMarkAsRead(socket, data));
+    socket.on("ping", (data) => this.handlePing(socket, data));
   }
 }
 
