@@ -4,6 +4,7 @@ import { AuctionsController } from "../controller/c_auctions.js";
 const router = Router();
 
 router.get("/", AuctionsController.getAll);
+router.get("/store/:storeId", AuctionsController.getByStoreId);
 router.get("/:id", AuctionsController.getById);
 router.post("/", AuctionsController.create);
 router.post("/:id/stop", AuctionsController.stop);
