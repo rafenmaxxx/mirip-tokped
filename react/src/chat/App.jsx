@@ -166,7 +166,7 @@ function Chat() {
     if (selectedRoom && user && connectionStatus === "connected") {
       // Delay untuk memastikan room sudah di-join
       const timer = setTimeout(() => {
-        console.log("📖 Auto marking messages as read");
+        console.log("Auto marking messages as read");
         markAsRead();
       }, 100);
 
