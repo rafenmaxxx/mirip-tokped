@@ -28,6 +28,7 @@ function Chat() {
     sendStopTyping,
     joinRoom,
     handleLoadMore,
+    markAsRead,
   } = useChat(user);
 
   // Fetch user data
@@ -159,6 +160,19 @@ function Chat() {
       );
     }
   }, [selectedRoom, user, setRooms]);
+
+  // Di App.jsx - useEffect untuk mark as read
+  useEffect(() => {
+    if (selectedRoom && user && connectionStatus === "connected") {
+      // Delay untuk memastikan room sudah di-join
+      const timer = setTimeout(() => {
+        console.log("📖 Auto marking messages as read");
+        markAsRead();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedRoom, user, markAsRead, connectionStatus]);
 
   if (loading) {
     return (
