@@ -213,4 +213,85 @@ export const FlagsController = {
       next(error);
     }
   },
+
+  async checkAuctionPermission(req, res, next) {
+    try {
+      const userId = parseInt(req.params.userId);
+
+      if (!userId) {
+        return res.status(400).json({
+          status: "error",
+          message: "User ID diperlukan",
+        });
+      }
+
+      const isAllowed = await FlagsService.isAllowedAuction(userId);
+
+      return res.status(200).json({
+        status: "success",
+        data: {
+          userId,
+          feature: "auction",
+          isAllowed,
+        },
+      });
+    } catch (error) {
+      console.error("Check auction permission error:", error);
+      next(error);
+    }
+  },
+
+  async checkChatPermission(req, res, next) {
+    try {
+      const userId = parseInt(req.params.userId);
+
+      if (!userId) {
+        return res.status(400).json({
+          status: "error",
+          message: "User ID diperlukan",
+        });
+      }
+
+      const isAllowed = await FlagsService.isAllowedChat(userId);
+
+      return res.status(200).json({
+        status: "success",
+        data: {
+          userId,
+          feature: "chat",
+          isAllowed,
+        },
+      });
+    } catch (error) {
+      console.error("Check chat permission error:", error);
+      next(error);
+    }
+  },
+
+  async checkCheckoutPermission(req, res, next) {
+    try {
+      const userId = parseInt(req.params.userId);
+
+      if (!userId) {
+        return res.status(400).json({
+          status: "error",
+          message: "User ID diperlukan",
+        });
+      }
+
+      const isAllowed = await FlagsService.isAllowedCheckout(userId);
+
+      return res.status(200).json({
+        status: "success",
+        data: {
+          userId,
+          feature: "checkout",
+          isAllowed,
+        },
+      });
+    } catch (error) {
+      console.error("Check checkout permission error:", error);
+      next(error);
+    }
+  },
 };

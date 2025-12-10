@@ -12,6 +12,10 @@ router.get("/check", FlagsController.checkFeature);
 router.get("/restrictions/global", FlagsController.getGlobalRestrictions);
 router.get("/restrictions/:userId", FlagsController.getUserRestrictions);
 
+router.get("/auction/allowed/:userId", FlagsController.checkAuctionPermission);
+router.get("/chat/allowed/:userId", FlagsController.checkChatPermission);
+router.get("/checkout/allowed/:userId", FlagsController.checkCheckoutPermission);
+
 // Admin-only routes for updating flags
 router.put("/global", requireAdmin, FlagsController.updateGlobalFlag);
 router.put("/user/:userId", requireAdmin, FlagsController.updateUserFlag);
