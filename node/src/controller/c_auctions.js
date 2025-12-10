@@ -24,6 +24,16 @@ export const AuctionsController = {
     }
   },
 
+  async getByStoreId(req, res) {
+    try {
+      const auctions = await AuctionsService.getByStoreId(req.params.storeId);
+      res.json(auctions);
+    } catch (error) {
+      console.error('Error getting auctions by store id:', error);
+      res.status(500).json({ message: 'Failed to fetch auctions for store' });
+    }
+  },
+
   async create(req, res) {
     try {
       const auction = await AuctionsService.create(req.body);
@@ -52,6 +62,18 @@ export const AuctionsController = {
       console.error('Error stopping auction:', error);
       res.status(500).json({ 
         message: error.message || 'Failed to stop auction' 
+      });
+    }
+  },
+
+  async cancel(req, res) {
+    try {
+      const auction = await AuctionsService.cancel(req.params.id);
+      res.json(auction);
+    } catch (error) {
+      console.error('Error canceling auction:', error);
+      res.status(500).json({ 
+        message: error.message || 'Failed to cancel auction' 
       });
     }
   }
