@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {
@@ -14,18 +14,11 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
   
   const minimumBid = currentPrice + minIncrement;
 
-  useEffect(() => {
-    if (bidAmount && currentPrice > 0) {
-      const amount = parseInt(bidAmount);
-      if (amount < minimumBid) {
-        setBidAmount(""); 
-      }
-    }
-  }, [currentPrice, minimumBid, bidAmount]);
-
-  useEffect(() => {
+  const handleSubmit = () => {
+    setError("");
+    
     if (bidAmount === "") {
-      setError("");
+      setError("Masukkan jumlah bid");
       return;
     }
 
@@ -46,25 +39,22 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
       return;
     }
 
-    setError("");
-  }, [bidAmount, minimumBid, userBalance]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (error || bidAmount === "") {
-      return;
-    }
-
-    const amount = parseInt(bidAmount);
+    // All validations passed
     onPlaceBid(amount);
+    setBidAmount("");
   };
 
   const handleQuickBid = (amount) => {
     setBidAmount(amount.toString());
   };
 
-  const isValid = bidAmount !== "" && !error && !isLoading;
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    // Hanya izinkan angka, jika ada karakter non-angka maka kosongkan
+    if (value === "" || /^\d+$/.test(value)) {
+      setBidAmount(value);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
@@ -121,7 +111,7 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
       </div>
 
       {/* Bid Amount Input */}
-      <form onSubmit={handleSubmit}>
+      <div>
         <div className="mb-4">
           <label htmlFor="bidAmount" className="block text-sm font-semibold text-gray-700 mb-2">
             Jumlah Bid
@@ -131,10 +121,10 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
               Rp
             </span>
             <input
-              type="number"
+              type="text"
               id="bidAmount"
               value={bidAmount}
-              onChange={(e) => setBidAmount(e.target.value)}
+              onChange={handleInputChange}
               placeholder="0"
               className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
                 error
@@ -151,17 +141,18 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
 
         {/* Submit Button */}
         <button
-          type="submit"
-          disabled={!isValid}
+          type="button"
+          onClick={handleSubmit}
+          disabled={isLoading}
           className={`w-full py-3 rounded-lg font-semibold text-white transition-colors ${
-            isValid
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-gray-300 cursor-not-allowed"
+            isLoading
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
           }`}
         >
           {isLoading ? "Memproses..." : "Pasang Bid"}
         </button>
-      </form>
+      </div>
     </div>
   );
 }
