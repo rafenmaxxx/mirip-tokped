@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import bcrypt from "bcrypt";
 
 export const AuthService = {
   async loginAdmin(email, password) {
@@ -15,13 +16,11 @@ export const AuthService = {
 
       const user = rows[0];
 
-      // Check if user is admin
       if (user.role !== "ADMIN") {
         throw new Error("Akses ditolak. Hanya admin yang dapat login di halaman ini.");
       }
 
-      // Verify password
-      const isPasswordValid = password == user.password;
+      const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         throw new Error("Email atau password salah 2");
       }
