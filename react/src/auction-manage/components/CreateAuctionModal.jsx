@@ -9,6 +9,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
   const [step, setStep] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [startingPrice, setStartingPrice] = useState("");
+  const [quantity, setQuantity] = useState("1");
   const [minIncrement, setMinIncrement] = useState("");
   const [duration, setDuration] = useState("60");
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,17 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
     const startPrice = parseFloat(startingPrice);
     const increment = parseFloat(minIncrement);
     const durationMinutes = parseInt(duration);
+    const qty = parseInt(quantity);
+
+    if (!quantity || qty <= 0) {
+      setError("Jumlah barang lelang harus lebih dari 0");
+      return false;
+    }
+
+    if (qty > selectedProduct.stock) {
+      setError(`Jumlah barang melebihi stok yang tersedia (${selectedProduct.stock})`);
+      return false;
+    }
 
     if (!startingPrice || startPrice <= 0) {
       setError("Harga awal harus lebih dari 0");
@@ -76,7 +88,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
         starting_price: parseFloat(startingPrice),
         current_price: parseFloat(startingPrice),
         min_increment: parseFloat(minIncrement),
-        quantity: 1,
+        quantity: parseInt(quantity),
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
       };
@@ -181,6 +193,30 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                       <p>• Hanya satu lelang yang dapat berjalan dalam satu waktu</p>
                     </div>
                   </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Jumlah Barang Lelang <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      Qty
+                    </span>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      placeholder="0"
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      min="1"
+                      step="1"
+                      required
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Jumlah barang yang akan dilelang (maksimal sesuai stok produk)
+                  </p>
                 </div>
 
                 <div>
@@ -311,6 +347,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <p className="text-sm font-semibold text-green-900 mb-2">Preview:</p>
                     <div className="text-sm text-green-800 space-y-1">
+                      <p>• Jumlah barang: <span className="font-bold">{quantity}</span></p>
                       <p>• Harga awal: <span className="font-bold">{formatCurrency(parseFloat(startingPrice))}</span></p>
                       <p>• Bid minimum berikutnya: <span className="font-bold">{formatCurrency(parseFloat(startingPrice) + parseFloat(minIncrement))}</span></p>
                       <p>• Setiap bid harus naik minimal: <span className="font-bold">{formatCurrency(parseFloat(minIncrement))}</span></p>
