@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AuctionList from "./components/AuctionList";
 import CreateAuctionModal from "./components/CreateAuctionModal";
@@ -11,6 +11,9 @@ function AuctionManage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeAuction, setActiveAuction] = useState(null);
+  const [activeTab, setActiveTab] = useState("active"); // active, ended, cancelled
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     fetchUserAndAuctions();
@@ -91,9 +94,61 @@ function AuctionManage() {
     fetchUserAndAuctions();
   };
 
-  const handleViewDetails = (auctionId) => {
+  const handleViewDetails = useCallback((auctionId) => {
     navigate(`/auction/${auctionId}`);
-  };
+  }, [navigate]);
+
+  // Filter auctions by status
+  const activeAuctions = useMemo(() => 
+    auctions.filter(a => a.status_auction === "active" || a.status_auction === "scheduled"),
+    [auctions]
+  );
+  
+  const endedAuctions = useMemo(() => 
+    auctions.filter(a => a.status_auction === "ended"),
+    [auctions]
+  );
+  
+  const cancelledAuctions = useMemo(() => 
+    auctions.filter(a => a.status_auction === "cancelled"),
+    [auctions]
+  );
+
+  const getFilteredAuctions = useCallback(() => {
+    switch (activeTab) {
+      case "active":
+        return activeAuctions;
+      case "ended":
+        return endedAuctions;
+      case "cancelled":
+        return cancelledAuctions;
+      default:
+        return activeAuctions;
+    }
+  }, [activeTab, activeAuctions, endedAuctions, cancelledAuctions]);
+
+  const filteredAuctions = getFilteredAuctions();
+  
+  const totalPages = useMemo(
+    () => Math.ceil(filteredAuctions.length / itemsPerPage),
+    [filteredAuctions.length, itemsPerPage]
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedAuctions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredAuctions.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredAuctions, currentPage, itemsPerPage]);
+
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  }, []);
 
   if (loading) {
     return (
@@ -166,10 +221,117 @@ function AuctionManage() {
             </button>
           </div>
         ) : (
-          <AuctionList
-            auctions={auctions}
-            onViewDetails={handleViewDetails}
-          />
+          <div>
+            {/* Tabs */}
+            <div className="flex gap-8 border-b-2 border-gray-200 mb-8">
+              <button
+                onClick={() => handleTabChange("active")}
+                className={`pb-3 px-0 text-base font-semibold border-b-2 -mb-0.5 transition-colors ${
+                  activeTab === "active"
+                    ? "text-green-600 border-green-600"
+                    : "text-gray-600 border-transparent hover:text-gray-800"
+                }`}
+              >
+                Aktif & Terjadwal
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                  activeTab === "active"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-600"
+                }`}>
+                  {activeAuctions.length}
+                </span>
+              </button>
+              <button
+                onClick={() => handleTabChange("ended")}
+                className={`pb-3 px-0 text-base font-semibold border-b-2 -mb-0.5 transition-colors ${
+                  activeTab === "ended"
+                    ? "text-green-600 border-green-600"
+                    : "text-gray-600 border-transparent hover:text-gray-800"
+                }`}
+              >
+                Selesai
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                  activeTab === "ended"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-600"
+                }`}>
+                  {endedAuctions.length}
+                </span>
+              </button>
+              <button
+                onClick={() => handleTabChange("cancelled")}
+                className={`pb-3 px-0 text-base font-semibold border-b-2 -mb-0.5 transition-colors ${
+                  activeTab === "cancelled"
+                    ? "text-green-600 border-green-600"
+                    : "text-gray-600 border-transparent hover:text-gray-800"
+                }`}
+              >
+                Dibatalkan
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                  activeTab === "cancelled"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-600"
+                }`}>
+                  {cancelledAuctions.length}
+                </span>
+              </button>
+            </div>
+
+            {/* Auction List */}
+            {paginatedAuctions.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-lg">
+                  {activeTab === "active" && "Tidak ada lelang yang aktif atau terjadwal"}
+                  {activeTab === "ended" && "Tidak ada lelang yang selesai"}
+                  {activeTab === "cancelled" && "Tidak ada lelang yang dibatalkan"}
+                </p>
+              </div>
+            ) : (
+              <>
+                <AuctionList
+                  auctions={paginatedAuctions}
+                  onViewDetails={handleViewDetails}
+                />
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-8">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Sebelumnya
+                    </button>
+
+                    <div className="flex gap-2">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-10 h-10 rounded-md font-medium ${
+                            currentPage === page
+                              ? "bg-green-600 text-white"
+                              : "border border-gray-300 bg-white hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Selanjutnya
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         )}
       </div>
 
