@@ -39,10 +39,10 @@ export default function FeatureDisabled() {
         </p>
 
         <button
-          onClick={() => navigate(-2)}
+          onClick={() => window.location.href = "/"}
           className="w-full bg-[#00AA5B] hover:bg-[#03924e] text-white font-bold text-sm py-3 px-6 rounded-lg transition-all duration-200 shadow-[0_2px_4px_rgba(0,170,91,0.2)] hover:shadow-[0_4px_8px_rgba(0,170,91,0.3)]"
         >
-          Kembali ke halaman sebelumnya
+          Kembali ke beranda
         </button>
 
       </div>
