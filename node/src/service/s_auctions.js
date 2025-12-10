@@ -96,12 +96,84 @@ export const AuctionsService = {
     return res.rows[0];
   }, 
 
-  async create(data) {
-    const { product_id, starting_price, min_increment, quantity, start_time, end_time } = data;
+  async getByStoreId(storeId) {
+    
     const res = await db.query(
-      `INSERT INTO auctions (product_id, starting_price, min_increment, quantity, start_time, end_time)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [product_id, starting_price, min_increment, quantity, start_time, end_time]
+      `SELECT 
+        a.auction_id,
+        a.product_id,
+        p.product_name, 
+        p.main_image_path, 
+        p.description AS product_description, 
+        a.quantity, 
+        s.store_name,
+        s.store_id,
+        s.user_id AS seller_id, 
+        a.starting_price, 
+        a.current_price, 
+        a.min_increment, 
+        a.start_time, 
+        a.end_time, 
+        a.status_auction,
+        a.winner_id,
+        a.created_at,
+        COUNT(ab.bid_id) AS bid_amount
+      FROM auctions a
+      JOIN products p ON a.product_id = p.product_id
+      JOIN stores s ON p.store_id = s.store_id
+      LEFT JOIN auction_bids ab ON a.auction_id = ab.auction_id
+      WHERE s.store_id = $1
+      GROUP BY 
+        a.auction_id,
+        a.product_id,
+        p.product_name, 
+        p.main_image_path,
+        p.description,
+        a.quantity, 
+        s.store_name,
+        s.store_id,
+        s.user_id,
+        a.starting_price,
+        a.current_price,
+        a.min_increment,
+        a.start_time,
+        a.end_time,
+        a.status_auction,
+        a.winner_id,
+        a.created_at
+      ORDER BY a.created_at DESC
+      `,
+      [storeId]
+    );
+    return res.rows;
+  }, 
+
+  async create(data) {
+    const { product_id, starting_price, current_price, min_increment, quantity, start_time, end_time } = data;
+    
+    const productRes = await db.query(
+      `SELECT stock FROM products WHERE product_id = $1`,
+      [product_id]
+    );
+    
+    if (productRes.rows.length === 0) {
+      throw new Error('Product not found');
+    }
+    
+    const currentStock = productRes.rows[0].stock;
+    if (currentStock < quantity) {
+      throw new Error('Insufficient stock');
+    }
+    
+    await db.query(
+      `UPDATE products SET stock = stock - $1 WHERE product_id = $2`,
+      [quantity, product_id]
+    );
+    
+    const res = await db.query(
+      `INSERT INTO auctions (product_id, starting_price, current_price, min_increment, quantity, start_time, end_time)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [product_id, starting_price, current_price, min_increment, quantity, start_time, end_time]
     );
     return res.rows[0]; 
   },
@@ -126,6 +198,7 @@ export const AuctionsService = {
     }
     
     const auction = auctionRes.rows[0];
+
     
     const bidRes = await db.query(
       `SELECT bidder_id, bid_amount
@@ -180,6 +253,22 @@ export const AuctionsService = {
 
   async cancel(id) {
 
+    const auctionRes = await db.query(
+      `SELECT product_id, quantity FROM auctions WHERE auction_id = $1`,
+      [id]
+    );
+    
+    if (auctionRes.rows.length === 0) {
+      throw new Error('Auction not found');
+    }
+    
+    const auction = auctionRes.rows[0];
+    
+    await db.query(
+      `UPDATE products SET stock = stock + $1 WHERE product_id = $2`,
+      [auction.quantity, auction.product_id]
+    );
+    
     const updateRes = await db.query(
       `UPDATE auctions 
        SET status_auction = 'cancelled', end_time = NOW()
