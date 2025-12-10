@@ -8,6 +8,41 @@ import { InitCountCart } from "../general/navbar.js";
 
 let total_price = 0;
 let user_address = "";
+
+// Check if checkout feature is enabled for current user
+async function checkCheckoutFeatureFlag() {
+  try {
+    const userResponse = await fetch("/node/api/user/me", {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (!userResponse.ok) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const userData = await userResponse.json();
+    const userId = userData.data?.user_id || userData.user_id;
+
+    if (!userId) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const flagResponse = await fetch(`/node/api/flags/checkout/allowed/${userId}`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
+
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking checkout access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
 function LoadCheckoutItems(data) {
   const container = document.getElementById("checkout-data");
   if (!container) return;
@@ -243,7 +278,20 @@ function AddressErr(err) {
   }
 }
 
-export function InitCheckoutPage() {
+export async function InitCheckoutPage() {
+  // Check checkout feature flag on page load
+  const checkoutAccess = await checkCheckoutFeatureFlag();
+  
+  if (!checkoutAccess.isAllowed) {
+    const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
+    const scope = reason.toLowerCase().includes("maintenance") || reason.toLowerCase().includes("global") 
+      ? "global" 
+      : "user";
+    
+    window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}&scope=${scope}`;
+    return;
+  }
+
   GET("/api/cart", {}, LoadCheckoutItems, CheckoutItemsErr);
 
   window.addEventListener("balanceUpdated", () => {
