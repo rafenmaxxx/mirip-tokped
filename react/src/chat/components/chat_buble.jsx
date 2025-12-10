@@ -1,38 +1,5 @@
 import React from "react";
 
-const IconCheck = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4">
-    <path
-      d="M5 13l4 4L19 7"
-      stroke="currentColor"
-      fill="none"
-      strokeWidth="2"
-    />
-  </svg>
-);
-
-const IconCheckDouble = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4">
-    <path
-      d="M3 12l4 4 4-4M13 12l4 4 4-4"
-      stroke="currentColor"
-      fill="none"
-      strokeWidth="2"
-    />
-  </svg>
-);
-
-const IconCheckDoubleFilled = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
-    <path
-      d="M3 12l4 4 4-4M13 12l4 4 4-4"
-      stroke="currentColor"
-      fill="none"
-      strokeWidth="2"
-    />
-  </svg>
-);
-
 const ChatBubble = ({
   text,
   mine,
@@ -44,20 +11,30 @@ const ChatBubble = ({
   read = false,
 }) => {
   const getStatusIcon = () => {
+    if (read)
+      return (
+        <div className="flex items-center">
+          R
+          {read && (
+            <div className="ml-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+          )}
+        </div>
+      );
+
     switch (status) {
       case "read":
         return (
           <div className="flex items-center">
-            <IconCheckDouble className="text-blue-500" />
+            R
             {read && (
               <div className="ml-1 w-2 h-2 bg-blue-500 rounded-full"></div>
             )}
           </div>
         );
       case "delivered":
-        return <IconCheckDouble className="text-gray-400" />;
+        return <p>D</p>;
       case "sent":
-        return <IconCheck className="text-gray-400" />;
+        return <p>S</p>;
       case "sending":
         return (
           <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
