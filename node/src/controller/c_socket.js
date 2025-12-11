@@ -1,6 +1,6 @@
 import SocketService from "../service/s_socket.js";
 import { UserService } from "../service/s_user.js"; // pastikan ada UserService
-
+import { AuctionBidsService } from "../service/s_auctionbids.js";
 class SocketController {
   constructor(io) {
     this.io = io;
@@ -124,6 +124,10 @@ class SocketController {
       timestamp: new Date().toISOString(),
     });
   }
+  async handlePing(socket, data) {
+    console.log(`[Controller] Ping received from ${socket.id}`);
+    socket.emit("pong", { timestamp: Date.now(), received: data.timestamp });
+  }
 
   async handleStopTyping(socket, data) {
     const { store_id, buyer_id, user_id, user_name } = data;
@@ -210,6 +214,112 @@ class SocketController {
     }
   }
 
+  async handleJoinAuctionRoom(socket, data) {
+    const { auctionId, userId } = data;
+    const roomName = `auction-room-${auctionId}`;
+
+    // Join room
+    socket.join(roomName);
+    console.log(
+      `[Controller] Socket ${socket.id} joined auction room: ${roomName}`
+    );
+
+    // Simpan room ke socket untuk reference
+    if (!socket.auctionRooms) {
+      socket.auctionRooms = new Set();
+    }
+    socket.auctionRooms.add(roomName);
+
+    // Kirim konfirmasi ke client
+    socket.emit("auction_room_joined", {
+      room: roomName,
+      auctionId,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Notify others in room (optional)
+    socket.to(roomName).emit("user_joined_auction", {
+      userId,
+      socketId: socket.id,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  async handleLeaveAuctionRoom(socket, data) {
+    const { auctionId } = data;
+    const roomName = `auction-room-${auctionId}`;
+
+    // Leave room
+    socket.leave(roomName);
+
+    // Hapus dari set
+    if (socket.auctionRooms) {
+      socket.auctionRooms.delete(roomName);
+    }
+
+    console.log(
+      `[Controller] Socket ${socket.id} left auction room: ${roomName}`
+    );
+  }
+
+  async handleNewBid(socket, bidData) {
+    console.log("[Server] Received new bid:", bidData);
+
+    const { auctionId, userId, amount } = bidData;
+
+    if (!auctionId || !userId || !amount) {
+      console.error("[Server] Invalid bid data:", bidData);
+      socket.emit("error_message", {
+        type: "bid",
+        message: "Data bid tidak lengkap",
+      });
+      return;
+    }
+
+    const roomName = `auction-room-${auctionId}`;
+    console.log(`[Server] Broadcasting to room: ${roomName}`);
+
+    try {
+      // Simpan bid ke database
+      const result = await AuctionBidsService.placeBid(
+        auctionId,
+        userId,
+        amount
+      );
+
+      console.log("[Server] Bid saved to DB:", result.bidId);
+
+      // Broadcast ke semua di room
+      this.io.to(roomName).emit("new_bid", result.bidData);
+
+      // Juga kirim ke sender sebagai konfirmasi
+      socket.emit("bid_confirmation", {
+        success: true,
+        bidId: result.bidId,
+      });
+    } catch (error) {
+      console.error("[Server] Failed to place bid:", error);
+      socket.emit("error_message", {
+        type: "bid",
+        message: error.message,
+      });
+    }
+  }
+  // Handler untuk real-time auction update
+  async handleAuctionUpdate(socket, data) {
+    const { auctionId, updateData } = data;
+    const roomName = `auction-room-${auctionId}`;
+
+    console.log(`[Controller] Auction update for ${auctionId}:`, updateData);
+
+    // Broadcast ke semua di room termasuk pengirim
+    this.io.to(roomName).emit("auction_updated", {
+      auctionId,
+      ...updateData,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   registerSocketListeners(socket) {
     socket.on("chat_message", (data) => this.handleChatMessage(socket, data));
     socket.on("join_room", (room) => this.handleJoinRoom(socket, room));
@@ -217,6 +327,18 @@ class SocketController {
     socket.on("typing", (data) => this.handleTyping(socket, data));
     socket.on("stop_typing", (data) => this.handleStopTyping(socket, data));
     socket.on("mark_as_read", (data) => this.handleMarkAsRead(socket, data));
+    socket.on("ping", (data) => this.handlePing(socket, data));
+
+    socket.on("join_auction_room", (data) =>
+      this.handleJoinAuctionRoom(socket, data)
+    );
+    socket.on("leave_auction_room", (data) =>
+      this.handleLeaveAuctionRoom(socket, data)
+    );
+    socket.on("new_bid", (data) => this.handleNewBid(socket, data));
+    socket.on("auction_update", (data) =>
+      this.handleAuctionUpdate(socket, data)
+    );
   }
 }
 

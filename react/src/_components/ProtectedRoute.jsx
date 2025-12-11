@@ -1,7 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const ProtectedRoutes = ({ redirectUrl = "/login" }) => {
+const ProtectedRoutes = ({ redirectUrl = "/login", allowedRoles }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +14,7 @@ const ProtectedRoutes = ({ redirectUrl = "/login" }) => {
 
         if (res.ok) {
           const data = await res.json();
-          setUser(data);
+          setUser(data.data);
         } else {
           setUser(null);
         }
@@ -31,9 +31,9 @@ const ProtectedRoutes = ({ redirectUrl = "/login" }) => {
 
   if (loading) return <div>Loading...</div>;
 
-  if (!user) {
+  if (!user || !allowedRoles.includes(user.role)) {
     window.location.href = redirectUrl;
-    return null; // penting supaya React tidak render apa pun
+    return null; // React tidak render apa-apa
   }
 
   return <Outlet />;

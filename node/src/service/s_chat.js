@@ -137,18 +137,6 @@ export const ChatService = {
   },
 
   async getMessages(storeId, buyerId, offset = 0, limit = 50) {
-    // Pertama, tandai pesan sebagai sudah dibaca
-    await db.query(
-      `
-      UPDATE chat_messages 
-      SET is_read = TRUE 
-      WHERE store_id = $1 
-        AND buyer_id = $2 
-        AND is_read = FALSE
-      `,
-      [storeId, buyerId]
-    );
-
     // Kemambil ambil pesan
     const res = await db.query(
       `

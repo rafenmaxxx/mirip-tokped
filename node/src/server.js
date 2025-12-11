@@ -13,6 +13,8 @@ const io = new Server(httpServer, {
 });
 initializeSocketEvents(io);
 
+app.set("io", io);
+
 httpServer.listen(ENV.PORT, () => {
   console.log(
     `Node server aman bos (HTTP & Socket.IO berjalan di port ${ENV.PORT})`

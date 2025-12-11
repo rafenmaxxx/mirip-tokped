@@ -77,7 +77,7 @@ export const WebPushService = {
       if (existing.rows.length > 0) {
         await db.query(
           `UPDATE push_subscriptions 
-           SET user_id = $1, updated_at = NOW()
+           SET user_id = $1
            WHERE endpoints = $2`,
           [userId, sub.endpoint]
         );
@@ -115,7 +115,13 @@ export const WebPushService = {
         title: payload.title || "Notification",
         body: payload.body || "You have a new notification",
         icon: payload.icon || "/vite.svg",
+        badge: "/vite.svg",
         data: payload.data || {},
+        // Tambahkan properti yang diperlukan
+        tag: payload.tag || `notification-${Date.now()}`,
+        timestamp: Date.now(),
+        requireInteraction: false,
+        // _meta untuk internal (tidak dikirim ke push service)
         _meta: {
           userId,
           sentAt: new Date().toISOString(),
@@ -161,12 +167,26 @@ export const WebPushService = {
             continue;
           }
 
+          const pushPayload = {
+            title: notificationPayload.title,
+            body: notificationPayload.body,
+            icon: notificationPayload.icon,
+            data: notificationPayload.data,
+            tag: notificationPayload.tag,
+            timestamp: notificationPayload.timestamp,
+          };
+
           await webpush.sendNotification(
             subscriptionObj,
-            JSON.stringify(notificationPayload),
+            JSON.stringify(pushPayload), // Hanya kirim properti yang diperlukan
             {
               TTL: 24 * 60 * 60,
               urgency: "normal",
+              vapidDetails: {
+                subject: "mailto:noreply@localhost.dev", // Ganti dengan email Anda
+                publicKey: process.env.VAPID_PUBLIC_KEY,
+                privateKey: process.env.VAPID_PRIVATE_KEY,
+              },
             }
           );
 

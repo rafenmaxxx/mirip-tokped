@@ -7,7 +7,6 @@ import db from "../config/db.js";
 
 class SocketService {
   static async addUserOnline(userId, socketId) {
-    // Menggunakan Hash untuk menyimpan ID soket pengguna (opsi 2)
     const userData = { socketId, joinTime: new Date().toISOString() };
     await redis.hSet("user_sessions", userId, JSON.stringify(userData));
     console.log(
@@ -15,18 +14,11 @@ class SocketService {
     );
   }
 
-  /**
-   * Menandai pengguna sebagai offline saat terputus.
-   * @param {string} userId
-   */
   static async removeUserOnline(userId) {
     await redis.hDel("user_sessions", userId);
     console.log(`[Service] User ${userId} is now offline`);
   }
 
-  /**
-   * Mengambil daftar semua pengguna online beserta data sesinya.
-   */
   static async getOnlineUsers() {
     const sessions = await redis.hGetAll("user_sessions");
 
@@ -34,7 +26,7 @@ class SocketService {
       try {
         return {
           userId,
-          ...JSON.parse(data), // Parse data JSON sesi
+          ...JSON.parse(data),
         };
       } catch (e) {
         console.error(`Error parsing session data for ${userId}:`, e);
@@ -76,7 +68,6 @@ class SocketService {
     });
 
     try {
-      // 1. Update atau insert chat_room (PENTING!)
       const roomQuery = `
       INSERT INTO chat_room (store_id, buyer_id, last_message_at, updated_at)
       VALUES ($1, $2, NOW(), NOW())
@@ -88,7 +79,6 @@ class SocketService {
 
       await db.query(roomQuery, [storeId, buyerId]);
 
-      // 2. Insert message dengan product_id
       const messageQuery = `
       INSERT INTO chat_messages 
       (store_id, buyer_id, sender_id, message_type, content, product_id)
@@ -111,7 +101,6 @@ class SocketService {
         savedMessage.message_id
       );
 
-      // 3. Format response TANPA field 'mine'
       return {
         message_id: savedMessage.message_id,
         store_id: savedMessage.store_id,
@@ -123,7 +112,6 @@ class SocketService {
         created_at: savedMessage.created_at,
         is_read:
           savedMessage.is_read !== undefined ? savedMessage.is_read : false,
-        // JANGAN tambahkan 'mine' di sini
       };
     } catch (error) {
       console.error("[Service] Error saving message:", error);
@@ -132,7 +120,6 @@ class SocketService {
   }
 
   static async handleTyping({ storeId, buyerId, userId, user_name }) {
-    // Log untuk debugging
     console.log("[Service] Typing event:", {
       storeId,
       buyerId,
@@ -166,10 +153,8 @@ class SocketService {
     };
   }
 
-  // Helper method untuk mendapatkan messages
   static async getMessages(storeId, buyerId, offset = 0, limit = 50) {
     try {
-      // Update read status untuk messages dari pengirim lain
       await db.query(
         `UPDATE chat_messages 
          SET is_read = TRUE 
@@ -180,7 +165,6 @@ class SocketService {
         [storeId, buyerId, sender_id]
       );
 
-      // Get messages
       const result = await db.query(
         `SELECT * FROM chat_messages 
          WHERE store_id = $1 AND buyer_id = $2
@@ -189,14 +173,12 @@ class SocketService {
         [storeId, buyerId, limit, offset]
       );
 
-      // Return in chronological order
       return result.rows.reverse();
     } catch (error) {
       console.error("[Service] Error getting messages:", error);
       throw error;
     }
   }
-  // Di s_socket.js, tambahkan fungsi ini ke class SocketService
 
   static async markMessagesAsRead(storeId, buyerId, readerId) {
     console.log("[Service] Marking messages as read:", {
@@ -206,7 +188,6 @@ class SocketService {
     });
 
     try {
-      // Update semua pesan dari orang lain yang belum dibaca
       const result = await db.query(
         `UPDATE chat_messages 
        SET is_read = TRUE 
