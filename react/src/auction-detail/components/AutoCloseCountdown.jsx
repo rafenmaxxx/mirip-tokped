@@ -26,7 +26,7 @@ function AutoCloseCountdown({ lastBidTime, onAutoClose }) {
           hasCalledAutoClose.current = true;
           onAutoClose();
         }
-      } else if (remaining <= 1500000) {
+      } else if (remaining <= 15) {
         setSecondsLeft(remaining);
         setIsActive(true);
       } else {
