@@ -1,6 +1,7 @@
 import SocketService from "../service/s_socket.js";
 import { UserService } from "../service/s_user.js"; // pastikan ada UserService
 import { AuctionBidsService } from "../service/s_auctionbids.js";
+import { sendNotif } from "../service/s_webpush.js";
 class SocketController {
   constructor(io) {
     this.io = io;
@@ -88,6 +89,13 @@ class SocketController {
         message_type: message_type || "text",
         product_id: product_id || null,
       });
+
+      const targetId = buyerId;
+      if (buyerId == sender_id) {
+        targetId = storeId;
+      }
+      console.log(targetId, " --> targetID");
+      sendNotif(targetId, `CHAT dari ${sender_id}`, message);
 
       // Debug log
       console.log(
