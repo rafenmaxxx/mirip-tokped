@@ -6,8 +6,8 @@ export const AuctionsController = {
       const auctions = await AuctionsService.getAll();
       res.json(auctions);
     } catch (error) {
-      console.error('Error getting auctions:', error);
-      res.status(500).json({ message: 'Failed to fetch auctions' });
+      console.error("Error getting auctions:", error);
+      res.status(500).json({ message: "Failed to fetch auctions" });
     }
   },
 
@@ -15,12 +15,12 @@ export const AuctionsController = {
     try {
       const auction = await AuctionsService.getById(req.params.id);
       if (!auction) {
-        return res.status(404).json({ message: 'Auction not found' });
+        return res.status(404).json({ message: "Auction not found" });
       }
       res.json(auction);
     } catch (error) {
-      console.error('Error getting auction by id:', error);
-      res.status(500).json({ message: 'Failed to fetch auction' });
+      console.error("Error getting auction by id:", error);
+      res.status(500).json({ message: "Failed to fetch auction" });
     }
   },
 
@@ -29,8 +29,8 @@ export const AuctionsController = {
       const auction = await AuctionsService.create(req.body);
       res.json(auction);
     } catch (error) {
-      console.error('Error creating auction:', error);
-      res.status(500).json({ message: 'Failed to create auction' });
+      console.error("Error creating auction:", error);
+      res.status(500).json({ message: "Failed to create auction" });
     }
   },
 
@@ -39,20 +39,21 @@ export const AuctionsController = {
       const result = await AuctionsService.remove(req.params.id);
       res.json(result);
     } catch (error) {
-      console.error('Error removing auction:', error);
-      res.status(500).json({ message: 'Failed to remove auction' });
+      console.error("Error removing auction:", error);
+      res.status(500).json({ message: "Failed to remove auction" });
     }
   },
 
   async stop(req, res) {
     try {
-      const auction = await AuctionsService.stop(req.params.id);
-      res.json(auction);
-    } catch (error) {
-      console.error('Error stopping auction:', error);
-      res.status(500).json({ 
-        message: error.message || 'Failed to stop auction' 
-      });
+      const id = req.params.id;
+      const io = req.app.get("io");
+
+      const data = await AuctionsService.stop(id, io);
+      return res.json(data);
+    } catch (err) {
+      console.error("Stop Error:", err);
+      return res.status(500).json({ error: err.message });
     }
-  }
+  },
 };
