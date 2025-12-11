@@ -19,8 +19,8 @@ export const AuctionsController = {
       }
       res.json(auction);
     } catch (error) {
-      console.error('Error getting auction by id:', error);
-      res.status(500).json({ message: 'Failed to fetch auction' });
+      console.error("Error getting auction by id:", error);
+      res.status(500).json({ message: "Failed to fetch auction" });
     }
   },
 
@@ -29,8 +29,8 @@ export const AuctionsController = {
       const auctions = await AuctionsService.getByStoreId(req.params.storeId);
       res.json(auctions);
     } catch (error) {
-      console.error('Error getting auctions by store id:', error);
-      res.status(500).json({ message: 'Failed to fetch auctions for store' });
+      console.error("Error getting auctions by store id:", error);
+      res.status(500).json({ message: "Failed to fetch auctions for store" });
     }
   },
 
@@ -69,14 +69,15 @@ export const AuctionsController = {
 
   async cancel(req, res) {
     try {
-      const auction = await AuctionsService.cancel(req.params.id);
+      const id = req.params.id;
+      const io = req.app.get("io");
+      const auction = await AuctionsService.cancel(id, io);
       res.json(auction);
     } catch (error) {
-      console.error('Error canceling auction:', error);
-      res.status(500).json({ 
-        message: error.message || 'Failed to cancel auction' 
+      console.error("Error canceling auction:", error);
+      res.status(500).json({
+        message: error.message || "Failed to cancel auction",
       });
     }
-  }
   },
 };
