@@ -159,7 +159,6 @@ switch ($method) {
             exit;
         }
 
-        break;
     case 'PUT':
         header('Content-Type: text/html; charset=utf-8');
         guard(['SELLER']);
@@ -227,7 +226,7 @@ switch ($method) {
             warn('Gagal update Product', '/seller/products');
             exit;
         }
-        break;
+
     case 'DELETE':
         guard(['SELLER']);
         $product_id = $_GET['product_id'] ?? null;

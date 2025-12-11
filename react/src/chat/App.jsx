@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useChat } from "./hooks/useChat";
+import { useNavigate } from "react-router-dom";
 import ChatNavbar from "./components/chat_navbar";
 import ChatSidebar from "./components/chat_sidebar";
 import ChatHeader from "./components/chat_header";
@@ -8,6 +9,7 @@ import ChatMessageList from "./components/chat_message_list";
 import LoadingSkeleton from "./components/loading_skeleton";
 
 function Chat() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +32,58 @@ function Chat() {
     handleLoadMore,
     markAsRead,
   } = useChat(user);
+
+  // Check chat feature flag
+  useEffect(() => {
+    const checkChatAccess = async () => {
+      try {
+        // Get current user
+        const userResponse = await fetch("http://localhost:80/node/api/user/me", {
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (!userResponse.ok) {
+          console.error("Failed to get user data");
+          return;
+        }
+
+        const userData = await userResponse.json();
+        const userId = userData.data?.user_id || userData.user_id;
+
+        if (!userId) {
+          console.error("User ID not found in response");
+          return;
+        }
+
+        // Check if chat is allowed for this user
+        const flagResponse = await fetch(`http://localhost:80/node/api/flags/chat/allowed/${userId}`, {
+          method: "GET",
+          credentials: "include"
+        });
+
+        const flagData = await flagResponse.json();
+
+        // Handle both error response and success response structure
+        const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+        const reason = flagData.data?.reason || flagData.reason || "Fitur Live Chat sedang tidak tersedia";
+        
+        if (!isAllowed) {
+          // Determine scope: check if this is global or user-specific
+          const scope = reason.toLowerCase().includes("global") 
+            ? "global" 
+            : "user";
+          
+          // Navigate to feature-disabled page with query params
+          navigate(`/feature-disabled?feature=chat&reason=${encodeURIComponent(reason)}&scope=${scope}`);
+        }
+      } catch (error) {
+        console.error("Error checking chat access:", error);
+      }
+    };
+
+    checkChatAccess();
+  }, [navigate]);
 
   // Fetch user data
   useEffect(() => {

@@ -9,6 +9,41 @@ import { showModalConfirmation } from "../general/modal.js";
 
 let canCheckout = true;
 
+// Check if checkout feature is enabled for current user
+async function checkCheckoutFeatureFlag() {
+  try {
+    const userResponse = await fetch("/node/api/user/me", {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (!userResponse.ok) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const userData = await userResponse.json();
+    const userId = userData.data?.user_id || userData.user_id;
+
+    if (!userId) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const flagResponse = await fetch(`/node/api/flags/checkout/allowed/${userId}`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
+
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking checkout access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
+
 function reloadCartPage() {
   GET(
     "/api/cart",
@@ -467,8 +502,21 @@ function LoadSummary(data) {
     container.innerHTML = html;
     if (summary.total_price !== 0) {
       const checkout = document.getElementById("checkout-btn");
-      checkout.addEventListener("click", () => {
+      checkout.addEventListener("click", async () => {
         if (canCheckout) {
+          // Check checkout feature flag first
+          const checkoutAccess = await checkCheckoutFeatureFlag();
+          
+          if (!checkoutAccess.isAllowed) {
+            const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
+            const scope = reason.toLowerCase().includes("maintenance") || reason.toLowerCase().includes("global") 
+              ? "global" 
+              : "user";
+            
+            window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}&scope=${scope}`;
+            return;
+          }
+
           showModalConfirmation(
             "Mau Checkout bos ? ",
             () => {

@@ -90,6 +90,9 @@ class Auth
                 }
             }
 
+            if (strtoupper($user['role']) === 'ADMIN') {
+                return ["status" => false, "message" => "Admin tidak dapat login lewat sini!"];
+            }
 
             $store_id = null;
 

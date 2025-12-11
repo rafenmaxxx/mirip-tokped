@@ -2,9 +2,11 @@ import { Routes, Route } from "react-router-dom";
 import Chat from "./chat/App.jsx";
 import Admin from "./admin/App.jsx";
 import Auction from "./auction/App.jsx";
-import AuctionDetail from "./auction_detail/App.jsx";
+import AuctionDetail from "./auction-detail/App.jsx";
+import AuctionManage from "./auction-manage/App.jsx";
 import Check from "./check/App.jsx";
 import AdminLogin from "./admin-login/App.jsx";
+import FeatureDisabled from "./_components/FeatureDisabled.jsx";
 import { useEffect, useState } from "react";
 import { showToast } from "./lib/toast.js";
 import ProtectedRoutes from "./_components/ProtectedRoute.jsx";
@@ -241,15 +243,17 @@ export default function App() {
       </Route>
       <Route
         element={
-          <ProtectedAdminRoute redirectUrl="/react/admin-login"></ProtectedAdminRoute>
+          <ProtectedAdminRoute redirectUrl="/unauthorized"></ProtectedAdminRoute>
         }
       >
         <Route path="/admin" element={<Admin />} />
       </Route>
       <Route path="/auction" element={<Auction />} />
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
+      <Route path="/auction-manage" element={<AuctionManage />} />
       <Route path="/check" element={<Check />} />
       <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/feature-disabled" element={<FeatureDisabled />} />
 
       {/* Optional: default home */}
       <Route path="/" element={<h1>Welcome</h1>} />
