@@ -142,6 +142,40 @@ class SocketManager {
     return true;
   }
 
+  joinAuctionRoom(auctionId, userId) {
+    console.log("join auction room -> ", auctionId);
+    if (!this.socket?.connected || !auctionId) return false;
+
+    this.socket.emit("join_auction_room", {
+      auctionId,
+      userId,
+      room: `auction-room-${auctionId}`,
+    });
+    return true;
+  }
+
+  // Method untuk mengirim bid (optional, karena bisa pakai REST)
+  sendBid({ auctionId, userId, bidderName, amount }) {
+    if (!this.socket?.connected) {
+      console.error("Cannot send bid: Socket not connected");
+      return false;
+    }
+
+    this.socket.emit("new_bid", {
+      auctionId,
+      userId,
+      bidder_name: bidderName,
+      amount,
+      created_at: new Date().toISOString(),
+    });
+    return true;
+  }
+
+  // Method untuk listen bid
+  onNewBid(handler) {
+    return this.on("new_bid", handler);
+  }
+
   on(event, handler) {
     if (!this.socket) return;
 
