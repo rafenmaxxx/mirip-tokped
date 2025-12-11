@@ -16,7 +16,6 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user data (sama seperti ProtectedRoutes)
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -28,7 +27,6 @@ export default function App() {
           const data = await res.json();
           setUser(data);
 
-          // Simpan userId di localStorage untuk akses mudah
           if (data.user_id) {
             localStorage.setItem("userId", data.user_id.toString());
             localStorage.setItem("userRole", data.role);
@@ -47,7 +45,6 @@ export default function App() {
     fetchUser();
   }, []);
 
-  // Initialize Push Notifications setelah user data tersedia
   useEffect(() => {
     if (!user || !user.user_id) return;
 
@@ -58,35 +55,33 @@ export default function App() {
 
     const initPush = async () => {
       try {
-        // Minta izin notifikasi
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
           console.warn("Notifications not allowed");
           return;
         }
 
-        // Register Service Worker
         await navigator.serviceWorker.register("/react/sw.js", {
           scope: "/react/",
         });
         console.log("SW registered, waiting for activation...");
 
-        // Tunggu sampai SW aktif
         const swRegistration = await navigator.serviceWorker.ready;
         console.log("Service Worker active:", swRegistration);
 
-        // CEK apakah sudah ada subscription
         let subscription = await swRegistration.pushManager.getSubscription();
 
         if (!subscription) {
           console.log("No existing subscription, creating a new one...");
           const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-          
+
           if (!publicKey) {
-            console.warn("VAPID public key not configured. Push notifications will not work.");
+            console.warn(
+              "VAPID public key not configured. Push notifications will not work."
+            );
             return;
           }
-          
+
           subscription = await swRegistration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: publicKey,
@@ -97,23 +92,21 @@ export default function App() {
           console.log("Using existing subscription:", subscription);
         }
 
-        // Kirim subscription ke server DENGAN userId dari user data
         const res = await fetch("/node/api/notif/subscribe", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // Kirim session cookie
+          credentials: "include",
           body: JSON.stringify({
             ...subscription,
-            userId: user.user_id, // Pakai user_id dari response API
+            userId: user.user_id,
           }),
         });
 
         const result = await res.json();
         console.log("Subscription response:", result);
 
-        // Beritahu SW bahwa user online
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({
             type: "USER_ONLINE",
@@ -121,7 +114,6 @@ export default function App() {
           });
         }
 
-        // Check queued notifications setelah subscribe
         setTimeout(() => {
           checkQueuedNotifications(user.user_id);
         }, 2000);
@@ -131,16 +123,15 @@ export default function App() {
     };
 
     initPush();
-  }, [user]); // Jalankan ketika user data tersedia
+  }, [user]);
 
-  // Fungsi untuk check queued notifications
   const checkQueuedNotifications = async (userId) => {
     try {
       const response = await fetch(
         `/node/api/notif/queue/check?userId=${userId}`,
         {
           method: "GET",
-          credentials: "include", // Kirim session cookie
+          credentials: "include",
         }
       );
 
@@ -153,18 +144,16 @@ export default function App() {
     }
   };
 
-  // Event listener untuk messages dari Service Worker
   useEffect(() => {
     const handleMessage = (event) => {
       console.log("Menerima pesan dari SW:", event.data);
 
       if (event.data && event.data.type === "PUSH_NOTIFICATION") {
         const { title, body } = event.data.payload;
-        // Panggil toast custom
+
         showToast(title, body);
       }
 
-      // Handle queue check request dari SW
       if (
         event.data &&
         (event.data.type === "CHECK_QUEUE" ||
@@ -187,15 +176,13 @@ export default function App() {
         navigator.serviceWorker.removeEventListener("message", handleMessage);
       }
     };
-  }, [user]); // Depend on user
+  }, [user]);
 
-  // Event listener untuk network online
   useEffect(() => {
     const handleOnline = () => {
       console.log("Network online, checking queued notifications...");
 
       if (user && user.user_id) {
-        // Beritahu SW
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({
             type: "USER_ONLINE",
@@ -203,7 +190,6 @@ export default function App() {
           });
         }
 
-        // Check queue
         setTimeout(() => {
           checkQueuedNotifications(user.user_id);
         }, 1000);
@@ -217,17 +203,14 @@ export default function App() {
     };
   }, [user]);
 
-  // Periodic queue check (setiap 10 menit)
   useEffect(() => {
     if (!user || !user.user_id) return;
 
-    // Check sekarang
     checkQueuedNotifications(user.user_id);
 
-    // Set interval untuk check periodic
     const interval = setInterval(() => {
       checkQueuedNotifications(user.user_id);
-    }, 10 * 60 * 1000); // 10 menit
+    }, 10 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [user]);
@@ -238,9 +221,17 @@ export default function App() {
 
   return (
     <Routes>
-      <Route element={<ProtectedRoutes redirectUrl="/login"></ProtectedRoutes>}>
+      <Route
+        element={
+          <ProtectedRoutes
+            redirectUrl="/login"
+            allowedRoles={["BUYER", "SELLER"]}
+          ></ProtectedRoutes>
+        }
+      >
         <Route path="/chat" element={<Chat />} />
       </Route>
+
       <Route
         element={
           <ProtectedAdminRoute redirectUrl="/unauthorized"></ProtectedAdminRoute>
@@ -248,6 +239,7 @@ export default function App() {
       >
         <Route path="/admin" element={<Admin />} />
       </Route>
+
       <Route path="/auction" element={<Auction />} />
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
       <Route path="/auction-manage" element={<AuctionManage />} />
