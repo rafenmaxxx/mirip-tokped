@@ -9,6 +9,7 @@ import storeRoutes from "./r_stores.js";
 import productRoutes from "./r_products.js";
 import authRoutes from "./r_auth.js";
 import flagsRoutes from "./r_flags.js";
+import timeRoute from "./r_time.js";
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use("/store", storeRoutes);
 router.use("/products", productRoutes);
 router.use("/auth", authRoutes);
 router.use("/flags", flagsRoutes);
+router.use("/time", timeRoute);
 
-export default router;  
+export default router;
