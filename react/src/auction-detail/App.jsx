@@ -23,14 +23,11 @@ function AuctionDetail() {
   const [currentPrice, setCurrentPrice] = useState(0);
   const [lastBidTime, setLastBidTime] = useState(null);
 
-  // Handler untuk new bid dari socket
   const handleNewBid = useCallback(
     (bidData) => {
       console.log("New bid received via socket:", bidData);
 
-      // Update state dengan bid baru
       setBids((prevBids) => {
-        // Cek apakah bid sudah ada (untuk menghindari duplikat)
         const isDuplicate = prevBids.some(
           (bid) =>
             bid.bid_id === bidData.bid_id ||
@@ -39,14 +36,11 @@ function AuctionDetail() {
 
         if (isDuplicate) return prevBids;
 
-        // Tambahkan bid baru di urutan pertama (terbaru)
         const updatedBids = [bidData, ...prevBids];
 
-        // Update current price
         setCurrentPrice(bidData.amount);
         setLastBidTime(bidData.created_at);
 
-        // Update auction bid count
         setAuction((prev) =>
           prev
             ? {
@@ -59,7 +53,6 @@ function AuctionDetail() {
         return updatedBids;
       });
 
-      // Notification (optional)
       if (
         currentUser?.user_id !== bidData.user_id &&
         Notification.permission === "granted"
@@ -82,16 +75,16 @@ function AuctionDetail() {
   const handleAuctionEnded = useCallback(() => {
     setAuction((prev) => (prev ? { ...prev, status_auction: "ended" } : null));
     alert("Lelang telah berakhir!");
-    // fetchAuctionData();
   }, []);
 
   const handleAuctionCancelled = useCallback(() => {
+    console.log("LELANG DIBATALKAN");
     setAuction((prev) =>
       prev ? { ...prev, status_auction: "cancelled" } : null
     );
     alert("Lelang telah dibatalkan!");
-    navigate("/auction");
-  }, [navigate]);
+    // navigate("/auction");
+  }, []);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -160,14 +153,12 @@ function AuctionDetail() {
       return;
     }
 
-    // Validasi bid amount
     const minBid = currentPrice + auction.min_increment;
     if (bidAmount < minBid) {
       alert(`Bid minimal adalah Rp ${minBid.toLocaleString()}`);
       return;
     }
 
-    // Validasi saldo
     if (bidAmount > currentUser.balance) {
       alert("Saldo tidak mencukupi");
       return;
@@ -180,7 +171,6 @@ function AuctionDetail() {
         auctionId,
         userId: currentUser.user_id,
         amount: bidAmount,
-        // server akan ambil bidderName dari database
       };
 
       console.log("Sending bid via socket:", payload);
@@ -267,17 +257,14 @@ function AuctionDetail() {
     }
   };
 
-  // Gunakan useEffect terpisah untuk socket
   useEffect(() => {
     if (!auctionId || !currentUser?.user_id) return;
 
     console.log(`[Frontend] Setting up socket for auction ${auctionId}`);
 
-    // Pastikan socket terhubung
     if (!socketManager.socket?.connected) {
       socketManager.connect("http://localhost:80");
 
-      // Tunggu koneksi
       socketManager.socket.once("connect", () => {
         setupSocketListeners();
       });
@@ -286,16 +273,13 @@ function AuctionDetail() {
     }
 
     function setupSocketListeners() {
-      // Join room
       socketManager.joinAuctionRoom(auctionId, currentUser.user_id);
 
-      // Setup listeners
       socketManager.on("new_bid", handleNewBid);
       socketManager.on("auction_updated", handleAuctionUpdate);
       socketManager.on("auction_ended", handleAuctionEnded);
       socketManager.on("auction_cancelled", handleAuctionCancelled);
 
-      // Tambahkan debug listener
       socketManager.on("auction_room_joined", (data) => {
         console.log(`[Frontend] Joined auction room:`, data);
       });
@@ -306,20 +290,14 @@ function AuctionDetail() {
     }
 
     return () => {
-      // Cleanup listeners
       socketManager.off("new_bid", handleNewBid);
       socketManager.off("auction_updated", handleAuctionUpdate);
       socketManager.off("auction_ended", handleAuctionEnded);
       socketManager.off("auction_cancelled", handleAuctionCancelled);
       socketManager.off("auction_room_joined");
       socketManager.off("error_message");
-
-      // Leave room jika perlu
-      if (auctionId && currentUser?.user_id) {
-        socketManager.leaveAuctionRoom(auctionId);
-      }
     };
-  }, [auctionId, currentUser?.user_id]); // ← hanya depend on user_id
+  }, [auctionId, currentUser?.user_id]);
 
   if (loading || !auction || !currentUser) {
     return (
@@ -333,8 +311,7 @@ function AuctionDetail() {
   }
 
   const isSeller = currentUser.user_id === auction.seller_id;
-  // console.log("currentUser user_id:", currentUser.user_id);
-  // console.log("auction seller_id:", auction.seller_id);
+
   const isActive = auction.status_auction === "active";
   const isScheduled = auction.status_auction === "scheduled";
   const hasBids = bids.length > 0;
@@ -356,9 +333,10 @@ function AuctionDetail() {
     }).format(amount);
   };
 
-  const winner = auction.status_auction === "ended" && bids.length > 0 
-    ? { name: bids[0].bidder_name, bid_amount: bids[0].amount }
-    : null;
+  const winner =
+    auction.status_auction === "ended" && bids.length > 0
+      ? { name: bids[0].bidder_name, bid_amount: bids[0].amount }
+      : null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -446,24 +424,42 @@ function AuctionDetail() {
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="text-center text-gray-600">
                   <p className="mb-2">Lelang belum dimulai</p>
-                  <p className="text-sm">Tunggu hingga lelang aktif untuk memasang bid</p>
+                  <p className="text-sm">
+                    Tunggu hingga lelang aktif untuk memasang bid
+                  </p>
                 </div>
               </div>
             ) : isHighestBidder ? (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="text-center">
                   <div className="mb-4">
-                    <svg className="w-16 h-16 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-16 h-16 mx-auto text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Anda Penawar Tertinggi!</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Anda Penawar Tertinggi!
+                  </h3>
                   <p className="text-gray-600 mb-4">
-                    Bid Anda saat ini: <span className="font-bold text-green-600">{formatCurrency(currentPrice)}</span>
+                    Bid Anda saat ini:{" "}
+                    <span className="font-bold text-green-600">
+                      {formatCurrency(currentPrice)}
+                    </span>
                   </p>
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                     <p className="text-sm text-yellow-800">
-                      Anda tidak dapat memasang bid lagi sampai ada penawar lain yang melebihi bid Anda
+                      Anda tidak dapat memasang bid lagi sampai ada penawar lain
+                      yang melebihi bid Anda
                     </p>
                   </div>
                 </div>
