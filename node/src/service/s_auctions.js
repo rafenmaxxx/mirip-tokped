@@ -90,10 +90,9 @@ export const AuctionsService = {
       [id]
     );
     return res.rows[0];
-  }, 
+  },
 
   async getByStoreId(storeId) {
-    
     const res = await db.query(
       `SELECT 
         a.auction_id,
@@ -142,34 +141,50 @@ export const AuctionsService = {
       [storeId]
     );
     return res.rows;
-  }, 
+  },
 
   async create(data) {
-    const { product_id, starting_price, current_price, min_increment, quantity, start_time, end_time } = data;
-    
+    const {
+      product_id,
+      starting_price,
+      current_price,
+      min_increment,
+      quantity,
+      start_time,
+      end_time,
+    } = data;
+
     const productRes = await db.query(
       `SELECT stock FROM products WHERE product_id = $1`,
       [product_id]
     );
-    
+
     if (productRes.rows.length === 0) {
-      throw new Error('Product not found');
+      throw new Error("Product not found");
     }
-    
+
     const currentStock = productRes.rows[0].stock;
     if (currentStock < quantity) {
-      throw new Error('Insufficient stock');
+      throw new Error("Insufficient stock");
     }
-    
+
     await db.query(
       `UPDATE products SET stock = stock - $1 WHERE product_id = $2`,
       [quantity, product_id]
     );
-    
+
     const res = await db.query(
       `INSERT INTO auctions (product_id, starting_price, current_price, min_increment, quantity, start_time, end_time)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [product_id, starting_price, current_price, min_increment, quantity, start_time, end_time]
+      [
+        product_id,
+        starting_price,
+        current_price,
+        min_increment,
+        quantity,
+        start_time,
+        end_time,
+      ]
     );
     return res.rows[0];
   },
@@ -205,9 +220,8 @@ export const AuctionsService = {
 
       const auction = auctionRes.rows[0];
 
-      // 🚨 JIKA SUDAH ENDED — STOP DISINI
       if (auction.status_auction === "ended") {
-        return auction; // tidak proses ulang
+        return auction;
       }
 
       const bidRes = await db.query(
@@ -266,6 +280,7 @@ export const AuctionsService = {
       );
 
       // BROADCAST SOCKET EVENT
+      console.log("[BC] EMIT AUCTION END");
       if (io) {
         const roomName = `auction-room-${id}`;
         io.to(roomName).emit("auction_ended", {
@@ -279,7 +294,77 @@ export const AuctionsService = {
       return updateRes.rows[0];
     } catch (error) {
       console.error("Stop Auction Error:", error);
-      throw error; // lempar ke controller
+      throw error;
     }
+  },
+
+  async cancel(id, io = null, reason = "Dibatalkan oleh penjual") {
+    const auctionRes = await db.query(
+      `SELECT product_id, quantity FROM auctions WHERE auction_id = $1`,
+      [id]
+    );
+
+    if (auctionRes.rows.length === 0) {
+      throw new Error("Auction not found");
+    }
+
+    const auction = auctionRes.rows[0];
+
+    const bidsRes = await db.query(
+      `SELECT bidder_id, bid_amount FROM auction_bids WHERE auction_id = $1`,
+      [id]
+    );
+
+    const allBids = bidsRes.rows;
+
+    for (const bid of allBids) {
+      await db.query(
+        `UPDATE users SET balance = balance + $1 WHERE user_id = $2`,
+        [bid.bid_amount, bid.bidder_id]
+      );
+      console.log(`Refunded ${bid.bid_amount} to user ${bid.bidder_id}`);
+    }
+
+    await db.query(
+      `UPDATE products SET stock = stock + $1 WHERE product_id = $2`,
+      [auction.quantity, auction.product_id]
+    );
+
+    const updateRes = await db.query(
+      `UPDATE auctions 
+     SET status_auction = 'cancelled', 
+         end_time = NOW()
+     WHERE auction_id = $1 
+     RETURNING *`,
+      [id]
+    );
+
+    const cancelledAuction = updateRes.rows[0];
+
+    // 4. BROADCAST SOCKET EVENT
+    if (io) {
+      const roomName = `auction-room-${id}`;
+      console.log(`[CANCEL] Broadcasting to room: ${roomName}`);
+
+      io.to(roomName).emit("auction_cancelled", {
+        auctionId: id,
+        status: "cancelled",
+        cancelledAt: new Date().toISOString(),
+        reason: reason,
+        totalRefunds: allBids.length,
+        totalRefundAmount: allBids.reduce(
+          (sum, bid) => sum + bid.bid_amount,
+          0
+        ),
+        message: `Auction cancelled: ${reason}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return {
+      ...cancelledAuction,
+      refunds_count: allBids.length,
+      refunds_total: allBids.reduce((sum, bid) => sum + bid.bid_amount, 0),
+    };
   },
 };
