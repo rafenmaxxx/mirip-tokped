@@ -15,7 +15,10 @@ router.post("/", requireAuctionEnabled, AuctionsController.create);
 router.post("/:id/stop", requireAuctionEnabled, (req, res) =>
   AuctionsController.stop(req, res)
 );
+router.post("/:id/cancel", AuctionsController.cancel);
 
-router.delete("/:id", requireAuctionEnabled, AuctionsController.remove);
+router.delete("/:id", requireAuctionEnabled, (req, res) =>
+  AuctionsController.remove(req, res)
+);
 
 export default router;
