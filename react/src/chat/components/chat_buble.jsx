@@ -58,18 +58,18 @@ const ChatBubble = ({
   const getStatusText = () => {
     if (!mine) return "";
 
-    switch (status) {
-      case "sending":
-        return "Mengirim...";
-      case "sent":
-        return "Terkirim";
-      case "delivered":
-        return "Terkirim";
-      case "read":
-        return "Dibaca";
-      default:
-        return "";
-    }
+    // switch (status) {
+    //   case "sending":
+    //     return "Mengirim...";
+    //   case "sent":
+    //     return "Terkirim";
+    //   case "delivered":
+    //     return "Terkirim";
+    //   case "read":
+    //     return "Dibaca";
+    //   default:
+    //     return "";
+    // }
   };
 
   if (type === "system") {
