@@ -5,7 +5,7 @@ const ChatInput = ({
   onSendMessage,
   onTypingChange,
   disabled,
-  isMobile,
+
   initialMessagePreview,
 }) => {
   const [input, setInput] = useState("");

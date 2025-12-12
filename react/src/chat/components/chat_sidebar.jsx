@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import ReactDOM from "react-dom";
 
 const IconUser = ({ className }) => (
   <svg viewBox="0 0 24 24" className={className}>
@@ -208,6 +209,16 @@ function ChatSidebar({
   );
 
   const handleNewChat = async (storeId) => {
+    // If a room for this store already exists in the sidebar, just select it
+    const existingRoom = sortedRooms.find((r) => r.store_id === storeId);
+    if (existingRoom) {
+      setShowNewChatModal(false);
+      setNewChatSearch("");
+      // notify parent to select the existing room
+      onSelect?.(existingRoom);
+      return;
+    }
+
     try {
       const res = await fetch("/node/api/chat/start", {
         method: "POST",
@@ -228,9 +239,11 @@ function ChatSidebar({
           last_message: { content: "Percakapan dimulai" },
         };
 
+        // let parent add the new room to its list and then select it
         onNewRoomCreated?.(formattedRoom);
         setShowNewChatModal(false);
         setNewChatSearch("");
+        onSelect?.(formattedRoom);
       } else {
         const error = await res.json();
         alert(`Gagal memulai chat baru: ${error.message}`);
@@ -440,9 +453,26 @@ function ChatSidebar({
                 }`}
               >
                 {/* Avatar */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                    <IconUser className="w-6 h-6 text-gray-500" />
+                <div className="relative shrink-0">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                    {currentUser?.role === "BUYER" &&
+                    (room.store_logo || room.store_logo_path) ? (
+                      <img
+                        src={
+                          "/api/image?file=" +
+                          encodeURIComponent(
+                            room.store_logo_path || room.store_logo
+                          )
+                        }
+                        alt={room.store_name || "Toko"}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <IconUser className="w-6 h-6 text-gray-500" />
+                    )}
                   </div>
 
                   {/* Unread Indicator (dot) */}
@@ -469,7 +499,7 @@ function ChatSidebar({
 
                     {/* Unread Badge atau Status Ikon */}
                     {unreadCount > 0 ? (
-                      <span className="ml-2 bg-green-600 text-white text-xs font-medium rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
+                      <span className="ml-2 bg-green-600 text-white text-xs font-medium rounded-full min-w-5 h-5 flex items-center justify-center px-1.5">
                         {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     ) : (
@@ -494,109 +524,113 @@ function ChatSidebar({
         )}
       </div>
 
-      {/* New Chat Modal */}
-      {showNewChatModal && currentUser?.role === "BUYER" && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={(e) =>
-            e.target === e.currentTarget && setShowNewChatModal(false)
-          }
-        >
-          <div className="bg-white rounded-lg w-96 max-h-[80vh] flex flex-col shadow-xl">
-            <div className="p-4 border-b">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-lg">Mulai Chat Baru</h3>
-                <button
-                  onClick={() => setShowNewChatModal(false)}
-                  className="text-gray-500 hover:text-gray-700 p-1"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="relative">
-                <IconSearch className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Cari toko..."
-                  value={newChatSearch}
-                  onChange={(e) => setNewChatSearch(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                  autoFocus
-                />
-                {newChatSearch && (
+      {/* New Chat Modal rendered via portal so it covers the entire viewport */}
+      {showNewChatModal &&
+        currentUser?.role === "BUYER" &&
+        ReactDOM.createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            onClick={(e) =>
+              e.target === e.currentTarget && setShowNewChatModal(false)
+            }
+          >
+            <div className="bg-white w-full h-full md:w-3/4 md:h-3/4 md:rounded-lg md:max-w-4xl md:max-h-[90vh] overflow-auto shadow-xl p-4">
+              <div className="p-2 border-b mb-2">
+                <div className="flex justify-between items-center mb-1">
+                  <h3 className="font-semibold text-lg">Mulai Chat Baru</h3>
                   <button
-                    onClick={() => setNewChatSearch("")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowNewChatModal(false)}
+                    className="text-gray-500 hover:text-gray-700 p-1"
                   >
                     ✕
                   </button>
+                </div>
+
+                <div className="relative">
+                  <IconSearch className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Cari toko..."
+                    value={newChatSearch}
+                    onChange={(e) => setNewChatSearch(e.target.value)}
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    autoFocus
+                  />
+                  {newChatSearch && (
+                    <button
+                      onClick={() => setNewChatSearch("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="overflow-y-auto flex-1 p-2">
+                {isLoadingStores ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Memuat daftar toko...</p>
+                  </div>
+                ) : getFilteredStores().length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <IconSearch className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500">
+                      {newChatSearch
+                        ? "Toko tidak ditemukan"
+                        : "Tidak ada toko tersedia"}
+                    </p>
+                  </div>
+                ) : (
+                  getFilteredStores().map((store) => (
+                    <div
+                      key={store.id}
+                      onClick={() => handleNewChat(store.id)}
+                      className="p-3 hover:bg-green-50 rounded-lg cursor-pointer flex items-center gap-3 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                        {store.logo ? (
+                          <img
+                            src={"/api/image?file=" + store.logo}
+                            alt={store.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <IconUser
+                            className="w-5 h-5 text-gray-500"
+                            style={{ display: store.logo ? "none" : "block" }}
+                          />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{store.name}</p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {store.category || "Toko"}
+                        </p>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
-            </div>
 
-            <div className="overflow-y-auto flex-1 p-2">
-              {isLoadingStores ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Memuat daftar toko...</p>
-                </div>
-              ) : getFilteredStores().length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconSearch className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-500">
-                    {newChatSearch
-                      ? "Toko tidak ditemukan"
-                      : "Tidak ada toko tersedia"}
-                  </p>
-                </div>
-              ) : (
-                getFilteredStores().map((store) => (
-                  <div
-                    key={store.id}
-                    onClick={() => handleNewChat(store.id)}
-                    className="p-3 hover:bg-green-50 rounded-lg cursor-pointer flex items-center gap-3 transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                      {store.logo ? (
-                        <img
-                          src={store.logo}
-                          alt={store.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                          }}
-                        />
-                      ) : null}
-                      <IconUser
-                        className="w-5 h-5 text-gray-500"
-                        style={{ display: store.logo ? "none" : "block" }}
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{store.name}</p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {store.category || "Toko"}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
+              <div className="p-2 border-t mt-2">
+                <button
+                  onClick={() => setShowNewChatModal(false)}
+                  className="w-full py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Batal
+                </button>
+              </div>
             </div>
-
-            <div className="p-4 border-t">
-              <button
-                onClick={() => setShowNewChatModal(false)}
-                className="w-full py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Batal
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

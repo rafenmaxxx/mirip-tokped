@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ConnectionStatus = ({ status }) => {
   const statusConfig = {
@@ -48,17 +48,7 @@ const ChatHeader = ({ room, currentUser, isTyping, connectionStatus }) => {
     <div className="p-4 border-b border-gray-200 bg-white">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-            <svg
-              className="w-6 h-6 text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-            </svg>
-          </div>
+          <StoreAvatar storeId={room.store_id} currentUser={currentUser} />
           <div>
             <p className="font-semibold">{getDisplayName()}</p>
             <div className="flex items-center gap-2">
@@ -79,3 +69,55 @@ const ChatHeader = ({ room, currentUser, isTyping, connectionStatus }) => {
 };
 
 export default ChatHeader;
+
+const StoreAvatar = ({ storeId, size = 40, currentUser }) => {
+  const [logoPath, setLogoPath] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchLogo = async () => {
+      if (!storeId) return;
+      try {
+        const res = await fetch(
+          `/api/detail_store?store_id=${encodeURIComponent(storeId)}`
+        );
+        const json = await res.json();
+        if (mounted && json?.status === "success") {
+          setLogoPath(json.data?.store_logo_path || null);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchLogo();
+    return () => {
+      mounted = false;
+    };
+  }, [storeId]);
+
+  if (logoPath && currentUser.user_id != storeId) {
+    const url = `/api/image?file=${encodeURIComponent(logoPath)}`;
+    return (
+      <img
+        src={url}
+        alt="store logo"
+        className="rounded-full object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
+  return (
+    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+      <svg
+        className="w-6 h-6 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+      </svg>
+    </div>
+  );
+};
