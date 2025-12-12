@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ProductSelector from "./ProductSelector";
+import { showToast } from "../../lib/toast";
 
 const getImageUrl = (path) => {
   return path && path !== "" ? `/api/image?file=${path}` : "no-image.png";
@@ -148,11 +149,12 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
         const now = new Date();
         
         if (startTimeObj <= now) {
-          alert("Lelang berhasil dibuat dan akan dimulai segera!");
+          // alert("Lelang berhasil dibuat dan akan dimulai segera!");
+          showToast("Lelang berhasil dibuat dan akan dimulai segera!", "success");
         } else {
-          const diffMs = startTimeObj - now;
-          const diffMins = Math.floor(diffMs / 60000);
-          alert(`Lelang berhasil dijadwalkan dan akan dimulai dalam ${diffMins} menit!`);
+          // const diffMs = startTimeObj - now;
+          // const diffMins = Math.floor(diffMs / 60000);
+          showToast(`Lelang berhasil dibuat!`, "success");
         }
         onSuccess();
       } else {

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AuctionList from "./components/AuctionList";
 import CreateAuctionModal from "./components/CreateAuctionModal";
+import { showToast } from "../lib/toast";
 
 function AuctionManage() {
   const navigate = useNavigate();
@@ -48,7 +49,8 @@ function AuctionManage() {
       console.log("Fetched store data:", storeData);
       
       if (!storeData.store_id) {
-        alert("Anda belum memiliki toko. Silakan buat toko terlebih dahulu.");
+        // alert("Anda belum memiliki toko. Silakan buat toko terlebih dahulu.");
+        showToast("Anda belum memiliki toko. Silakan buat toko terlebih dahulu.", "warning");
         navigate("/");
         return;
       }
@@ -75,7 +77,8 @@ function AuctionManage() {
       
     } catch (error) {
       console.error("Error fetching data:", error);
-      alert("Gagal memuat data: " + error.message);
+      // alert("Gagal memuat data: " + error.message);
+      showToast("Gagal memuat data: " + error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -83,7 +86,8 @@ function AuctionManage() {
 
   const handleCreateAuction = () => {
     if (activeAuction) {
-      alert("Anda sudah memiliki lelang yang sedang berjalan. Hentikan lelang tersebut terlebih dahulu.");
+      // alert("Anda sudah memiliki lelang yang sedang berjalan. Hentikan lelang tersebut terlebih dahulu.");
+      showToast("Anda sudah memiliki lelang yang sedang berjalan. Hentikan lelang tersebut terlebih dahulu.", "warning");
       return;
     }
     setShowCreateModal(true);
