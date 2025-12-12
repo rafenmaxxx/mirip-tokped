@@ -553,10 +553,10 @@ async function unsubscribePush() {
       console.log("Unsubscribe result:", result);
       
       if (result) {
-        renderToast("Berhasil berhenti dari notifikasi push", "success");
+        renderToast("berhasil unsubscribed!", "success");
         return true;
       } else {
-        renderToast("Gagal unsubscribe", "error");
+        renderToast("gagal unsubscribe", "error");
         return false;
       }
     } else {
