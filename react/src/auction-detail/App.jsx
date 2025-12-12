@@ -94,13 +94,16 @@ function AuctionDetail() {
           throw new Error(`Failed to fetch auction: ${auctionRes.status}`);
         if (!bidsRes.ok)
           throw new Error(`Failed to fetch bids: ${bidsRes.status}`);
-        if (!userRes.ok)
-          throw new Error(`Failed to fetch user: ${userRes.status}`);
 
-        const [auctionData, bidsData, userData] = await Promise.all([
+        // User fetch might fail for guest (not logged in) - this is OK
+        let userData = null;
+        if (userRes.ok) {
+          userData = await userRes.json();
+        }
+
+        const [auctionData, bidsData] = await Promise.all([
           auctionRes.json(),
           bidsRes.json(),
-          userRes.json(),
         ]);
 
         const bidsArray = Array.isArray(bidsData)
@@ -109,7 +112,8 @@ function AuctionDetail() {
 
         setAuction(auctionData);
         setBids(bidsArray);
-        setCurrentUser(userData.data);
+        // Set currentUser to null if guest (not logged in)
+        setCurrentUser(userData?.data || null);
 
         const initialPrice =
           bidsArray.length > 0
@@ -301,7 +305,7 @@ function AuctionDetail() {
     };
   }, [auctionId, currentUser?.user_id]);
 
-  if (loading || !auction || !currentUser) {
+  if (loading || !auction) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -312,13 +316,13 @@ function AuctionDetail() {
     );
   }
 
-  const isSeller = currentUser.user_id === auction.seller_id;
+  const isSeller = currentUser?.user_id === auction.seller_id;
 
   const isActive = auction.status_auction === "active";
   const isScheduled = auction.status_auction === "scheduled";
   const hasBids = bids.length > 0;
-  const isHighestBidder = hasBids && bids[0].bidder_id === currentUser.user_id;
-  const canBid = !isSeller && isActive && !isHighestBidder;
+  const isHighestBidder = currentUser && hasBids && bids[0].bidder_id === currentUser.user_id;
+  const canBid = currentUser && !isSeller && isActive && !isHighestBidder;
 
   const product = {
     name: auction.product_name,
@@ -405,7 +409,7 @@ function AuctionDetail() {
 
             <BidHistory
               bids={bids}
-              currentUserId={currentUser.user_id}
+              currentUserId={currentUser?.user_id || null}
               totalBidders={auction.bid_amount || 0}
             />
           </div>
@@ -464,6 +468,38 @@ function AuctionDetail() {
                       yang melebihi bid Anda
                     </p>
                   </div>
+                </div>
+              </div>
+            ) : !currentUser ? (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="text-center">
+                  <div className="mb-4">
+                    <svg
+                      className="w-16 h-16 mx-auto text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Login untuk Ikut Lelang
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Anda harus login terlebih dahulu untuk dapat memasang bid
+                  </p>
+                  <button
+                    onClick={() => window.location.href = '/login'}
+                    className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Login Sekarang
+                  </button>
                 </div>
               </div>
             ) : canBid ? (
