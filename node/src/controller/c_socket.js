@@ -90,7 +90,7 @@ class SocketController {
         product_id: product_id || null,
       });
 
-      const targetId = buyerId;
+      let targetId = buyerId;
       if (buyerId == sender_id) {
         targetId = storeId;
       }
