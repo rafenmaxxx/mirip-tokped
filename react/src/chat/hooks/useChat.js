@@ -399,7 +399,7 @@ export const useChat = (user) => {
 
   // Handle sending message
   const sendMessage = useCallback(
-    (input, messageType = "text") => {
+    async (input, messageType = "text") => {
       if (!user || !selectedRoom) {
         console.error("Cannot send - missing requirements");
         return false;
@@ -481,7 +481,91 @@ export const useChat = (user) => {
       };
 
       const success = socketManager.sendMessage(socketData);
-      return success;
+      if (success) return true;
+
+      // Fallback to REST API if socket is not connected
+      try {
+        const res = await fetch("/node/api/chat/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            store_id: store_id,
+            buyer_id: buyer_id,
+            message_type: messageType,
+            content: content,
+            product_id: product_id,
+          }),
+        });
+
+        if (res.ok) {
+          const saved = await res.json();
+
+          // Replace optimistic message with saved message
+          setRoomMessages((prev) => {
+            const current = prev[roomKey] || [];
+            const optimisticIndex = current.findIndex(
+              (m) => m.status === "sending" && m.mine === true
+            );
+
+            if (optimisticIndex !== -1) {
+              const updated = [...current];
+              const formatted = formatMessage(saved, user);
+              updated[optimisticIndex] = formatted || updated[optimisticIndex];
+              return { ...prev, [roomKey]: updated };
+            }
+
+            return prev;
+          });
+
+          // Also update rooms list with last_message_info
+          setRooms((prev) => {
+            const roomIndex = prev.findIndex(
+              (r) => r.store_id === store_id && r.buyer_id === buyer_id
+            );
+
+            if (roomIndex > -1) {
+              const updatedRooms = [...prev];
+              const room = { ...updatedRooms[roomIndex] };
+              room.last_message_at =
+                saved.created_at || new Date().toISOString();
+              room.last_message_content =
+                saved.message_type === "item_preview"
+                  ? `📦 ${JSON.parse(saved.content).product_name}`
+                  : saved.message_type === "image"
+                  ? "📷 Gambar"
+                  : saved.content;
+              updatedRooms.splice(roomIndex, 1);
+              updatedRooms.unshift(room);
+              return updatedRooms;
+            }
+            return prev;
+          });
+
+          return true;
+        }
+      } catch (err) {
+        console.error("Fallback REST send failed:", err);
+      }
+
+      // If both socket and REST failed, mark message as failed (leave optimistic)
+      setRoomMessages((prev) => {
+        const current = prev[roomKey] || [];
+        const optimisticIndex = current.findIndex(
+          (m) => m.status === "sending" && m.mine === true
+        );
+        if (optimisticIndex !== -1) {
+          const updated = [...current];
+          updated[optimisticIndex] = {
+            ...updated[optimisticIndex],
+            status: "failed",
+          };
+          return { ...prev, [roomKey]: updated };
+        }
+        return prev;
+      });
+
+      return false;
     },
     [user, selectedRoom, getRoomKey]
   );
