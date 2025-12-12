@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { showToast } from "../../lib/toast";
-import Toggle from "./toggle";
 
 const GlobalFlags = () => {
   const [flags, setFlags] = useState({
@@ -191,11 +190,17 @@ const GlobalFlags = () => {
         <div className="space-y-4">
           {/* Auction Feature */}
           <div className="pb-4">
-            <Toggle
-              label="Auction Feature"
-              checked={flags.auction_enabled}
-              onChange={() => handleToggle("auction_enabled")}
-            />
+            <label className="flex items-center space-x-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={flags.auction_enabled}
+                onChange={() => handleToggle("auction_enabled")}
+                className="w-5 h-5 rounded border-gray-300 text-[#00AA5B] focus:ring-[#00AA5B] focus:ring-2 cursor-pointer transition-all"
+              />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-[#00AA5B] transition-colors">
+                Auction Feature
+              </span>
+            </label>
 
             {!flags.auction_enabled && (
               <div className="mt-2 animate-fadeIn">
@@ -226,11 +231,17 @@ const GlobalFlags = () => {
 
           {/* Live Chat System */}
           <div className="pb-4">
-            <Toggle
-              label="Live Chat System"
-              checked={flags.chat_enabled}
-              onChange={() => handleToggle("chat_enabled")}
-            />
+            <label className="flex items-center space-x-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={flags.chat_enabled}
+                onChange={() => handleToggle("chat_enabled")}
+                className="w-5 h-5 rounded border-gray-300 text-[#00AA5B] focus:ring-[#00AA5B] focus:ring-2 cursor-pointer transition-all"
+              />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-[#00AA5B] transition-colors">
+                Live Chat System
+              </span>
+            </label>
 
             {!flags.chat_enabled && (
               <div className="mt-2 animate-fadeIn">
@@ -261,11 +272,17 @@ const GlobalFlags = () => {
 
           {/* Checkout Process */}
           <div className="pb-2">
-            <Toggle
-              label="Checkout Process"
-              checked={flags.checkout_enabled}
-              onChange={() => handleToggle("checkout_enabled")}
-            />
+            <label className="flex items-center space-x-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={flags.checkout_enabled}
+                onChange={() => handleToggle("checkout_enabled")}
+                className="w-5 h-5 rounded border-gray-300 text-[#00AA5B] focus:ring-[#00AA5B] focus:ring-2 cursor-pointer transition-all"
+              />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-[#00AA5B] transition-colors">
+                Checkout Process
+              </span>
+            </label>
 
             {!flags.checkout_enabled && (
               <div className="mt-2 animate-fadeIn">
