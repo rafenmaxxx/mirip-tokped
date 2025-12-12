@@ -8,8 +8,6 @@ const ProtectedAdminRoute = ({ redirectUrl = "/unauthorized" }) => {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        console.log("Checking admin authentication with JWT...");
-
         const token = localStorage.getItem("accessToken");
 
         if (!token) {
@@ -18,8 +16,6 @@ const ProtectedAdminRoute = ({ redirectUrl = "/unauthorized" }) => {
           setLoading(false);
           return;
         }
-
-        console.log("Token found, verifying...");
 
         const res = await fetch("http://localhost:80/node/api/auth/me", {
           headers: {
