@@ -37,23 +37,19 @@ function Auction() {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 4;
 
-  // Check if user is SELLER (should not access auction page)
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        // Try to get user from PHP session (for BUYER/SELLER)
         let userResponse = await fetch("http://localhost:80/node/api/user/me", {
           method: "GET",
           credentials: "include"
         });
-        
-        // for guest
+
         if (userResponse.status === "error" || !userResponse.ok) {
           console.log("Guest user, allowing access to auction page");
           return;
         }
   
-        // If PHP session fails, try JWT auth (for ADMIN)
         if (!userResponse.ok) {
           const token = localStorage.getItem("accessToken");
           if (token) {
@@ -70,13 +66,11 @@ function Auction() {
         const userId = userData.data?.user_id || userData.data?.id || userData.user_id || userData.id;
         const userRole = userData.data?.role || userData.role;
 
-        // Block SELLER from accessing auction page
         if (userRole === "SELLER") {
           window.location.href = "http://localhost/unauthorized";
           return;
         }
 
-        // Block ADMIN from accessing auction page (redirect to login/admin dashboard)
         if (userRole === "ADMIN") {
           window.location.href = "http://localhost/login";
           return;
@@ -87,7 +81,6 @@ function Auction() {
           return;
         }
 
-        // Check if auction is allowed for this logged-in BUYER
         const flagResponse = await fetch(`http://localhost:80/node/api/flags/auction/allowed/${userId}`, {
           method: "GET",
           credentials: "include"

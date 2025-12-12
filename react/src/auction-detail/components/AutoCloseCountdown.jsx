@@ -6,7 +6,6 @@ function AutoCloseCountdown({ lastBidTime, onAutoClose }) {
   const hasCalledAutoClose = useRef(false);
 
   useEffect(() => {
-    // Jika tidak ada bid sama sekali, tampilkan frozen countdown
     if (!lastBidTime) {
       setSecondsLeft(15);
       setIsFrozen(true);
@@ -14,7 +13,6 @@ function AutoCloseCountdown({ lastBidTime, onAutoClose }) {
       return;
     }
 
-    // Ada bid, mulai countdown
     setIsFrozen(false);
 
     const checkCountdown = () => {

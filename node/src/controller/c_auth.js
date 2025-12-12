@@ -98,7 +98,7 @@ export const AuthController = {
   async getCurrentUser(req, res, next) {
     try {
       console.log("GET /auth/me called");
-      console.log("User from JWT:", req.user);
+      // console.log("User from JWT:", req.user);
 
       if (!req.user || !req.user.id) {
         return res.status(401).json({

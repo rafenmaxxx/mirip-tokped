@@ -21,13 +21,11 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
   const [serverTime, setServerTime] = useState(null);
 
   useEffect(() => {
-    // Fetch server time first
     const fetchServerTime = async () => {
       try {
         const timestamp = await getDbNow();
         setServerTime(timestamp);
-        
-        // Set minimum datetime to current time from server
+
         const now = new Date(timestamp);
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -38,7 +36,6 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
         const minDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
         setMinDateTime(minDateTimeString);
         
-        // Set default start time to current time + 5 minutes
         const defaultStart = new Date(timestamp + 5 * 60000);
         const defaultYear = defaultStart.getFullYear();
         const defaultMonth = String(defaultStart.getMonth() + 1).padStart(2, '0');
@@ -137,7 +134,6 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
       const auctionEndTime = new Date(auctionStartTime);
       auctionEndTime.setFullYear(auctionEndTime.getFullYear() + 100);
 
-      // Adjust for timezone offset to keep local time instead of converting to UTC
       const offset = new Date().getTimezoneOffset();
       const startTimeAdjusted = new Date(auctionStartTime.getTime() - offset * 60 * 1000);
       const endTimeAdjusted = new Date(auctionEndTime.getTime() - offset * 60 * 1000);

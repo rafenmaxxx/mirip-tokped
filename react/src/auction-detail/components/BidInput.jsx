@@ -39,7 +39,6 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
       return;
     }
 
-    // All validations passed
     onPlaceBid(amount);
     setBidAmount("");
   };
@@ -50,7 +49,6 @@ function BidInput({ currentPrice, minIncrement, userBalance, onPlaceBid, isLoadi
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    // Hanya izinkan angka, jika ada karakter non-angka maka kosongkan
     if (value === "" || /^\d+$/.test(value)) {
       setBidAmount(value);
     }

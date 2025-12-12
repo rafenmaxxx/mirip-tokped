@@ -82,12 +82,6 @@ function AuctionInformation({ auction, currentPrice }) {
           <span className="text-lg font-semibold">{formatCurrency(auction.min_increment)}</span>
         </div>
 
-        {/* Countdown Timer */}
-        {/* <div className="py-4 border-b border-gray-200">
-          <span className="text-gray-600 block mb-2">Waktu Tersisa</span>
-          <CountdownTimer endTime={auction.end_time} />
-        </div> */}
-
         {/* Start Time */}
         <div className="flex justify-between items-center py-3 border-b border-gray-200">
           <span className="text-gray-600">Waktu Mulai</span>
