@@ -11,9 +11,34 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
   const [startingPrice, setStartingPrice] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [minIncrement, setMinIncrement] = useState("");
+  const [startTime, setStartTime] = useState("");
   const [duration, setDuration] = useState("60");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [minDateTime, setMinDateTime] = useState("");
+
+  useEffect(() => {
+    // Set minimum datetime to current time
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const minDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+    setMinDateTime(minDateTimeString);
+    
+    // Set default start time to current time + 5 minutes
+    const defaultStart = new Date(now.getTime() + 5 * 60000);
+    const defaultYear = defaultStart.getFullYear();
+    const defaultMonth = String(defaultStart.getMonth() + 1).padStart(2, '0');
+    const defaultDay = String(defaultStart.getDate()).padStart(2, '0');
+    const defaultHours = String(defaultStart.getHours()).padStart(2, '0');
+    const defaultMinutes = String(defaultStart.getMinutes()).padStart(2, '0');
+    
+    setStartTime(`${defaultYear}-${defaultMonth}-${defaultDay}T${defaultHours}:${defaultMinutes}`);
+  }, []);
 
   const handleProductSelect = (product) => {
     setSelectedProduct(product);
@@ -61,6 +86,19 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
       return false;
     }
 
+    if (!startTime) {
+      setError("Waktu mulai lelang harus diisi");
+      return false;
+    }
+
+    const selectedStartTime = new Date(startTime);
+    const now = new Date();
+
+    if (selectedStartTime < now) {
+      setError("Waktu mulai tidak boleh sebelum waktu sekarang");
+      return false;
+    }
+
     if (!duration || durationMinutes <= 0) {
       setError("Durasi lelang harus lebih dari 0 menit");
       return false;
@@ -80,8 +118,9 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
     try {
       setLoading(true);
 
-      const startTime = new Date();
-      const endTime = new Date(startTime.getTime() + parseInt(duration) * 60000);
+      const auctionStartTime = new Date(startTime);
+      const auctionEndTime = new Date(auctionStartTime);
+      auctionEndTime.setFullYear(auctionEndTime.getFullYear() + 100);
 
       const auctionData = {
         product_id: selectedProduct.product_id,
@@ -89,8 +128,8 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
         current_price: parseFloat(startingPrice),
         min_increment: parseFloat(minIncrement),
         quantity: parseInt(quantity),
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
+        start_time: auctionStartTime.toISOString(),
+        end_time: auctionEndTime.toISOString(),
       };
 
       const response = await fetch("http://localhost:80/node/api/auctions", {
@@ -105,7 +144,16 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Lelang berhasil dibuat dan akan dimulai segera!");
+        const startTimeObj = new Date(startTime);
+        const now = new Date();
+        
+        if (startTimeObj <= now) {
+          alert("Lelang berhasil dibuat dan akan dimulai segera!");
+        } else {
+          const diffMs = startTimeObj - now;
+          const diffMins = Math.floor(diffMs / 60000);
+          alert(`Lelang berhasil dijadwalkan dan akan dimulai dalam ${diffMins} menit!`);
+        }
         onSuccess();
       } else {
         setError(data.message || "Gagal membuat lelang");
@@ -124,6 +172,27 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return "-";
+    const date = new Date(dateTimeString);
+    return date.toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  };
+
+  const setQuickStartTime = (minutesFromNow) => {
+    const now = new Date();
+    const quickStart = new Date(now.getTime() + minutesFromNow * 60000);
+    const year = quickStart.getFullYear();
+    const month = String(quickStart.getMonth() + 1).padStart(2, '0');
+    const day = String(quickStart.getDate()).padStart(2, '0');
+    const hours = String(quickStart.getHours()).padStart(2, '0');
+    const minutes = String(quickStart.getMinutes()).padStart(2, '0');
+    
+    setStartTime(`${year}-${month}-${day}T${hours}:${minutes}`);
   };
 
   return (
@@ -187,10 +256,10 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                     </svg>
                     <div className="text-sm text-blue-800">
                       <p className="font-semibold mb-1">Informasi:</p>
-                      <p>• Lelang akan dimulai segera setelah dibuat</p>
+                      <p>• Lelang akan dimulai sesuai waktu yang Anda tentukan</p>
                       <p>• Lelang akan berakhir sesuai durasi yang ditentukan</p>
-                      <p>• Jika ada bid dalam 15 detik terakhir, waktu akan otomatis diperpanjang 15 detik</p>
-                      <p>• Hanya satu lelang yang dapat berjalan dalam satu waktu</p>
+                      <p>• Jika tidak ada bid dalam 15 detik, lelang akan otomatis berakhir</p>
+                      <p>• Hanya satu lelang yang dapat berjalan dalam satu waktu per toko</p>
                     </div>
                   </div>
                 </div>
@@ -269,6 +338,60 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Waktu Mulai Lelang <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    min={minDateTime}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Pilih tanggal dan waktu mulai lelang (tidak boleh sebelum sekarang)
+                  </p>
+                  <div className="mt-2 flex gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setQuickStartTime(0)}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      Sekarang
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickStartTime(5)}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      +5 menit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickStartTime(15)}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      +15 menit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickStartTime(30)}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      +30 menit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQuickStartTime(60)}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      +1 jam
+                    </button>
+                  </div>
+                </div>
+
+                {/* <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Durasi Lelang <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -340,10 +463,10 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                       24 jam
                     </button>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Preview */}
-                {startingPrice && minIncrement && duration && (
+                {startingPrice && minIncrement && duration && startTime && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <p className="text-sm font-semibold text-green-900 mb-2">Preview:</p>
                     <div className="text-sm text-green-800 space-y-1">
@@ -351,7 +474,9 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
                       <p>• Harga awal: <span className="font-bold">{formatCurrency(parseFloat(startingPrice))}</span></p>
                       <p>• Bid minimum berikutnya: <span className="font-bold">{formatCurrency(parseFloat(startingPrice) + parseFloat(minIncrement))}</span></p>
                       <p>• Setiap bid harus naik minimal: <span className="font-bold">{formatCurrency(parseFloat(minIncrement))}</span></p>
+                      <p>• Waktu mulai: <span className="font-bold">{formatDateTime(startTime)}</span></p>
                       <p>• Durasi lelang: <span className="font-bold">{parseInt(duration)} menit</span> ({parseInt(duration) >= 60 ? `≈ ${(parseInt(duration) / 60).toFixed(1)} jam` : '< 1 jam'})</p>
+                      <p>• Waktu berakhir (estimasi): <span className="font-bold">{formatDateTime(new Date(new Date(startTime).getTime() + parseInt(duration) * 60000))}</span></p>
                     </div>
                   </div>
                 )}
