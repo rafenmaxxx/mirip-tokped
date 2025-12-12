@@ -340,9 +340,17 @@ async function morphAuthBtn(data) {
           POST(
             "/api/logout",
             {},
-            (data) => {
+            async (data) => {
               if (data.status) {
                 renderToast("Berhasil Log Out", "success");
+                
+                // Check and unsubscribe properly with await
+                const isSubscribed = await checkSubscriptionStatus();
+                if (isSubscribed) {
+                  await unsubscribePush();
+                  console.log("User unsubscribed from push notifications on logout.");
+                }
+
                 morphAuthBtn({ status: "error" });
                 router.navigateTo("/login");
               } else {
@@ -579,4 +587,68 @@ export function InitNavbar() {
 
   // CEK USER DAH LOGIN APA BELUM
   GET("/api/auth", {}, morphAuthBtn, () => {});
+}
+
+async function unsubscribePush() {
+  try {
+    console.log("Starting unsubscribe process...");
+    
+    if (!("serviceWorker" in navigator)) {
+      console.error("Service Worker not supported");
+      renderToast("Browser tidak mendukung Service Worker", "error");
+      return false;
+    }
+    
+    const registration = await navigator.serviceWorker.getRegistration("/react/");
+    
+    if (!registration) {
+      console.log("No service worker registration found");
+      renderToast("Tidak ada subscription aktif", "warning");
+      return true; // Consider it success since there's nothing to unsubscribe
+    }
+    
+    const subscription = await registration.pushManager.getSubscription();
+    
+    if (subscription) {
+      console.log("Unsubscribing...", subscription.endpoint.substring(0, 50));
+      const result = await subscription.unsubscribe();
+      console.log("Unsubscribe result:", result);
+      
+      if (result) {
+        renderToast("berhasil unsubscribe!", "success");
+        return true;
+      } else {
+        renderToast("gagal unsubscribe", "error");
+        return false;
+      }
+    } else {
+      console.log("No subscription found");
+      renderToast("Tidak ada subscription aktif", "warning");
+      return true;
+    }
+  } catch (err) {
+    console.error("Unsubscribe failed:", err);
+    renderToast(`Gagal unsubscribe: ${err.message}`, "error");
+    return false;
+  }
+}
+
+// --- Check if user is subscribed ---
+async function checkSubscriptionStatus() {
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration("/react/");
+      if (!registration) {
+        console.log("No service worker registered");
+        return false;
+      }
+      const subscription = await registration.pushManager.getSubscription();
+      console.log("Subscription status:", subscription ? "Subscribed" : "Not subscribed");
+      return subscription !== null;
+    }
+    return false;
+  } catch (err) {
+    console.error("Error checking subscription:", err);
+    return false;
+  }
 }
