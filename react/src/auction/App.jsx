@@ -67,19 +67,11 @@ function Auction() {
         });
 
         const flagData = await flagResponse.json();
-
-        // Handle both error response and success response structure
         const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
         const reason = flagData.data?.reason || flagData.reason || "Fitur Lelang Produk sedang tidak tersedia";
         
         if (!isAllowed) {
-          // Determine scope: check if this is global or user-specific
-          const scope = reason.toLowerCase().includes("global") 
-            ? "global" 
-            : "user";
-          
-          // Navigate to feature-disabled page with query params
-          navigate(`/feature-disabled?feature=auction&reason=${encodeURIComponent(reason)}&scope=${scope}`);
+          navigate(`/feature-disabled?feature=auction&reason=${encodeURIComponent(reason)}`);
         }
       } catch (error) {
         console.error("Error checking auction access:", error);

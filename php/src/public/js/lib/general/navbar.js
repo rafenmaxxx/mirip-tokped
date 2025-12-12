@@ -15,6 +15,81 @@ function HandleSearchNavbar(param) {
   router.navigateTo("/home?search=" + param);
 }
 
+async function checkChatFeatureFlag(userId) {
+  try {
+    if (!userId) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const flagResponse = await fetch(
+      `/node/api/flags/chat/allowed/${userId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
+
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking chat access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
+
+async function checkAuctionFeatureFlag(userId) {
+  try {
+    if (!userId) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const flagResponse = await fetch(
+      `/node/api/flags/auction/allowed/${userId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
+
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking auction access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
+
+async function checkCheckoutFeatureFlag(userId) {
+  try {
+    if (!userId) {
+      return { isAllowed: true, reason: null };
+    }
+
+    const flagResponse = await fetch(
+      `/node/api/flags/checkout/allowed/${userId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
+
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking checkout access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
+
 export function InitCountCart() {
   GET(
     "/api/cart",
@@ -100,7 +175,7 @@ export function InitDropdown() {
   });
 }
 
-function morphAuthBtn(data) {
+async function morphAuthBtn(data) {
   const btn = document.getElementById("navbar-auth-btn");
   const chart = document.getElementById("navbar-chart");
   const balance = document.getElementById("balance-btn");
@@ -112,18 +187,36 @@ function morphAuthBtn(data) {
   const chat = document.getElementById("for-chat");
   const auction = document.getElementById("for-auction");
 
+  // sudah login
   if (data.status == "success") {
-    // udah login
+    // Check feature flags using user_id from data
+    const userId = data.data?.user_id || data.data?.id;
+    const chatAccess = await checkChatFeatureFlag(userId);
+    const auctionAccess = await checkAuctionFeatureFlag(userId);
+    const checkoutAccess = await checkCheckoutFeatureFlag(userId);
+
+    // responsive untuk buyer mobile
     const viewportWidth = window.innerWidth;
-    console.log(viewportWidth);
     if (data.data.role == "BUYER" && viewportWidth <= 480) {
       document.getElementById("balance-n").innerHTML = "";
       document.getElementById("userDropdown").innerHTML = "";
-      btn.innerHTML = ` <button class="btn btn-login" id="btn-profile">Profile</button>
-                <button class="btn btn-login" id="btn-orders">Order History</button>
-                <button class="btn btn-login" id="btn-logout">Logout</button>`;
-      chat.innerHTML = `<button class="btn btn-login" id="btn-chat">Chat</button>`;
-      auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+      btn.innerHTML = 
+        `<button class="btn btn-login" id="btn-profile">Profile</button>
+         <button class="btn btn-login" id="btn-orders">Order History</button>
+         <button class="btn btn-login" id="btn-logout">Logout</button>`;
+      
+      // Hide buttons if disabled
+      if (chatAccess.isAllowed) {
+        chat.innerHTML = `<button class="btn btn-login" id="btn-chat-navbar">Chat</button>`;
+      } else {
+        chat.innerHTML = "";
+      }
+      
+      if (auctionAccess.isAllowed) {
+        auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+      } else {
+        auction.innerHTML = "";
+      }
 
       document.getElementById("btn-profile").addEventListener("click", () => {
         router.navigateTo("/profile");
@@ -151,43 +244,75 @@ function morphAuthBtn(data) {
         console.log("Logout");
       });
 
-      document.getElementById("btn-chat").addEventListener("click", () => {
-        window.location.href = "/react/chat";
-      });
-
-      document.getElementById("btn-auction").addEventListener("click", () => {
-        window.location.href = "/react/auction";
-      });
-
-      chart.addEventListener("click", () => {
-        router.navigateTo("/cart");
-      });
+      if (checkoutAccess.isAllowed) {
+        chart.addEventListener("click", (e) => {
+          e.stopPropagation();
+          router.navigateTo("/cart");
+        });
+      } else {
+        chart.style.display = "none";
+      }
+      
       InitBalance();
       InitCountCart();
+    
+      // buyer desktop
     } else if (data.data.role == "BUYER") {
       InitDropdown();
-      chat.innerHTML = `<button class="btn btn-login" id="btn-chat">Chat</button>`;
-      auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
       
-      chart.addEventListener("click", () => {
-        menu.classList.remove("is-active");
-        router.navigateTo("/cart");
-      });
+      // Hide buttons if disabled
+      if (chatAccess.isAllowed) {
+        chat.innerHTML = `<button class="btn btn-login" id="btn-chat-navbar">Chat</button>`;
+      } else {
+        chat.innerHTML = "";
+      }
+      
+      if (auctionAccess.isAllowed) {
+        auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+      } else {
+        auction.innerHTML = "";
+      }
+      
+      if (checkoutAccess.isAllowed) {
+        chart.addEventListener("click", (e) => {
+          e.stopPropagation();
+          menu.classList.remove("is-active");
+          router.navigateTo("/cart");
+        });
+      } else {
+        chart.style.display = "none";
+      }
+      
       document.getElementById("balance-n").innerHTML = "";
       document.getElementById("dropdownToggle").innerHTML = data.data.name;
       InitBalance();
       InitCountCart();
+    
+      // seller
     } else if (data.data.role == "SELLER") {
       document.getElementById("userDropdown").innerHTML = "";
-      btn.innerHTML = `<button class="btn btn-login" id="btn-home">Dashboard</button><button class="btn btn-login" id="btn-profile">Profile</button>
+      btn.innerHTML = 
+      `<button class="btn btn-login" id="btn-home">Dashboard</button>
+       <button class="btn btn-login" id="btn-profile">Profile</button>
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
       chart.innerHTML = `<button class="btn btn-login" id="chartBtn">Produk</button>`;
-      chat.innerHTML = `<button class="btn btn-login" id="btn-chat">Chat</button>`;
-      auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+      
+      // Hide buttons if disabled
+      if (chatAccess.isAllowed) {
+        chat.innerHTML = `<button class="btn btn-login" id="btn-chat-navbar">Chat</button>`;
+      } else {
+        chat.innerHTML = "";
+      }
+      
+      if (auctionAccess.isAllowed) {
+        auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+      } else {
+        auction.innerHTML = "";
+      }
 
-      document.getElementById(
-        "for-order"
-      ).innerHTML = `<div id="order-hist"> <button class="btn btn-login" id="chartBtn">Order</button></div>`;
+      document.getElementById("for-order").innerHTML = 
+      `<div id="order-hist"> <button class="btn btn-login" id="chartBtn">Order</button></div>`;
+    
       chart.addEventListener("click", () => {
         menu.classList.remove("is-active");
         router.navigateTo("/seller/products");
@@ -206,6 +331,7 @@ function morphAuthBtn(data) {
       search.innerHTML = "";
       filter.innerHTML = "";
     }
+
     const logoutBtn = document.getElementById("btn-logout");
     logoutBtn.addEventListener("click", () => {
       showModalConfirmation(
@@ -237,30 +363,38 @@ function morphAuthBtn(data) {
       });
     }
     
-    const chatBtn = document.getElementById("btn-chat");
+    const chatBtn = document.getElementById("btn-chat-navbar");
     if (chatBtn) {
-      chatBtn.addEventListener("click", () => {
+      chatBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         window.location.href = "/react/chat";
       });
     }
 
     const auctionBtn = document.getElementById("btn-auction");
     if (auctionBtn) {
-      auctionBtn.addEventListener("click", () => {
-        window.location.href = "/react/auction";
+      auctionBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        
+        // Redirect berdasarkan role
+        if (data.data.role === "BUYER") {
+          window.location.href = "/react/auction";
+        } else if (data.data.role === "SELLER") {
+          window.location.href = "/react/auction-manage";
+        }
       });
     }
-  } else {
-    // blom login
 
-    btn.innerHTML = ` <a href="/login"><button class="btn btn-login">Login</button></a>
-        <a href="/register "><button class="btn btn-register">Register</button></a>`;
+  // blom login
+  } else {
+
+    btn.innerHTML = 
+    `<a href="/login"><button class="btn btn-login">Login</button></a>
+     <a href="/register "><button class="btn btn-register">Register</button></a>`;
     chart.innerHTML = "";
     balance.innerHTML = "";
     document.getElementById("balance-n").innerHTML = "";
     document.getElementById("userDropdown").innerHTML = "";
-
-    // Di dalam else block (blom login)
     document.getElementById("for-chat").innerHTML = "";
     document.getElementById("for-auction").innerHTML = "";
   }

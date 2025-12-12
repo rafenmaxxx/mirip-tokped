@@ -199,7 +199,7 @@ export default function Subscribe() {
               fontWeight: "600",
               letterSpacing: "-0.5px"
             }}>
-              Mengaktifkan Notifikasi Push
+              Mengaktifkan Notifikasi
             </h2>
             <p style={{ 
               color: "#6D7588", 

@@ -284,11 +284,7 @@ export async function InitCheckoutPage() {
   
   if (!checkoutAccess.isAllowed) {
     const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
-    const scope = reason.toLowerCase().includes("maintenance") || reason.toLowerCase().includes("global") 
-      ? "global" 
-      : "user";
-    
-    window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}&scope=${scope}`;
+    window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}`;
     return;
   }
 

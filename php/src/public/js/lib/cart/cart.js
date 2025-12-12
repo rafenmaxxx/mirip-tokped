@@ -509,11 +509,7 @@ function LoadSummary(data) {
           
           if (!checkoutAccess.isAllowed) {
             const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
-            const scope = reason.toLowerCase().includes("maintenance") || reason.toLowerCase().includes("global") 
-              ? "global" 
-              : "user";
-            
-            window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}&scope=${scope}`;
+            window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}`;
             return;
           }
 
@@ -606,7 +602,15 @@ function SummaryErr(err) {
   }
 }
 
-export function InitCartPage() {
+export async function InitCartPage() {
+  const checkoutAccess = await checkCheckoutFeatureFlag();
+  
+  if (!checkoutAccess.isAllowed) {
+    const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
+    window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}`;
+    return;
+  }
+
   GET("/api/cart", {}, LoadCartItems, CartItemsErr);
   GET("/api/cart", { action: "summary" }, LoadSummary, SummaryErr);
 }
