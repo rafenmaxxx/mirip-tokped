@@ -24,13 +24,13 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
 
     // Typing logic
     if (wasEmpty && !isEmpty && !isTypingRef.current) {
-      console.log("🚀 Start typing");
+      console.log(" Start typing");
       isTypingRef.current = true;
       onTypingChange?.(true);
     }
 
     if (!wasEmpty && isEmpty && isTypingRef.current) {
-      console.log("🛑 Stop typing (input cleared)");
+      console.log("Stop typing (input cleared)");
       isTypingRef.current = false;
       onTypingChange?.(false);
     }
@@ -39,7 +39,7 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
   const handleImageSelect = async (file) => {
     if (!file) return;
 
-    console.log("📸 Selected image:", file.name, file.type, file.size);
+    console.log("Selected image:", file.name, file.type, file.size);
 
     // Validasi file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -68,7 +68,7 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
       const formData = new FormData();
       formData.append("attachment", file);
 
-      console.log("📤 Uploading image to /api/attachment...");
+      console.log("Uploading image to /api/attachment...");
 
       const response = await fetch("/api/attachment", {
         method: "POST",
@@ -81,11 +81,11 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
       }
 
       const result = await response.json();
-      console.log("✅ Image uploaded successfully:", result);
+      console.log("Image uploaded successfully:", result);
 
       return result.data; // Return uploaded file data
     } catch (error) {
-      console.error("❌ Error uploading image:", error);
+      console.error("Error uploading image:", error);
       alert(`Failed to upload image: ${error.message}`);
       return null;
     } finally {
@@ -118,7 +118,7 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
 
     // Stop typing sebelum kirim
     if (isTypingRef.current) {
-      console.log("📤 Stop typing before send");
+      console.log("Stop typing before send");
       isTypingRef.current = false;
       onTypingChange?.(false);
     }
@@ -173,7 +173,7 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
   };
 
   const handleBlur = () => {
-    console.log("👁️ Input blurred, typing state unchanged");
+    console.log("Input blurred, typing state unchanged");
   };
 
   const handleAttachmentClick = () => {
