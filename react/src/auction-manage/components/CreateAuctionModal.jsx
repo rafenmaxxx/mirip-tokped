@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ProductSelector from "./ProductSelector";
 import { showToast } from "../../lib/toast";
+import { getDbNow } from "../../lib/dbTime";
 
 const getImageUrl = (path) => {
   return path && path !== "" ? `/api/image?file=${path}` : "no-image.png";
@@ -17,28 +18,41 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [minDateTime, setMinDateTime] = useState("");
+  const [serverTime, setServerTime] = useState(null);
 
   useEffect(() => {
-    // Set minimum datetime to current time
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    // Fetch server time first
+    const fetchServerTime = async () => {
+      try {
+        const timestamp = await getDbNow();
+        setServerTime(timestamp);
+        
+        // Set minimum datetime to current time from server
+        const now = new Date(timestamp);
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const minDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+        setMinDateTime(minDateTimeString);
+        
+        // Set default start time to current time + 5 minutes
+        const defaultStart = new Date(timestamp + 5 * 60000);
+        const defaultYear = defaultStart.getFullYear();
+        const defaultMonth = String(defaultStart.getMonth() + 1).padStart(2, '0');
+        const defaultDay = String(defaultStart.getDate()).padStart(2, '0');
+        const defaultHours = String(defaultStart.getHours()).padStart(2, '0');
+        const defaultMinutes = String(defaultStart.getMinutes()).padStart(2, '0');
+        
+        setStartTime(`${defaultYear}-${defaultMonth}-${defaultDay}T${defaultHours}:${defaultMinutes}`);
+      } catch (err) {
+        console.error("Error fetching server time:", err);
+      }
+    };
     
-    const minDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-    setMinDateTime(minDateTimeString);
-    
-    // Set default start time to current time + 5 minutes
-    const defaultStart = new Date(now.getTime() + 5 * 60000);
-    const defaultYear = defaultStart.getFullYear();
-    const defaultMonth = String(defaultStart.getMonth() + 1).padStart(2, '0');
-    const defaultDay = String(defaultStart.getDate()).padStart(2, '0');
-    const defaultHours = String(defaultStart.getHours()).padStart(2, '0');
-    const defaultMinutes = String(defaultStart.getMinutes()).padStart(2, '0');
-    
-    setStartTime(`${defaultYear}-${defaultMonth}-${defaultDay}T${defaultHours}:${defaultMinutes}`);
+    fetchServerTime();
   }, []);
 
   const handleProductSelect = (product) => {
@@ -93,7 +107,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
     }
 
     const selectedStartTime = new Date(startTime);
-    const now = new Date();
+    const now = new Date(serverTime);
 
     if (selectedStartTime < now) {
       setError("Waktu mulai tidak boleh sebelum waktu sekarang");
@@ -123,14 +137,19 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
       const auctionEndTime = new Date(auctionStartTime);
       auctionEndTime.setFullYear(auctionEndTime.getFullYear() + 100);
 
+      // Adjust for timezone offset to keep local time instead of converting to UTC
+      const offset = new Date().getTimezoneOffset();
+      const startTimeAdjusted = new Date(auctionStartTime.getTime() - offset * 60 * 1000);
+      const endTimeAdjusted = new Date(auctionEndTime.getTime() - offset * 60 * 1000);
+
       const auctionData = {
         product_id: selectedProduct.product_id,
         starting_price: parseFloat(startingPrice),
         current_price: parseFloat(startingPrice),
         min_increment: parseFloat(minIncrement),
         quantity: parseInt(quantity),
-        start_time: auctionStartTime.toISOString(),
-        end_time: auctionEndTime.toISOString(),
+        start_time: startTimeAdjusted.toISOString(),
+        end_time: endTimeAdjusted.toISOString(),
       };
 
       const response = await fetch("http://localhost:80/node/api/auctions", {
@@ -146,7 +165,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
 
       if (response.ok) {
         const startTimeObj = new Date(startTime);
-        const now = new Date();
+        const now = new Date(serverTime);
         
         if (startTimeObj <= now) {
           // alert("Lelang berhasil dibuat dan akan dimulai segera!");
@@ -186,7 +205,7 @@ function CreateAuctionModal({ onClose, onSuccess, userId, storeId }) {
   };
 
   const setQuickStartTime = (minutesFromNow) => {
-    const now = new Date();
+    const now = new Date(serverTime);
     const quickStart = new Date(now.getTime() + minutesFromNow * 60000);
     const year = quickStart.getFullYear();
     const month = String(quickStart.getMonth() + 1).padStart(2, '0');
