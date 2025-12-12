@@ -24,7 +24,7 @@ export const AuctionsService = {
        WHERE a.product_id = p.product_id
          AND p.store_id = $1
          AND a.status_auction IN ('scheduled', 'active')
-         AND NOW() >= a.end_time`,
+         AND a.winner_id IS NOT NULL`,
       [storeId]
     );
 
