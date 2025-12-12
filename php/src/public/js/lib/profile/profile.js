@@ -210,6 +210,24 @@ function renderProfile(data) {
         </form>
     </div>
 
+    <div class="notification-card">
+        <h2>Preferensi Notifikasi</h2>
+        <div class="notification-group">
+            <div class="notification-item">
+                <input type="checkbox" id="notif-chat" name="notif-chat" checked>
+                <label for="notif-chat">Notifikasi Chat</label>
+            </div>
+            <div class="notification-item">
+                <input type="checkbox" id="notif-lelang" name="notif-lelang" checked>
+                <label for="notif-lelang">Notifikasi Lelang</label>
+            </div>
+            <div class="notification-item">
+                <input type="checkbox" id="notif-pesanan" name="notif-pesanan" checked>
+                <label for="notif-pesanan">Notifikasi Pesanan</label>
+            </div>
+        </div>
+    </div>
+
     <div class="edit-card">
         <h2>Edit Profil</h2>
         <form id="edit-profile-form">
@@ -228,6 +246,10 @@ function renderProfile(data) {
                 <button type="button" id="change-password-btn-profile" class="btn-profile btn-profile-password">Ubah Password</button>
             </div>
         </form>
+    </div>
+
+    <div class="profile-image-card">
+        <img src="/img/user-minion.png" alt="User Profile" class="profile-minion-image">
     </div>
     `;
 
@@ -311,21 +333,32 @@ function sanitizeHTML(str) {
 }
 
 export function InitProfilePage() {
-  const profileContent = document.getElementById("profile-content");
-  showPendingToast();
-  GET(
-    "/api/user",
-    {},
-    (response) => {
-      if (response.status === "success" && response.data) {
-        renderProfile(response.data);
-        setupEditHandlers(response.data.user_id);
-      } else {
-        profileContent.innerHTML = `<p class="error-message">Gagal memuat data profil.</p>`;
-      }
-    },
-    () => {
-      profileContent.innerHTML = `<p class="error-message">Terjadi kesalahan saat memuat profil.</p>`;
+  // Tunggu sampai DOM selesai di-render
+  setTimeout(() => {
+    const profileContent = document.getElementById("profile-content");
+    
+    if (!profileContent) {
+      console.error("Element 'profile-content' tidak ditemukan");
+      // Coba lagi setelah delay lebih lama
+      setTimeout(InitProfilePage, 100);
+      return;
     }
-  );
+    
+    showPendingToast();
+    GET(
+      "/api/user",
+      {},
+      (response) => {
+        if (response.status === "success" && response.data) {
+          renderProfile(response.data);
+          setupEditHandlers(response.data.user_id);
+        } else {
+          profileContent.innerHTML = `<p class="error-message">Gagal memuat data profil.</p>`;
+        }
+      },
+      () => {
+        profileContent.innerHTML = `<p class="error-message">Terjadi kesalahan saat memuat profil.</p>`;
+      }
+    );
+  }, 0);
 }
