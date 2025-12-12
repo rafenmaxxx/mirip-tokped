@@ -8,12 +8,11 @@ import {
   showModalSpinnerInput,
 } from "../general/modal.js";
 
-// Check if checkout feature is enabled for current user
 async function checkCheckoutFeatureFlag() {
   try {
     const userResponse = await fetch("/node/api/user/me", {
       method: "GET",
-      credentials: "include"
+      credentials: "include",
     });
 
     if (!userResponse.ok) {
@@ -21,7 +20,7 @@ async function checkCheckoutFeatureFlag() {
     }
 
     const userData = await userResponse.json();
-    
+
     if (userData.status === "error") {
       return { isAllowed: true, reason: null };
     }
@@ -32,10 +31,13 @@ async function checkCheckoutFeatureFlag() {
       return { isAllowed: true, reason: null };
     }
 
-    const flagResponse = await fetch(`/node/api/flags/checkout/allowed/${userId}`, {
-      method: "GET",
-      credentials: "include"
-    });
+    const flagResponse = await fetch(
+      `/node/api/flags/checkout/allowed/${userId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
 
     const flagData = await flagResponse.json();
     const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
@@ -48,7 +50,7 @@ async function checkCheckoutFeatureFlag() {
   }
 }
 
-function LoadDetail(data) {
+function LoadDetail(data, productId) {
   const res = data.data;
   const price = res.price.toLocaleString("id-ID", {
     style: "currency",
@@ -82,6 +84,72 @@ function LoadDetail(data) {
   storeBtn.addEventListener("click", () => {
     router.navigateTo("/store?store_id=" + res.store_id);
   });
+
+  ChangeInnerHtmlById(
+    "btn-chat",
+    `<button class="visit-store-btn" id="chatPenjualBtn">Chat Penjual</button>`
+  );
+  const chatBtn = document.getElementById("chatPenjualBtn");
+  if (chatBtn) {
+    chatBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      GET(
+        "/api/auth",
+        {},
+        async (authData) => {
+          if (authData.status !== "success") {
+            showModalConfirmation(
+              "Login untuk memulai chat dengan penjual 1",
+              () => {
+                router.navigateTo("/login");
+              },
+              () => {}
+            );
+            return;
+          }
+
+          POST(
+            "/node/api/chat/start",
+            { store_id: res.store_id },
+            (roomResp) => {
+              const room = roomResp.data || roomResp.room || roomResp;
+              const roomId =
+                room.room_id ||
+                room.id ||
+                (room.store_id && room.buyer_id
+                  ? `${room.store_id}-${room.buyer_id}`
+                  : null);
+
+              if (!roomId) {
+                renderToast("Gagal membuka chat dengan penjual 2", "error");
+                return;
+              }
+
+              window.location.href = `/react/chat?room_id=${encodeURIComponent(
+                roomId
+              )}&product_id=${encodeURIComponent(productId)}`;
+            },
+            (err) => {
+              console.error("Failed create/get room", err);
+              renderToast("Gagal membuka chat dengan penjual 3", "error");
+            }
+          );
+        },
+        (hasErr) => {
+          if (hasErr) {
+            showModalConfirmation(
+              "Login untuk memulai chat dengan penjual",
+              () => {
+                router.navigateTo("/login");
+              },
+              () => {}
+            );
+          }
+        }
+      );
+    });
+  }
   if (Array.isArray(res.categories) && res.categories.length > 0) {
     ChangeInnerHtmlById("p-category", res.categories.join(", "));
   } else {
@@ -97,34 +165,37 @@ async function LoadAddCartBtn(id, stock) {
       if (data.status == "success") {
         const res = data.data;
         if (res.role == "BUYER") {
-          // Check checkout feature flag for logged-in user
           const checkoutAccess = await checkCheckoutFeatureFlag();
-          
-          // disable button if checkout not allowed
+
           const buttonStyle = !checkoutAccess.isAllowed
-            ? 'style="background-color: #9CA3AF !important; cursor: not-allowed; opacity: 0.6;"' 
-            : '';
-          
+            ? 'style="background-color: #9CA3AF !important; cursor: not-allowed; opacity: 0.6;"'
+            : "";
+
           ChangeInnerHtmlById(
             "add-cart",
             `<button class="visit-store-btn" id="cartBtn" ${buttonStyle}>Add To Cart</button>`
           );
-          
+
           const cartBtn = document.getElementById("cartBtn");
           cartBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            
-            // Check if checkout is disabled
+
             if (!checkoutAccess.isAllowed) {
-              const reason = checkoutAccess.reason || "Fitur Proses Checkout sedang tidak tersedia";
-              const scope = reason.toLowerCase().includes("maintenance") || reason.toLowerCase().includes("global") 
-                ? "global" 
-                : "user";
-              
-              window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(reason)}&scope=${scope}`;
+              const reason =
+                checkoutAccess.reason ||
+                "Fitur Proses Checkout sedang tidak tersedia";
+              const scope =
+                reason.toLowerCase().includes("maintenance") ||
+                reason.toLowerCase().includes("global")
+                  ? "global"
+                  : "user";
+
+              window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(
+                reason
+              )}&scope=${scope}`;
               return;
             }
-            
+
             showModalSpinnerInput(
               "Tambahkan ke keranjang",
               stock,
@@ -175,8 +246,6 @@ async function LoadAddCartBtn(id, stock) {
           );
         });
       }
-      {
-      }
     },
     () => {}
   );
@@ -192,7 +261,7 @@ export function InitProductDetail() {
     "/api/product",
     { id: param_id },
     (data) => {
-      LoadDetail(data);
+      LoadDetail(data, param_id);
       const stock = data.data.stock;
       LoadAddCartBtn(param_id, stock);
     },

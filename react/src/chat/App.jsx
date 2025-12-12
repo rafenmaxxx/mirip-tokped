@@ -35,6 +35,8 @@ function Chat() {
     markAsRead,
   } = useChat(user);
 
+  const [initialMessagePreview, setInitialMessagePreview] = useState(null);
+
   // Check chat feature flag
   useEffect(() => {
     const checkChatAccess = async () => {
@@ -189,6 +191,92 @@ function Chat() {
       fetchRooms();
     }
   }, [user, fetchRooms]);
+
+  // Handle redirect from product detail: /react/chat?room_id=...&product_id=...
+  useEffect(() => {
+    if (!user) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const roomId = params.get("room_id");
+    const productId = params.get("product_id");
+    if (!roomId) return;
+
+    const handleRedirectJoin = async () => {
+      try {
+        // Ensure we have latest rooms
+        await fetchRooms();
+
+        // Try to find room in loaded rooms
+        let found = null;
+        if (rooms && rooms.length) {
+          found = rooms.find((r) => {
+            const rid =
+              r.room_id ||
+              r.id ||
+              (r.store_id && r.buyer_id ? `${r.store_id}-${r.buyer_id}` : null);
+            return rid === roomId;
+          });
+        }
+
+        if (found) {
+          setSelectedRoom(found);
+          if (found.store_id && found.buyer_id) {
+            joinRoom({ storeId: found.store_id, buyerId: found.buyer_id });
+          }
+        } else {
+          // If not found, try to parse roomId as store-buyer
+          const parts = roomId.split("-");
+          if (parts.length === 2) {
+            const storeId = parts[0];
+            const buyerId = parts[1];
+            const tentative = {
+              store_id: storeId,
+              buyer_id: buyerId,
+              store_name: "Toko",
+              buyer_name: "Pembeli",
+            };
+            setSelectedRoom(tentative);
+            joinRoom({ storeId, buyerId });
+          }
+        }
+
+        // Fetch product preview if provided
+        if (productId) {
+          try {
+            const res = await fetch(
+              `/api/product?id=${encodeURIComponent(productId)}`,
+              { credentials: "include" }
+            );
+            if (res.ok) {
+              const pdata = await res.json();
+              const prod = pdata.data || pdata;
+              setInitialMessagePreview({
+                product_id: productId,
+                product_name: prod.product_name,
+                price: prod.price,
+                main_image_path: prod.main_image_path,
+                description: prod.description,
+                store_id: prod.store_id,
+                stock: prod.stock,
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching product preview:", err);
+          }
+        }
+
+        // Remove query params so refresh doesn't re-trigger
+        const url = new URL(window.location.href);
+        url.searchParams.delete("room_id");
+        url.searchParams.delete("product_id");
+        window.history.replaceState({}, "", url.toString());
+      } catch (err) {
+        console.error("Error handling chat redirect:", err);
+      }
+    };
+
+    handleRedirectJoin();
+  }, [user, fetchRooms, rooms, setSelectedRoom, joinRoom]);
 
   // Handle new room created
   const handleNewRoomCreated = useCallback(
@@ -486,6 +574,7 @@ function Chat() {
             onTypingChange={handleTypingChange}
             disabled={!selectedRoom}
             isMobile={isMobile}
+            initialMessagePreview={initialMessagePreview}
           />
         )}
       </div>

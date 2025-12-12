@@ -88,7 +88,21 @@ export default function Check() {
       }
 
       // 1. Minta izin notifikasi
-      const permission = await Notification.requestPermission();
+
+      const forceGrantEnv =
+        (import.meta.env && import.meta.env.VITE_FORCE_NOTIFICATION_GRANTED) ===
+        "true";
+      const forceGrantWindow = !!window.__FORCE_NOTIFICATION_GRANTED;
+      let permission;
+      if (forceGrantEnv || forceGrantWindow) {
+        console.warn(
+          "Notification permission forced to 'granted' for development"
+        );
+        permission = "granted";
+      } else {
+        permission = await Notification.requestPermission();
+      }
+
       if (permission !== "granted") {
         showToast("Warning", "Notifications not allowed");
         return;
