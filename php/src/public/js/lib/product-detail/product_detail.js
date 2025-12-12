@@ -8,25 +8,33 @@ import {
   showModalSpinnerInput,
 } from "../general/modal.js";
 
-async function checkCheckoutFeatureFlag() {
+async function checkChatFeatureFlag(userId) {
   try {
-    const userResponse = await fetch("/node/api/user/me", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!userResponse.ok) {
+    if (!userId) {
       return { isAllowed: true, reason: null };
     }
 
-    const userData = await userResponse.json();
+    const flagResponse = await fetch(
+      `/node/api/flags/chat/allowed/${userId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
 
-    if (userData.status === "error") {
-      return { isAllowed: true, reason: null };
-    }
+    const flagData = await flagResponse.json();
+    const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+    const reason = flagData.data?.reason || flagData.reason;
 
-    const userId = userData.data?.user_id || userData.user_id;
+    return { isAllowed, reason };
+  } catch (error) {
+    console.error("Error checking chat access:", error);
+    return { isAllowed: true, reason: null };
+  }
+}
 
+async function checkCheckoutFeatureFlag(userId) {
+  try {
     if (!userId) {
       return { isAllowed: true, reason: null };
     }
@@ -85,71 +93,99 @@ function LoadDetail(data, productId) {
     router.navigateTo("/store?store_id=" + res.store_id);
   });
 
-  ChangeInnerHtmlById(
-    "btn-chat",
-    `<button class="visit-store-btn" id="chatPenjualBtn">Chat Penjual</button>`
-  );
-  const chatBtn = document.getElementById("chatPenjualBtn");
-  if (chatBtn) {
-    chatBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
+  // Check chat feature flag and render button
+  GET(
+    "/api/auth",
+    {},
+    async (authData) => {
+      let chatAccess = { isAllowed: true, reason: null };
+      
+      if (authData.status === "success") {
+        const userId = authData.data?.user_id || authData.data?.id;
+        chatAccess = await checkChatFeatureFlag(userId);
+      }
 
-      GET(
-        "/api/auth",
-        {},
-        async (authData) => {
-          if (authData.status !== "success") {
-            showModalConfirmation(
-              "Login untuk memulai chat dengan penjual 1",
-              () => {
-                router.navigateTo("/login");
-              },
-              () => {}
-            );
-            return;
-          }
+      // Hide button if chat is disabled
+      if (!chatAccess.isAllowed) {
+        ChangeInnerHtmlById("btn-chat", "");
+        return;
+      }
 
-          POST(
-            "/node/api/chat/start",
-            { store_id: res.store_id },
-            (roomResp) => {
-              const room = roomResp.data || roomResp.room || roomResp;
-              const roomId =
-                room.room_id ||
-                room.id ||
-                (room.store_id && room.buyer_id
-                  ? `${room.store_id}-${room.buyer_id}`
-                  : null);
+      ChangeInnerHtmlById(
+        "btn-chat",
+        `<button class="visit-store-btn" id="chatPenjualBtn">Chat Penjual</button>`
+      );
+      
+      const chatBtn = document.getElementById("chatPenjualBtn");
+      if (chatBtn) {
+        chatBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
 
-              if (!roomId) {
-                renderToast("Gagal membuka chat dengan penjual 2", "error");
+          GET(
+            "/api/auth",
+            {},
+            async (authData) => {
+              if (authData.status !== "success") {
+                showModalConfirmation(
+                  "Login untuk memulai chat dengan penjual",
+                  () => {
+                    router.navigateTo("/login");
+                  },
+                  () => {}
+                );
                 return;
               }
 
-              window.location.href = `/react/chat?room_id=${encodeURIComponent(
-                roomId
-              )}&product_id=${encodeURIComponent(productId)}`;
+              POST(
+                "/node/api/chat/start",
+                { store_id: res.store_id },
+                (roomResp) => {
+                  const room = roomResp.data || roomResp.room || roomResp;
+                  const roomId =
+                    room.room_id ||
+                    room.id ||
+                    (room.store_id && room.buyer_id
+                      ? `${room.store_id}-${room.buyer_id}`
+                      : null);
+
+                  if (!roomId) {
+                    renderToast("Gagal membuka chat dengan penjual", "error");
+                    return;
+                  }
+
+                  window.location.href = `/react/chat?room_id=${encodeURIComponent(
+                    roomId
+                  )}&product_id=${encodeURIComponent(productId)}`;
+                },
+                (err) => {
+                  console.error("Failed create/get room", err);
+                  renderToast("Gagal membuka chat dengan penjual", "error");
+                }
+              );
             },
-            (err) => {
-              console.error("Failed create/get room", err);
-              renderToast("Gagal membuka chat dengan penjual 3", "error");
+            (hasErr) => {
+              if (hasErr) {
+                showModalConfirmation(
+                  "Login untuk memulai chat dengan penjual",
+                  () => {
+                    router.navigateTo("/login");
+                  },
+                  () => {}
+                );
+              }
             }
           );
-        },
-        (hasErr) => {
-          if (hasErr) {
-            showModalConfirmation(
-              "Login untuk memulai chat dengan penjual",
-              () => {
-                router.navigateTo("/login");
-              },
-              () => {}
-            );
-          }
-        }
+        });
+      }
+    },
+    () => {
+      // If auth check fails, render button without styling
+      ChangeInnerHtmlById(
+        "btn-chat",
+        `<button class="visit-store-btn" id="chatPenjualBtn">Chat Penjual</button>`
       );
-    });
-  }
+    }
+  );
   if (Array.isArray(res.categories) && res.categories.length > 0) {
     ChangeInnerHtmlById("p-category", res.categories.join(", "));
   } else {
@@ -165,10 +201,11 @@ async function LoadAddCartBtn(id, stock) {
       if (data.status == "success") {
         const res = data.data;
         if (res.role == "BUYER") {
-          const checkoutAccess = await checkCheckoutFeatureFlag();
+          const userId = res.user_id || res.id;
+          const checkoutAccess = await checkCheckoutFeatureFlag(userId);
 
           const buttonStyle = !checkoutAccess.isAllowed
-            ? 'style="background-color: #9CA3AF !important; cursor: not-allowed; opacity: 0.6;"'
+            ? 'style="background-color: #9CA3AF !important; color: white !important; border-color: #9CA3AF !important; cursor: not-allowed; opacity: 0.6;"'
             : "";
 
           ChangeInnerHtmlById(
@@ -181,18 +218,7 @@ async function LoadAddCartBtn(id, stock) {
             e.stopPropagation();
 
             if (!checkoutAccess.isAllowed) {
-              const reason =
-                checkoutAccess.reason ||
-                "Fitur Proses Checkout sedang tidak tersedia";
-              const scope =
-                reason.toLowerCase().includes("maintenance") ||
-                reason.toLowerCase().includes("global")
-                  ? "global"
-                  : "user";
-
-              window.location.href = `/react/feature-disabled?feature=checkout&reason=${encodeURIComponent(
-                reason
-              )}&scope=${scope}`;
+              // Do nothing if checkout is disabled
               return;
             }
 
