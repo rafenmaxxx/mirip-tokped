@@ -10,6 +10,11 @@ router.get(
   requireAuctionEnabled,
   AuctionsController.getByStoreId
 );
+router.get(
+  "/store/:storeId/paginated",
+  requireAuctionEnabled,
+  AuctionsController.getByStoreIdWithCursor
+);
 router.get("/:id", requireAuctionEnabled, AuctionsController.getById);
 router.post("/", requireAuctionEnabled, AuctionsController.create);
 router.post("/:id/stop", requireAuctionEnabled, (req, res) =>
