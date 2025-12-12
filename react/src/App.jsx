@@ -240,9 +240,30 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
       </Route>
 
-      <Route path="/auction" element={<Auction />} />
+      <Route
+        element={
+          <ProtectedRoutes
+            redirectUrl="/login"
+            allowedRoles={["BUYER"]}
+          ></ProtectedRoutes>
+        }
+      >
+        <Route path="/auction" element={<Auction />} />
+      </Route>
+      
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
-      <Route path="/auction-manage" element={<AuctionManage />} />
+
+      <Route
+        element={
+          <ProtectedRoutes
+            redirectUrl="/login"
+            allowedRoles={["SELLER"]}
+          ></ProtectedRoutes>
+        }
+      >
+        <Route path="/auction-manage" element={<AuctionManage />} />
+      </Route>
+      
       <Route path="/check" element={<Check />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/feature-disabled" element={<FeatureDisabled />} />
