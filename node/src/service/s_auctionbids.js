@@ -64,4 +64,38 @@ export const AuctionBidsService = {
       bidData: bidRes.rows[0],
     };
   },
+
+  async getUserIdsByAuctionId(auctionId) {
+    if (!auctionId) {
+      throw new Error("Auction ID is required");
+    }
+
+    const res = await db.query(
+      `SELECT DISTINCT bidder_id 
+       FROM auction_bids 
+       WHERE auction_id = $1`,
+      [auctionId]
+    );
+
+    return res.rows.map((row) => row.bidder_id);
+  },
+
+  async getSecondHighestBidder(auctionId) {
+    if (!auctionId) {
+      throw new Error("Auction ID is required");
+    }
+
+    const res = await db.query(
+      `SELECT bidder_id
+       FROM auction_bids
+       WHERE auction_id = $1
+       ORDER BY bid_amount DESC
+       OFFSET 1 LIMIT 1`,
+      [auctionId]
+    );
+
+    return res.rows.length > 0 ? res.rows[0].bidder_id : null;
+  },
 };
+
+export default AuctionBidsService;

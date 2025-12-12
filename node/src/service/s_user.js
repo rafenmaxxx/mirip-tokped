@@ -104,4 +104,12 @@ export const UserService = {
     await db.query("DELETE FROM users WHERE user_id = $1", [id]);
     return { message: "User deleted" };
   },
+
+  async getAllUserIds() {
+    const res = await db.query("SELECT user_id FROM users");
+
+    return res.rows.map((row) => row.user_id);
+  },
 };
+
+export default UserService;
