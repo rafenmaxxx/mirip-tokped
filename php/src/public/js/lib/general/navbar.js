@@ -383,6 +383,8 @@ async function morphAuthBtn(data) {
           window.location.href = "/react/auction-manage";
         }
       });
+
+    InitBalance();
     }
 
   // blom login
