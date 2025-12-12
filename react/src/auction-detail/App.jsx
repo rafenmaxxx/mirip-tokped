@@ -52,18 +52,6 @@ function AuctionDetail() {
 
         return updatedBids;
       });
-
-      if (
-        currentUser?.user_id !== bidData.user_id &&
-        Notification.permission === "granted"
-      ) {
-        new Notification("Bid Baru!", {
-          body: `${
-            bidData.bidder_name
-          } menawar: Rp ${bidData.amount.toLocaleString()}`,
-          icon: "/notification-icon.png",
-        });
-      }
     },
     [currentUser?.user_id]
   );
@@ -83,7 +71,6 @@ function AuctionDetail() {
       prev ? { ...prev, status_auction: "cancelled" } : null
     );
     alert("Lelang telah dibatalkan!");
-    // navigate("/auction");
   }, []);
 
   useEffect(() => {

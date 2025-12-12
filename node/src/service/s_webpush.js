@@ -3,8 +3,41 @@ import redis from "../config/redis.js";
 import db from "../config/db.js";
 
 const REDIS_QUEUE_KEY = "push:queue";
-const REDIS_PENDING_KEY = "push:pending"; // Untuk notifikasi yang sedang diproses
+const REDIS_PENDING_KEY = "push:pending";
 const REDIS_SUBSCRIPTION_KEY = "push:subscriptions";
+
+export async function sendNotif(
+  userId,
+  title,
+  body,
+  data = {},
+  icon = null,
+  type = null
+) {
+  console.log("KIRIM NOTIF");
+  const payload = {
+    title: title || "Notification",
+    body: body || "You have a new notification",
+    data: data || {},
+    icon,
+    type,
+  };
+
+  try {
+    const result = await WebPushService.sendToUser(userId, payload);
+    return {
+      success: true,
+      userId,
+      result,
+    };
+  } catch (err) {
+    console.error("sendNotification error:", err);
+    return {
+      success: false,
+      error: "Failed to send notification",
+    };
+  }
+}
 
 export const WebPushService = {
   // ========== SUBSCRIPTION MANAGEMENT (SAMA) ==========

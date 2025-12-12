@@ -12,6 +12,8 @@ function Chat() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const {
     rooms,
@@ -38,10 +40,13 @@ function Chat() {
     const checkChatAccess = async () => {
       try {
         // Get current user
-        const userResponse = await fetch("http://localhost:80/node/api/user/me", {
-          method: "GET",
-          credentials: "include"
-        });
+        const userResponse = await fetch(
+          "http://localhost:80/node/api/user/me",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         if (!userResponse.ok) {
           console.error("Failed to get user data");
@@ -57,25 +62,36 @@ function Chat() {
         }
 
         // Check if chat is allowed for this user
-        const flagResponse = await fetch(`http://localhost:80/node/api/flags/chat/allowed/${userId}`, {
-          method: "GET",
-          credentials: "include"
-        });
+        const flagResponse = await fetch(
+          `http://localhost:80/node/api/flags/chat/allowed/${userId}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         const flagData = await flagResponse.json();
 
         // Handle both error response and success response structure
-        const isAllowed = flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
-        const reason = flagData.data?.reason || flagData.reason || "Fitur Live Chat sedang tidak tersedia";
-        
+        const isAllowed =
+          flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
+        const reason =
+          flagData.data?.reason ||
+          flagData.reason ||
+          "Fitur Live Chat sedang tidak tersedia";
+
         if (!isAllowed) {
           // Determine scope: check if this is global or user-specific
-          const scope = reason.toLowerCase().includes("global") 
-            ? "global" 
+          const scope = reason.toLowerCase().includes("global")
+            ? "global"
             : "user";
-          
+
           // Navigate to feature-disabled page with query params
-          navigate(`/feature-disabled?feature=chat&reason=${encodeURIComponent(reason)}&scope=${scope}`);
+          navigate(
+            `/feature-disabled?feature=chat&reason=${encodeURIComponent(
+              reason
+            )}&scope=${scope}`
+          );
         }
       } catch (error) {
         console.error("Error checking chat access:", error);
@@ -84,6 +100,26 @@ function Chat() {
 
     checkChatAccess();
   }, [navigate]);
+
+  // Responsive detection
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      const mobile = width < 768;
+      setIsMobile(mobile);
+
+      // On mobile, hide sidebar if a room is selected
+      if (mobile && selectedRoom) {
+        setShowSidebar(false);
+      } else {
+        setShowSidebar(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [selectedRoom]);
 
   // Fetch user data
   useEffect(() => {
@@ -175,9 +211,31 @@ function Chat() {
 
       setRooms((prev) => [formattedRoom, ...prev]);
       setSelectedRoom(formattedRoom);
+
+      // On mobile, switch to chat view when new room is created
+      if (isMobile) {
+        setShowSidebar(false);
+      }
     },
-    [joinRoom, setRooms, setSelectedRoom, user]
+    [joinRoom, setRooms, setSelectedRoom, user, isMobile]
   );
+
+  // Handle room selection
+  const handleSelectRoom = useCallback(
+    (room) => {
+      setSelectedRoom(room);
+      // On mobile, hide sidebar when room is selected
+      if (isMobile) {
+        setShowSidebar(false);
+      }
+    },
+    [isMobile, setSelectedRoom]
+  );
+
+  // Handle back to sidebar on mobile
+  const handleBackToSidebar = useCallback(() => {
+    setShowSidebar(true);
+  }, []);
 
   // Handle typing change
   const handleTypingChange = useCallback(
@@ -237,35 +295,138 @@ function Chat() {
   }
 
   return (
-    <div className="w-full h-screen max-h-screen flex bg-white">
-      {/* Sidebar */}
-      <div className="flex flex-col h-full w-80 border-r border-gray-200">
-        <ChatNavbar onBack={() => window.history.back()} />
+    <div className="w-full h-screen max-h-screen flex bg-white overflow-hidden">
+      {/* Sidebar - Responsive behavior */}
+      <div
+        className={`
+          ${
+            isMobile
+              ? "fixed inset-0 z-40 transform transition-transform duration-300 ease-in-out"
+              : "flex flex-col h-full"
+          }
+          ${showSidebar ? "translate-x-0" : "-translate-x-full"}
+          ${!isMobile ? "w-80 border-r border-gray-200" : "w-full bg-white"}
+        `}
+      >
+        {isMobile && (
+          <div className="absolute top-4 right-4 z-50">
+            <button
+              onClick={() => setShowSidebar(false)}
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+        <ChatNavbar onBack={() => window.history.back()} isMobile={isMobile} />
         <div className="flex-1 overflow-hidden">
           <ChatSidebar
             rooms={rooms}
             selectedRoom={selectedRoom}
-            onSelect={setSelectedRoom}
+            onSelect={handleSelectRoom}
             currentUser={user}
             onNewRoomCreated={handleNewRoomCreated}
+            isMobile={isMobile}
           />
         </div>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <ChatHeader
-          room={selectedRoom}
-          currentUser={user}
-          isTyping={isTyping}
-          connectionStatus={connectionStatus}
+      {/* Overlay for mobile sidebar */}
+      {isMobile && showSidebar && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setShowSidebar(false)}
         />
+      )}
+
+      {/* Main Chat Area */}
+      <div
+        className={`
+        flex-1 flex flex-col
+        ${isMobile && !showSidebar ? "w-full" : "hidden md:flex"}
+        ${!selectedRoom ? "hidden md:flex" : ""}
+      `}
+      >
+        {/* Mobile Header with back button */}
+        {isMobile && selectedRoom && (
+          <div className="flex items-center p-3 border-b border-gray-200 bg-white md:hidden">
+            <button
+              onClick={handleBackToSidebar}
+              className="p-2 mr-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <svg
+                className="w-5 h-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                <svg
+                  className="w-4 h-4 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">
+                  {selectedRoom.store_name || "Toko"}
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {connectionStatus === "connected"
+                    ? isTyping
+                      ? "Sedang mengetik..."
+                      : "Online"
+                    : "Offline"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Header */}
+        {!isMobile && (
+          <ChatHeader
+            room={selectedRoom}
+            currentUser={user}
+            isTyping={isTyping}
+            connectionStatus={connectionStatus}
+          />
+        )}
 
         {/* Messages Area */}
         <div className="flex-1 overflow-hidden relative">
           {selectedRoom ? (
             isLoadingCurrent && currentMessages.length === 0 ? (
-              <LoadingSkeleton />
+              <LoadingSkeleton isMobile={isMobile} />
             ) : (
               <ChatMessageList
                 messages={currentMessages.map((msg) => ({
@@ -276,14 +437,15 @@ function Chat() {
                 onLoadMore={handleLoadMore}
                 hasMore={hasMoreMessages[currentRoomKey]}
                 isLoadingMore={isLoadingCurrent}
+                isMobile={isMobile}
               />
             )
           ) : (
             <div className="h-full flex items-center justify-center bg-gray-50">
-              <div className="text-center p-8">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="text-center p-4 md:p-8">
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
                   <svg
-                    className="w-12 h-12 text-gray-400"
+                    className="w-8 h-8 md:w-12 md:h-12 text-gray-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -296,24 +458,59 @@ function Chat() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-700 mb-2">
-                  Pilih Percakapan
+                <h3 className="text-base md:text-lg font-medium text-gray-700 mb-2">
+                  {isMobile ? "Pilih percakapan" : "Pilih Percakapan"}
                 </h3>
-                <p className="text-gray-500">
-                  Pilih percakapan dari daftar untuk memulai mengobrol
+                <p className="text-sm md:text-base text-gray-500 max-w-sm mx-auto">
+                  {isMobile
+                    ? "Pilih percakapan dari daftar untuk memulai mengobrol"
+                    : "Pilih percakapan dari daftar untuk memulai mengobrol"}
                 </p>
+                {isMobile && (
+                  <button
+                    onClick={() => setShowSidebar(true)}
+                    className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                  >
+                    Lihat Daftar Percakapan
+                  </button>
+                )}
               </div>
             </div>
           )}
         </div>
 
         {/* Input Area */}
-        <ChatInput
-          onSendMessage={sendMessage}
-          onTypingChange={handleTypingChange}
-          disabled={!selectedRoom}
-        />
+        {selectedRoom && (
+          <ChatInput
+            onSendMessage={sendMessage}
+            onTypingChange={handleTypingChange}
+            disabled={!selectedRoom}
+            isMobile={isMobile}
+          />
+        )}
       </div>
+
+      {/* Mobile Floating Button to show sidebar */}
+      {isMobile && !showSidebar && !selectedRoom && (
+        <button
+          onClick={() => setShowSidebar(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition-colors z-30 flex items-center justify-center"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
