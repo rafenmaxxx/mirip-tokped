@@ -37,30 +37,57 @@ function Auction() {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 4;
 
-  // Check auction feature flag
+  // Check if user is SELLER (should not access auction page)
   useEffect(() => {
-    const checkAuctionAccess = async () => {
+    const checkAccess = async () => {
       try {
-        // Get current user
-        const userResponse = await fetch("http://localhost:80/node/api/user/me", {
+        // Try to get user from PHP session (for BUYER/SELLER)
+        let userResponse = await fetch("http://localhost:80/node/api/user/me", {
           method: "GET",
           credentials: "include"
         });
-
-        if (!userResponse.ok) {
-          console.error("Failed to get user data");
+        
+        // for guest
+        if (userResponse.status === "error" || !userResponse.ok) {
+          console.log("Guest user, allowing access to auction page");
           return;
+        }
+  
+        // If PHP session fails, try JWT auth (for ADMIN)
+        if (!userResponse.ok) {
+          const token = localStorage.getItem("accessToken");
+          if (token) {
+            userResponse = await fetch("http://localhost:80/node/api/auth/me", {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${token}`
+              }
+            });
+          }
         }
 
         const userData = await userResponse.json();
-        const userId = userData.data?.user_id || userData.user_id;
+        const userId = userData.data?.user_id || userData.data?.id || userData.user_id || userData.id;
+        const userRole = userData.data?.role || userData.role;
+
+        // Block SELLER from accessing auction page
+        if (userRole === "SELLER") {
+          window.location.href = "http://localhost/unauthorized";
+          return;
+        }
+
+        // Block ADMIN from accessing auction page (redirect to login/admin dashboard)
+        if (userRole === "ADMIN") {
+          window.location.href = "http://localhost/login";
+          return;
+        }
 
         if (!userId) {
           console.error("User ID not found in response");
           return;
         }
 
-        // Check if auction is allowed for this user
+        // Check if auction is allowed for this logged-in BUYER
         const flagResponse = await fetch(`http://localhost:80/node/api/flags/auction/allowed/${userId}`, {
           method: "GET",
           credentials: "include"
@@ -78,7 +105,7 @@ function Auction() {
       }
     };
 
-    checkAuctionAccess();
+    checkAccess();
   }, [navigate]);
 
   useEffect(() => {
@@ -159,10 +186,32 @@ function Auction() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Lelang Produk
-          </h1>
-          <p className="text-gray-600">
+          <div className="flex items-center gap-4 mb-2">
+            <button
+              onClick={() => window.location.href = 'http://localhost/'}
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Kembali ke beranda"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-6 h-6 text-gray-700"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Lelang Produk
+            </h1>
+          </div>
+          <p className="text-gray-600 ml-14">
             Temukan produk impian Anda dengan harga terbaik
           </p>
         </div>
