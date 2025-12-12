@@ -375,7 +375,7 @@ function AuctionDetail() {
         />
 
         {/* Auto Close Countdown */}
-        {isActive && hasBids && (
+        {isActive && (
           <AutoCloseCountdown
             lastBidTime={lastBidTime}
             onAutoClose={handleAutoClose}
