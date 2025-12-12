@@ -241,17 +241,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
       </Route>
 
-      <Route
-        element={
-          <ProtectedRoutes
-            redirectUrl="/login"
-            allowedRoles={["BUYER"]}
-          ></ProtectedRoutes>
-        }
-      >
-        <Route path="/auction" element={<Auction />} />
-      </Route>
-      
+      <Route path="/auction" element={<Auction />} />
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
 
       <Route
