@@ -113,7 +113,7 @@ class SocketController {
       }
       console.log(targetId, " --> targetID");
       // get user name
-      const user = await UserService.getById(targetId);
+      const user = await UserService.getById(sender_id);
       NotificationPreferences.isAllowedChatNotif([targetId], () => {
         sendNotif([targetId], `CHAT dari ${user.name}`, message);
       });
