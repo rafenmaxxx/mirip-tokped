@@ -1,6 +1,6 @@
 /* Container Utama */
 #profile-container {
-    max-width: 1000px;
+    max-width: 1400px;
     margin: 40px auto;
     padding: 20px;
     background-color: #f9f9f9;
@@ -19,23 +19,23 @@
     color: #333;
 }
 
-/* Layout Dua Kartu */
+/* Layout Dua Baris */
 #profile-content {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 24px;
+    gap: 20px;
     flex-wrap: wrap;
 }
 
-/* Kartu Profil (Utama) */
+/* Kartu Profil (Baris 1 - Kiri) */
 .profile-card {
-    flex: 0 0 60%;
+    flex: 0 0 calc(50% - 10px);
     background-color: #fff;
     border-radius: 10px;
     padding: 24px;
     box-sizing: border-box;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Lebih dalam untuk kartu utama */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
@@ -44,14 +44,30 @@
     transform: translateY(-3px);
 }
 
-/* Kartu Edit (Lebih Kecil di Sisi Kanan) */
-.edit-card {
-    flex: 0 0 35%;
+/* Kartu Notifikasi (Baris 1 - Kanan) */
+.notification-card {
+    flex: 0 0 calc(50% - 10px);
     background-color: #fff;
     border-radius: 10px;
     padding: 20px;
     box-sizing: border-box;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); /* Lebih halus dari kartu utama */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.notification-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Kartu Edit (Baris 2 - Kiri 50%) */
+.edit-card {
+    flex: 0 0 calc(70% - 10px);
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
@@ -60,9 +76,31 @@
     transform: translateY(-2px);
 }
 
+/* Edit Card Form Layout */
+.edit-card .form-group {
+    max-width: 100%;
+}
+
+/* Profile Image Card (Baris 2 - Kanan 50%) */
+.profile-image-card {
+    flex: 0 0 calc(30% - 10px);
+    padding: 60px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-minion-image {
+    max-width: 60%;
+    max-height: 200px;
+    object-fit: contain;
+}
+
 /* Judul di Dalam Card */
 .profile-card h2,
-.edit-card h2 {
+.edit-card h2,
+.notification-card h2 {
     margin-top: 0;
     margin-bottom: 16px;
     font-size: 20px;
@@ -87,6 +125,46 @@
     margin-bottom: 6px;
     font-weight: 500;
     color: #444;
+}
+
+/* Notification Checkbox Group */
+.notification-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background-color: #e9ecef;
+}
+
+.notification-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #00AA5B;
+    border-radius: 4px;
+}
+
+.notification-item label {
+    margin: 0;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
 }
 
 /* Input & Textarea */
@@ -374,7 +452,8 @@
     }
 
     .profile-card,
-    .edit-card {
+    .edit-card,
+    .notification-card {
         flex: 1 1 100%;
     }
 
