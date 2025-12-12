@@ -10,6 +10,7 @@ import productRoutes from "./r_products.js";
 import authRoutes from "./r_auth.js";
 import flagsRoutes from "./r_flags.js";
 import timeRoute from "./r_time.js";
+import pushPreferencesRoutes from "./r_pushpreferences.js";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/products", productRoutes);
 router.use("/auth", authRoutes);
 router.use("/flags", flagsRoutes);
 router.use("/time", timeRoute);
+router.use("/push-preferences", pushPreferencesRoutes);
 
 export default router;

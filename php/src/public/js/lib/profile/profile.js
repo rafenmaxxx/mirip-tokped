@@ -190,10 +190,10 @@ function renderConfirmationModal(nama, alamat, onConfirm) {
 // --- Render isi profil ke form ---
 function renderProfile(data) {
   const html = `
-    <div class="profile-card">
+    <div class="profile-card" style="height: 100%;">
         <h2>Biodata Kamu</h2>
-        <form id="view-profile-form">
-            <div class="form-grid">
+        <form id="view-profile-form" style="height: calc(100% - 50px); display: flex; flex-direction: column;">
+            <div class="form-grid" style="flex: 1;">
                 <div class="form-group">
                     <label for="nama">Nama</label>
                     <input type="text" id="nama" name="nama" readonly>
@@ -208,6 +208,30 @@ function renderProfile(data) {
                 </div>
             </div>
         </form>
+    </div>
+
+    <div class="notification-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Preferensi Notifikasi</h2>
+            <button type="button" id="subscription-toggle-btn" class="btn-profile" style="padding: 8px 16px; font-size: 14px; background-color: #00AA5B; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Start Subscribing
+            </button>
+        </div>
+        <div class="notification-group" id="notification-group" style="position: relative;">
+            <div id="notification-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(156, 163, 175, 0.5); border-radius: 8px; z-index: 10; pointer-events: all;"></div>
+            <div class="notification-item">
+                <input type="checkbox" id="notif-chat" name="notif-chat" disabled>
+                <label for="notif-chat" style="color: #9CA3AF;">Notifikasi Chat</label>
+            </div>
+            <div class="notification-item">
+                <input type="checkbox" id="notif-lelang" name="notif-lelang" disabled>
+                <label for="notif-lelang" style="color: #9CA3AF;">Notifikasi Lelang</label>
+            </div>
+            <div class="notification-item">
+                <input type="checkbox" id="notif-pesanan" name="notif-pesanan" disabled>
+                <label for="notif-pesanan" style="color: #9CA3AF;">Notifikasi Pesanan</label>
+            </div>
+        </div>
     </div>
 
     <div class="edit-card">
@@ -229,6 +253,10 @@ function renderProfile(data) {
             </div>
         </form>
     </div>
+
+    <div class="profile-image-card">
+        <img src="/img/user-minion.png" alt="User Profile" class="profile-minion-image">
+    </div>
     `;
 
   document.getElementById("profile-content").innerHTML = html;
@@ -240,6 +268,402 @@ function renderProfile(data) {
   // Isi form edit
   document.getElementById("nama-edit").value = data.name || "";
   document.getElementById("alamat-edit").value = data.address || "";
+
+  // Load notification preferences
+  loadNotificationPreferences();
+  
+  // Setup subscription toggle
+  setupSubscriptionToggle();
+}
+
+// --- Load Notification Preferences ---
+function loadNotificationPreferences() {
+  console.log("Loading notification preferences...");
+  
+  // Get user data from PHP API (not Node API to avoid routing issues)
+  GET(
+    "/api/user",
+    {},
+    async (response) => {
+      if (response.status !== "success" || !response.data) {
+        console.error("Failed to get user data");
+        setDefaultPreferences();
+        return;
+      }
+
+      const userId = response.data.user_id;
+      console.log("User ID:", userId);
+
+      if (!userId) {
+        console.error("No user ID found");
+        setDefaultPreferences();
+        return;
+      }
+
+      try {
+        // Now fetch preferences using userId
+        const prefsResponse = await fetch(`/node/api/push-preferences/user/${userId}`, {
+          method: "GET",
+          credentials: "include"
+        });
+
+        console.log("Preferences response status:", prefsResponse.status, prefsResponse.ok);
+
+        if (!prefsResponse.ok) {
+          console.error("Failed to load preferences, status:", prefsResponse.status);
+          setDefaultPreferences(userId);
+          return;
+        }
+
+        const data = await prefsResponse.json();
+        console.log("Preferences data:", data);
+        
+        if (data.status === "success" && data.data) {
+          const prefs = data.data;
+          
+          // Set checkbox values based on data
+          document.getElementById("notif-chat").checked = prefs.chat_enabled !== false;
+          document.getElementById("notif-lelang").checked = prefs.auction_enabled !== false;
+          document.getElementById("notif-pesanan").checked = prefs.order_enabled !== false;
+          
+          // Setup change handlers with userId
+          setupNotificationHandlers(userId);
+        } else {
+          setDefaultPreferences(userId);
+        }
+      } catch (error) {
+        console.error("Error loading notification preferences:", error);
+        setDefaultPreferences(userId);
+      }
+    },
+    (hasError) => {
+      // hasError = false berarti sukses, true berarti error
+      if (hasError) {
+        console.error("Error getting user data from API");
+        setDefaultPreferences();
+      }
+    }
+  );
+}
+
+// Helper function to set default preferences
+function setDefaultPreferences(userId = null) {
+  document.getElementById("notif-chat").checked = true;
+  document.getElementById("notif-lelang").checked = true;
+  document.getElementById("notif-pesanan").checked = true;
+  
+  if (userId) {
+    setupNotificationHandlers(userId);
+  } else {
+    // Setup handlers without userId (will fail gracefully)
+    setupNotificationHandlers(null);
+  }
+}
+
+// --- Setup Notification Change Handlers ---
+function setupNotificationHandlers(userId) {
+  const chatCheckbox = document.getElementById("notif-chat");
+  const lelangCheckbox = document.getElementById("notif-lelang");
+  const pesananCheckbox = document.getElementById("notif-pesanan");
+
+  const updatePreference = async (field, value) => {
+    if (!userId) {
+      renderToast("User ID tidak ditemukan", "error");
+      return;
+    }
+
+    try {
+      const payload = {};
+      payload[field] = value;
+
+      const response = await fetch(`/node/api/push-preferences/user/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        renderToast("Preferensi notifikasi berhasil diperbarui", "success");
+      } else {
+        renderToast("Gagal memperbarui preferensi notifikasi", "error");
+      }
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      renderToast("Terjadi kesalahan saat memperbarui preferensi", "error");
+    }
+  };
+
+  chatCheckbox.addEventListener("change", (e) => {
+    updatePreference("chat_enabled", e.target.checked);
+  });
+
+  lelangCheckbox.addEventListener("change", (e) => {
+    updatePreference("auction_enabled", e.target.checked);
+  });
+
+  pesananCheckbox.addEventListener("change", (e) => {
+    updatePreference("order_enabled", e.target.checked);
+  });
+}
+
+// --- Helper function untuk convert VAPID key ---
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// --- Initialize Push Notifications ---
+async function initPush(userId) {
+  const VITE_VAPID_PUBLIC_KEY = "BHp7HlmxLT1N6HFRan79yhwOTlnyljB1DFSsyNru-Rf0RqyKej7P70vzVgukeXrxPCw0yK0hkyzoF0kQ6W3-Rho";
+  
+  try {
+    if (!("serviceWorker" in navigator)) {
+      throw new Error("Service Worker not supported");
+    }
+
+    // 1. Minta izin notifikasi
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      throw new Error("Notification permission denied");
+    }
+
+    // 2. Dapatkan VAPID public key
+    const publicKey = VITE_VAPID_PUBLIC_KEY;
+    if (!publicKey) {
+      throw new Error("VAPID public key not found");
+    }
+
+    console.log("VAPID Public Key:", publicKey.substring(0, 50) + "...");
+
+    // 3. Convert VAPID key dari base64 URL safe ke Uint8Array
+    const convertedVapidKey = urlBase64ToUint8Array(publicKey);
+    console.log("Converted VAPID key to Uint8Array");
+
+    // 4. Register Service Worker
+    console.log("Registering Service Worker...");
+    const registration = await navigator.serviceWorker.register("/react/sw.js", {
+      scope: "/react/",
+    });
+
+    console.log("Service Worker registered:", registration);
+    renderToast("Service Worker berhasil didaftarkan", "success");
+
+    // 5. Tunggu SW aktif
+    const swRegistration = await navigator.serviceWorker.ready;
+    console.log("Service Worker active:", swRegistration);
+
+    // 6. CEK apakah sudah ada subscription
+    let subscription = await swRegistration.pushManager.getSubscription();
+    console.log("Existing subscription:", subscription ? "Yes" : "No");
+
+    if (!subscription) {
+      // Subscribe baru
+      subscription = await swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidKey,
+      });
+      console.log("New subscription created:", subscription);
+    } else {
+      console.log("Using existing subscription");
+    }
+
+    // 7. Konversi subscription ke format JSON untuk dikirim ke server
+    const subscriptionJson = subscription.toJSON();
+    console.log("Subscription JSON:", subscriptionJson);
+
+    const subscriptionData = {
+      endpoint: subscriptionJson.endpoint,
+      expirationTime: subscriptionJson.expirationTime,
+      keys: {
+        p256dh: subscriptionJson.keys.p256dh,
+        auth: subscriptionJson.keys.auth,
+      },
+    };
+
+    console.log("Prepared subscription data:", subscriptionData);
+
+    // 8. Kirim subscription ke server
+    const res = await fetch("/node/api/notif/subscribe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        ...subscriptionData,
+        userId: userId,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Subscription failed: ${res.status}`);
+    }
+
+    const result = await res.json();
+    console.log("Subscription response:", result);
+    renderToast("Berhasil subscribe notifikasi push!", "success");
+
+    return true;
+  } catch (err) {
+    console.error("Push setup failed:", err);
+    renderToast(`Gagal setup push notification: ${err.message}`, "error");
+    return false;
+  }
+}
+
+// --- Unsubscribe Push Notifications ---
+async function unsubscribePush() {
+  try {
+    console.log("Starting unsubscribe process...");
+    
+    if (!("serviceWorker" in navigator)) {
+      console.error("Service Worker not supported");
+      renderToast("Browser tidak mendukung Service Worker", "error");
+      return false;
+    }
+    
+    const registration = await navigator.serviceWorker.getRegistration("/react/");
+    
+    if (!registration) {
+      console.log("No service worker registration found");
+      renderToast("Tidak ada subscription aktif", "warning");
+      return true; // Consider it success since there's nothing to unsubscribe
+    }
+    
+    const subscription = await registration.pushManager.getSubscription();
+    
+    if (subscription) {
+      console.log("Unsubscribing...", subscription.endpoint.substring(0, 50));
+      const result = await subscription.unsubscribe();
+      console.log("Unsubscribe result:", result);
+      
+      if (result) {
+        renderToast("Berhasil berhenti dari notifikasi push", "success");
+        return true;
+      } else {
+        renderToast("Gagal unsubscribe", "error");
+        return false;
+      }
+    } else {
+      console.log("No subscription found");
+      renderToast("Tidak ada subscription aktif", "warning");
+      return true;
+    }
+  } catch (err) {
+    console.error("Unsubscribe failed:", err);
+    renderToast(`Gagal unsubscribe: ${err.message}`, "error");
+    return false;
+  }
+}
+
+// --- Check if user is subscribed ---
+async function checkSubscriptionStatus() {
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration("/react/");
+      if (!registration) {
+        console.log("No service worker registered");
+        return false;
+      }
+      const subscription = await registration.pushManager.getSubscription();
+      console.log("Subscription status:", subscription ? "Subscribed" : "Not subscribed");
+      return subscription !== null;
+    }
+    return false;
+  } catch (err) {
+    console.error("Error checking subscription:", err);
+    return false;
+  }
+}
+
+// --- Setup Subscription Toggle ---
+function setupSubscriptionToggle() {
+  const toggleBtn = document.getElementById("subscription-toggle-btn");
+  const overlay = document.getElementById("notification-overlay");
+  const checkboxes = [
+    document.getElementById("notif-chat"),
+    document.getElementById("notif-lelang"),
+    document.getElementById("notif-pesanan")
+  ];
+  const labels = document.querySelectorAll(".notification-item label");
+  
+  if (!toggleBtn) {
+    console.error("Subscription toggle button not found");
+    return;
+  }
+  
+  let isSubscribed = false;
+  
+  // Check subscription status asynchronously
+  checkSubscriptionStatus().then(subscribed => {
+    isSubscribed = subscribed;
+    console.log("Initial subscription status:", isSubscribed);
+    
+    // Update UI based on subscription status
+    if (isSubscribed) {
+      toggleBtn.textContent = "Stop Subscribing";
+      toggleBtn.style.backgroundColor = "#DC2626";
+      overlay.style.display = "none";
+      
+      checkboxes.forEach(cb => {
+        if (cb) cb.disabled = false;
+      });
+      
+      labels.forEach(label => {
+        label.style.color = "#000";
+      });
+    }
+  });
+  
+  toggleBtn.addEventListener("click", async () => {
+    console.log("Toggle button clicked, isSubscribed:", isSubscribed);
+    
+    if (!isSubscribed) {
+      // Start subscribing - redirect to React subscribe page
+      console.log("Redirecting to subscribe page");
+      window.location.href = "/react/subscribe";
+    } else {
+      // Stop subscribing
+      toggleBtn.disabled = true;
+      toggleBtn.textContent = "Loading...";
+      
+      const success = await unsubscribePush();
+      
+      if (success) {
+        isSubscribed = false;
+        toggleBtn.textContent = "Start Subscribing";
+        toggleBtn.style.backgroundColor = "#00AA5B";
+        overlay.style.display = "block";
+        
+        checkboxes.forEach(cb => {
+          if (cb) cb.disabled = true;
+        });
+        
+        labels.forEach(label => {
+          label.style.color = "#9CA3AF";
+        });
+      } else {
+        toggleBtn.textContent = "Stop Subscribing";
+      }
+      
+      toggleBtn.disabled = false;
+    }
+  });
 }
 
 // --- Setup event listener tombol edit/simpan/batal ---
@@ -311,21 +735,32 @@ function sanitizeHTML(str) {
 }
 
 export function InitProfilePage() {
-  const profileContent = document.getElementById("profile-content");
-  showPendingToast();
-  GET(
-    "/api/user",
-    {},
-    (response) => {
-      if (response.status === "success" && response.data) {
-        renderProfile(response.data);
-        setupEditHandlers(response.data.user_id);
-      } else {
-        profileContent.innerHTML = `<p class="error-message">Gagal memuat data profil.</p>`;
-      }
-    },
-    () => {
-      profileContent.innerHTML = `<p class="error-message">Terjadi kesalahan saat memuat profil.</p>`;
+  // Tunggu sampai DOM selesai di-render
+  setTimeout(() => {
+    const profileContent = document.getElementById("profile-content");
+    
+    if (!profileContent) {
+      console.error("Element 'profile-content' tidak ditemukan");
+      // Coba lagi setelah delay lebih lama
+      setTimeout(InitProfilePage, 100);
+      return;
     }
-  );
+    
+    showPendingToast();
+    GET(
+      "/api/user",
+      {},
+      (response) => {
+        if (response.status === "success" && response.data) {
+          renderProfile(response.data);
+          setupEditHandlers(response.data.user_id);
+        } else {
+          profileContent.innerHTML = `<p class="error-message">Gagal memuat data profil.</p>`;
+        }
+      },
+      () => {
+        profileContent.innerHTML = `<p class="error-message">Terjadi kesalahan saat memuat profil.</p>`;
+      }
+    );
+  }, 0);
 }

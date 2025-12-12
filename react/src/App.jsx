@@ -5,6 +5,7 @@ import Auction from "./auction/App.jsx";
 import AuctionDetail from "./auction-detail/App.jsx";
 import AuctionManage from "./auction-manage/App.jsx";
 import Check from "./check/App.jsx";
+import Subscribe from "./subscribe/App.jsx";
 import AdminLogin from "./admin-login/App.jsx";
 import FeatureDisabled from "./_components/FeatureDisabled.jsx";
 import { useEffect, useState } from "react";
@@ -244,6 +245,7 @@ export default function App() {
       <Route path="/auction/:auctionId" element={<AuctionDetail />} />
       <Route path="/auction-manage" element={<AuctionManage />} />
       <Route path="/check" element={<Check />} />
+      <Route path="/subscribe" element={<Subscribe />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/feature-disabled" element={<FeatureDisabled />} />
 

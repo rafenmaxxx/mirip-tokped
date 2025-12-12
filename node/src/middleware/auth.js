@@ -1,32 +1,5 @@
 import { verifyToken } from "../utils/jwt.js";
 
-const requireAuth = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: "error",
-        message: "Tidak terautentikasi. Token tidak ditemukan.",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token);
-    req.user = decoded;
-
-    console.log("User authenticated:", decoded.email);
-    next();
-  } catch (error) {
-    console.error("Auth middleware error:", error.message);
-
-    return res.status(401).json({
-      status: "error",
-      message: error.message || "Token tidak valid atau expired",
-    });
-  }
-};
-
 const requireAdmin = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -61,4 +34,4 @@ const requireAdmin = (req, res, next) => {
   }
 };
 
-export { requireAuth, requireAdmin };
+export { requireAdmin };
