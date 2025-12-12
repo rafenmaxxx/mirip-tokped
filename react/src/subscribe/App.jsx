@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 // Helper function untuk convert VAPID key
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -21,126 +19,128 @@ export default function Subscribe() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("Initializing...");
   const [error, setError] = useState(null);
+  const [permission, setPermission] = useState(Notification.permission);
 
   useEffect(() => {
     const initPush = async () => {
-      const VITE_VAPID_PUBLIC_KEY = "BHp7HlmxLT1N6HFRan79yhwOTlnyljB1DFSsyNru-Rf0RqyKej7P70vzVgukeXrxPCw0yK0hkyzoF0kQ6W3-Rho";
-      
+      const VITE_VAPID_PUBLIC_KEY =
+        "BHp7HlmxLT1N6HFRan79yhwOTlnyljB1DFSsyNru-Rf0RqyKej7P70vzVgukeXrxPCw0yK0hkyzoF0kQ6W3-Rho";
+
       try {
         setStatus("Checking browser support...");
         if (!("serviceWorker" in navigator)) {
           throw new Error("Service Worker not supported in this browser");
         }
 
-        setStatus("Requesting notification permission...");
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-          throw new Error("Notification permission denied");
-        }
+        if (permission === "granted") {
+          setStatus("Getting VAPID key...");
+          const publicKey = VITE_VAPID_PUBLIC_KEY;
+          if (!publicKey) {
+            throw new Error("VAPID public key not found");
+          }
 
-        setStatus("Getting VAPID key...");
-        const publicKey = VITE_VAPID_PUBLIC_KEY;
-        if (!publicKey) {
-          throw new Error("VAPID public key not found");
-        }
+          console.log("VAPID Public Key:", publicKey.substring(0, 50) + "...");
 
-        console.log("VAPID Public Key:", publicKey.substring(0, 50) + "...");
+          setStatus("Converting VAPID key...");
+          const convertedVapidKey = urlBase64ToUint8Array(publicKey);
+          console.log("Converted VAPID key to Uint8Array");
 
-        setStatus("Converting VAPID key...");
-        const convertedVapidKey = urlBase64ToUint8Array(publicKey);
-        console.log("Converted VAPID key to Uint8Array");
+          setStatus("Registering Service Worker...");
+          const registration = await navigator.serviceWorker.register(
+            "/react/sw.js",
+            {
+              scope: "/react/",
+            }
+          );
 
-        setStatus("Registering Service Worker...");
-        const registration = await navigator.serviceWorker.register("/react/sw.js", {
-          scope: "/react/",
-        });
+          console.log("Service Worker registered:", registration);
 
-        console.log("Service Worker registered:", registration);
+          setStatus("Waiting for Service Worker to activate...");
+          const swRegistration = await navigator.serviceWorker.ready;
+          console.log("Service Worker active:", swRegistration);
 
-        setStatus("Waiting for Service Worker to activate...");
-        const swRegistration = await navigator.serviceWorker.ready;
-        console.log("Service Worker active:", swRegistration);
+          setStatus("Checking existing subscription...");
+          let subscription = await swRegistration.pushManager.getSubscription();
+          console.log("Existing subscription:", subscription ? "Yes" : "No");
 
-        setStatus("Checking existing subscription...");
-        let subscription = await swRegistration.pushManager.getSubscription();
-        console.log("Existing subscription:", subscription ? "Yes" : "No");
+          if (!subscription) {
+            setStatus("Creating new subscription...");
+            subscription = await swRegistration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: convertedVapidKey,
+            });
+            console.log("New subscription created:", subscription);
+          } else {
+            console.log("Using existing subscription");
+          }
 
-        if (!subscription) {
-          setStatus("Creating new subscription...");
-          subscription = await swRegistration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey,
+          setStatus("Preparing subscription data...");
+          const subscriptionJson = subscription.toJSON();
+          console.log("Subscription JSON:", subscriptionJson);
+
+          const subscriptionData = {
+            endpoint: subscriptionJson.endpoint,
+            expirationTime: subscriptionJson.expirationTime,
+            keys: {
+              p256dh: subscriptionJson.keys.p256dh,
+              auth: subscriptionJson.keys.auth,
+            },
+          };
+
+          console.log("Prepared subscription data:", subscriptionData);
+
+          setStatus("Getting user information...");
+          const userRes = await fetch("/api/user", {
+            method: "GET",
+            credentials: "include",
           });
-          console.log("New subscription created:", subscription);
+
+          if (!userRes.ok) {
+            throw new Error("Failed to get user information");
+          }
+
+          const userData = await userRes.json();
+          if (userData.status !== "success" || !userData.data) {
+            throw new Error("Invalid user data");
+          }
+
+          const userId = userData.data.user_id;
+          console.log("User ID:", userId);
+
+          setStatus("Sending subscription to server...");
+          const res = await fetch("/node/api/notif/subscribe", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              ...subscriptionData,
+              userId: userId,
+            }),
+          });
+
+          if (!res.ok) {
+            throw new Error(`Subscription failed: ${res.status}`);
+          }
+
+          const result = await res.json();
+          console.log("Subscription response:", result);
+
+          setStatus("Redirecting...");
+
+          // Redirect back to profile after 1 second
+          setTimeout(() => {
+            window.location.href = "/profile";
+          }, 1000);
         } else {
-          console.log("Using existing subscription");
+          setStatus("Requesting notification permission...");
         }
-
-        setStatus("Preparing subscription data...");
-        const subscriptionJson = subscription.toJSON();
-        console.log("Subscription JSON:", subscriptionJson);
-
-        const subscriptionData = {
-          endpoint: subscriptionJson.endpoint,
-          expirationTime: subscriptionJson.expirationTime,
-          keys: {
-            p256dh: subscriptionJson.keys.p256dh,
-            auth: subscriptionJson.keys.auth,
-          },
-        };
-
-        console.log("Prepared subscription data:", subscriptionData);
-
-        setStatus("Getting user information...");
-        const userRes = await fetch("/api/user", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!userRes.ok) {
-          throw new Error("Failed to get user information");
-        }
-
-        const userData = await userRes.json();
-        if (userData.status !== "success" || !userData.data) {
-          throw new Error("Invalid user data");
-        }
-
-        const userId = userData.data.user_id;
-        console.log("User ID:", userId);
-
-        setStatus("Sending subscription to server...");
-        const res = await fetch("/node/api/notif/subscribe", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            ...subscriptionData,
-            userId: userId,
-          }),
-        });
-
-        if (!res.ok) {
-          throw new Error(`Subscription failed: ${res.status}`);
-        }
-
-        const result = await res.json();
-        console.log("Subscription response:", result);
-
-        setStatus("Redirecting...");
-        
-        // Redirect back to profile after 1 second
-        setTimeout(() => {
-          window.location.href = "/profile";
-        }, 1000);
-
       } catch (err) {
         console.error("Push setup failed:", err);
         setError(err.message);
         setStatus("Failed");
-        
+
         // Redirect back to profile after 3 seconds even on error
         setTimeout(() => {
           window.location.href = "/profile";
@@ -149,71 +149,131 @@ export default function Subscribe() {
     };
 
     initPush();
-  }, [navigate]);
+  }, [navigate, permission]);
+
+  const handleRequestPermission = async () => {
+    if (!("Notification" in window)) {
+      console.error("This browser does not support notifications.");
+      return;
+    }
+
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+
+      if (result === "granted") {
+        console.log("Notification permission granted.");
+        // initPush();
+      } else if (result === "denied") {
+        console.warn("Notification permission denied.");
+        setStatus("Permission denied");
+      } else {
+        console.log("Notification permission dismissed.");
+        setStatus("Permission dismissed");
+      }
+    } catch (error) {
+      console.error("Error requesting notification permission:", error);
+    }
+  };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "100vh",
-      backgroundColor: "#f0f3f7",
-      padding: "20px",
-    }}>
-      <div style={{
-        backgroundColor: "white",
-        borderRadius: "16px",
-        padding: "48px 40px",
-        boxShadow: "0 1px 6px rgba(49, 53, 59, 0.12)",
-        maxWidth: "480px",
-        width: "100%",
-        textAlign: "center"
-      }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        backgroundColor: "#f0f3f7",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          borderRadius: "16px",
+          padding: "48px 40px",
+          boxShadow: "0 1px 6px rgba(49, 53, 59, 0.12)",
+          maxWidth: "480px",
+          width: "100%",
+          textAlign: "center",
+        }}
+      >
         {!error ? (
           <>
-            <img 
-              src="/react/img/flags-disabled.png" 
+            <img
+              src="/react/img/flags-disabled.png"
               alt="Notification Setup"
               style={{
                 width: "180px",
                 height: "180px",
                 margin: "0 auto 24px",
                 display: "block",
-                objectFit: "contain"
+                objectFit: "contain",
               }}
             />
-            <div style={{
-              width: "48px",
-              height: "48px",
-              border: "3px solid #00AA5B",
-              borderTop: "3px solid transparent",
-              borderRadius: "50%",
-              margin: "0 auto 24px",
-              animation: "spin 0.8s linear infinite"
-            }}></div>
-            <h2 style={{ 
-              marginBottom: "12px", 
-              color: "#212121",
-              fontSize: "24px",
-              fontWeight: "600",
-              letterSpacing: "-0.5px"
-            }}>
+            <div
+              style={{
+                width: "48px",
+                height: "48px",
+                border: "3px solid #00AA5B",
+                borderTop: "3px solid transparent",
+                borderRadius: "50%",
+                margin: "0 auto 24px",
+                animation: "spin 0.8s linear infinite",
+              }}
+            ></div>
+            <h2
+              style={{
+                marginBottom: "12px",
+                color: "#212121",
+                fontSize: "24px",
+                fontWeight: "600",
+                letterSpacing: "-0.5px",
+              }}
+            >
               Mengaktifkan Notifikasi
             </h2>
-            <p style={{ 
-              color: "#6D7588", 
-              fontSize: "15px",
-              lineHeight: "1.6",
-              margin: "0"
-            }}>
+            <p
+              style={{
+                color: "#6D7588",
+                fontSize: "15px",
+                lineHeight: "1.6",
+                margin: "0",
+              }}
+            >
               {status}
             </p>
+            {permission !== "granted" && (
+              <button
+                onClick={handleRequestPermission}
+                style={{
+                  marginTop: "20px",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  color: "white",
+                  backgroundColor: "#007bff",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = "#0056b3";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = "#007bff";
+                }}
+              >
+                Aktifkan Notifikasi
+              </button>
+            )}
           </>
         ) : (
           <>
-            <img 
-              src="/img/flags-disabled.png" 
+            <img
+              src="/img/flags-disabled.png"
               alt="Setup Failed"
               style={{
                 width: "160px",
@@ -221,59 +281,69 @@ export default function Subscribe() {
                 margin: "0 auto 24px",
                 display: "block",
                 objectFit: "contain",
-                opacity: "0.7"
+                opacity: "0.7",
               }}
             />
-            <div style={{
-              width: "64px",
-              height: "64px",
-              backgroundColor: "#ff5252",
-              borderRadius: "50%",
-              margin: "0 auto 20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontSize: "32px",
-              fontWeight: "bold"
-            }}>
+            <div
+              style={{
+                width: "64px",
+                height: "64px",
+                backgroundColor: "#ff5252",
+                borderRadius: "50%",
+                margin: "0 auto 20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontSize: "32px",
+                fontWeight: "bold",
+              }}
+            >
               ✕
             </div>
-            <h2 style={{ 
-              marginBottom: "12px", 
-              color: "#ff5252",
-              fontSize: "24px",
-              fontWeight: "600",
-              letterSpacing: "-0.5px"
-            }}>
+            <h2
+              style={{
+                marginBottom: "12px",
+                color: "#ff5252",
+                fontSize: "24px",
+                fontWeight: "600",
+                letterSpacing: "-0.5px",
+              }}
+            >
               Pengaturan Gagal
             </h2>
-            <p style={{ 
-              color: "#6D7588", 
-              fontSize: "15px", 
-              marginBottom: "24px",
-              lineHeight: "1.6"
-            }}>
+            <p
+              style={{
+                color: "#6D7588",
+                fontSize: "15px",
+                marginBottom: "24px",
+                lineHeight: "1.6",
+              }}
+            >
               {error}
             </p>
-            <div style={{
-              padding: "12px 16px",
-              backgroundColor: "#fff3cd",
-              borderRadius: "8px",
-              border: "1px solid #ffeaa7"
-            }}>
-              <p style={{ 
-                color: "#856404", 
-                fontSize: "13px",
-                margin: "0",
-                lineHeight: "1.5"
-              }}>
+            <div
+              style={{
+                padding: "12px 16px",
+                backgroundColor: "#fff3cd",
+                borderRadius: "8px",
+                border: "1px solid #ffeaa7",
+              }}
+            >
+              <p
+                style={{
+                  color: "#856404",
+                  fontSize: "13px",
+                  margin: "0",
+                  lineHeight: "1.5",
+                }}
+              >
                 🔄 Mengarahkan kembali ke halaman profil...
               </p>
             </div>
           </>
         )}
-      </div>``
+      </div>
 
       <style>{`
         @keyframes spin {
