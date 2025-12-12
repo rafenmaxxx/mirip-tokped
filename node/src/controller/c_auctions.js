@@ -34,6 +34,28 @@ export const AuctionsController = {
     }
   },
 
+    async getByStoreIdWithCursor(req, res) {
+    try {
+      const { storeId } = req.params;
+      const { cursor, limit = 4, status } = req.query;
+
+      const options = {
+        cursor: cursor ? parseInt(cursor) : null,
+        limit: parseInt(limit),
+        status: status || null
+      };
+
+      const result = await AuctionsService.getByStoreIdWithCursor(storeId, options);
+      res.json(result);
+    } catch (error) {
+      console.error("Error getting auctions by store id with cursor:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch auctions for store",
+        error: error.message 
+      });
+    }
+  },
+
   async create(req, res) {
     try {
       const auction = await AuctionsService.create(req.body);

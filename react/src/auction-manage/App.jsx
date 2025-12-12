@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AuctionList from "./components/AuctionList";
 import CreateAuctionModal from "./components/CreateAuctionModal";
@@ -10,17 +10,34 @@ function AuctionManage() {
   const [user, setUser] = useState(null);
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeAuction, setActiveAuction] = useState(null);
-  const [activeTab, setActiveTab] = useState("active"); // active, ended, cancelled
-  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState("active");
+  
+  // Cursor-based pagination states
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
   const itemsPerPage = 4;
 
+  // Tab counts
+  const [tabCounts, setTabCounts] = useState({
+    active: 0,
+    ended: 0,
+    cancelled: 0
+  });
+
   useEffect(() => {
-    fetchUserAndAuctions();
+    fetchUserAndStore();
   }, []);
 
-  const fetchUserAndAuctions = async () => {
+  useEffect(() => {
+    if (store) {
+      fetchAuctions(true); // Reset and fetch from beginning when tab changes
+    }
+  }, [activeTab, store]);
+
+  const fetchUserAndStore = async () => {
     try {
       setLoading(true);
       
@@ -49,44 +66,109 @@ function AuctionManage() {
       console.log("Fetched store data:", storeData);
       
       if (!storeData.store_id) {
-        // alert("Anda belum memiliki toko. Silakan buat toko terlebih dahulu.");
         showToast("Anda belum memiliki toko. Silakan buat toko terlebih dahulu.", "warning");
         navigate("/");
         return;
       }
       
       setStore(storeData);
-
-      const auctionsRes = await fetch(`http://localhost:80/node/api/auctions/store/${storeData.store_id}`, {
-        credentials: "include",
-      });
-      const sellerAuctions = await auctionsRes.json();
       
-      console.log("Fetched auctions data:", sellerAuctions);
-   
-      sellerAuctions.sort((a, b) => 
-        new Date(b.created_at) - new Date(a.created_at)
-      );
-      
-      setAuctions(sellerAuctions);
-      
-      const active = sellerAuctions.find(
-        auction => auction.status_auction === "active"
-      );
-      setActiveAuction(active || null);
+      // Fetch initial tab counts
+      await fetchTabCounts(storeData.store_id);
       
     } catch (error) {
-      console.error("Error fetching data:", error);
-      // alert("Gagal memuat data: " + error.message);
+      console.error("Error fetching user and store:", error);
       showToast("Gagal memuat data: " + error.message, "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchTabCounts = async (storeId) => {
+    try {
+      // Fetch counts for all tabs
+      const [activeRes, endedRes, cancelledRes] = await Promise.all([
+        fetch(`http://localhost:80/node/api/auctions/store/${storeId}/paginated?status=active&limit=1`, {
+          credentials: "include",
+        }),
+        fetch(`http://localhost:80/node/api/auctions/store/${storeId}/paginated?status=ended&limit=1`, {
+          credentials: "include",
+        }),
+        fetch(`http://localhost:80/node/api/auctions/store/${storeId}/paginated?status=cancelled&limit=1`, {
+          credentials: "include",
+        })
+      ]);
+
+      const activeData = await activeRes.json();
+      const endedData = await endedRes.json();
+      const cancelledData = await cancelledRes.json();
+
+      setTabCounts({
+        active: activeData.pagination?.count || 0,
+        ended: endedData.pagination?.count || 0,
+        cancelled: cancelledData.pagination?.count || 0
+      });
+    } catch (error) {
+      console.error("Error fetching tab counts:", error);
+    }
+  };
+
+  const fetchAuctions = async (reset = false) => {
+    try {
+      if (reset) {
+        setLoading(true);
+        setAuctions([]);
+        setNextCursor(null);
+      } else {
+        setLoadingMore(true);
+      }
+      
+      // Build query params
+      const params = new URLSearchParams({
+        limit: itemsPerPage.toString(),
+        status: activeTab,
+        ...(nextCursor && !reset && { cursor: nextCursor.toString() })
+      });
+      
+      const auctionsRes = await fetch(
+        `http://localhost:80/node/api/auctions/store/${store.store_id}/paginated?${params}`,
+        { credentials: "include" }
+      );
+      
+      if (!auctionsRes.ok) {
+        throw new Error("Failed to fetch auctions");
+      }
+      
+      const result = await auctionsRes.json();
+      console.log("Fetched auctions data:", result);
+      
+      // Append or replace auctions
+      setAuctions(prev => reset ? result.data : [...prev, ...result.data]);
+      setNextCursor(result.pagination.nextCursor);
+      setHasMore(result.pagination.hasMore);
+      
+      // Update active auction
+      const active = result.data.find(
+        auction => auction.status_auction === "active"
+      );
+      if (active) {
+        setActiveAuction(active);
+      } else if (reset) {
+        // If resetting and no active auction found in first page, clear it
+        setActiveAuction(null);
+      }
+      
+    } catch (error) {
+      console.error("Error fetching auctions:", error);
+      showToast("Gagal memuat data lelang: " + error.message, "error");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
   const handleCreateAuction = () => {
     if (activeAuction) {
-      // alert("Anda sudah memiliki lelang yang sedang berjalan. Hentikan lelang tersebut terlebih dahulu.");
       showToast("Anda sudah memiliki lelang yang sedang berjalan. Hentikan lelang tersebut terlebih dahulu.", "warning");
       return;
     }
@@ -95,66 +177,23 @@ function AuctionManage() {
 
   const handleAuctionCreated = () => {
     setShowCreateModal(false);
-    fetchUserAndAuctions();
+    fetchUserAndStore(); // Refresh all data including tab counts
   };
 
   const handleViewDetails = useCallback((auctionId) => {
     navigate(`/auction/${auctionId}`);
   }, [navigate]);
 
-  // Filter auctions by status
-  const activeAuctions = useMemo(() => 
-    auctions.filter(a => a.status_auction === "active" || a.status_auction === "scheduled"),
-    [auctions]
-  );
-  
-  const endedAuctions = useMemo(() => 
-    auctions.filter(a => a.status_auction === "ended"),
-    [auctions]
-  );
-  
-  const cancelledAuctions = useMemo(() => 
-    auctions.filter(a => a.status_auction === "cancelled"),
-    [auctions]
-  );
-
-  const getFilteredAuctions = useCallback(() => {
-    switch (activeTab) {
-      case "active":
-        return activeAuctions;
-      case "ended":
-        return endedAuctions;
-      case "cancelled":
-        return cancelledAuctions;
-      default:
-        return activeAuctions;
-    }
-  }, [activeTab, activeAuctions, endedAuctions, cancelledAuctions]);
-
-  const filteredAuctions = getFilteredAuctions();
-  
-  const totalPages = useMemo(
-    () => Math.ceil(filteredAuctions.length / itemsPerPage),
-    [filteredAuctions.length, itemsPerPage]
-  );
-
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [currentPage, totalPages]);
-
-  const paginatedAuctions = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAuctions.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredAuctions, currentPage, itemsPerPage]);
-
   const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
-    setCurrentPage(1);
+    // Fetch will be triggered by useEffect
   }, []);
 
-  if (loading) {
+  const handleLoadMore = () => {
+    fetchAuctions(false);
+  };
+
+  if (loading && auctions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -164,6 +203,8 @@ function AuctionManage() {
       </div>
     );
   }
+
+  const totalAuctions = tabCounts.active + tabCounts.ended + tabCounts.cancelled;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -210,7 +251,7 @@ function AuctionManage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-8 py-8">
-        {auctions.length === 0 ? (
+        {totalAuctions === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -242,7 +283,7 @@ function AuctionManage() {
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-600"
                 }`}>
-                  {activeAuctions.length}
+                  {tabCounts.active}
                 </span>
               </button>
               <button
@@ -259,7 +300,7 @@ function AuctionManage() {
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-600"
                 }`}>
-                  {endedAuctions.length}
+                  {tabCounts.ended}
                 </span>
               </button>
               <button
@@ -276,13 +317,13 @@ function AuctionManage() {
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-600"
                 }`}>
-                  {cancelledAuctions.length}
+                  {tabCounts.cancelled}
                 </span>
               </button>
             </div>
 
             {/* Auction List */}
-            {paginatedAuctions.length === 0 ? (
+            {auctions.length === 0 && !loading ? (
               <div className="text-center py-12">
                 <p className="text-gray-400 text-lg">
                   {activeTab === "active" && "Tidak ada lelang yang aktif atau terjadwal"}
@@ -293,43 +334,26 @@ function AuctionManage() {
             ) : (
               <>
                 <AuctionList
-                  auctions={paginatedAuctions}
+                  auctions={auctions}
                   onViewDetails={handleViewDetails}
                 />
                 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2 mt-8">
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="flex justify-center mt-8">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      className="px-6 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
                     >
-                      Sebelumnya
-                    </button>
-
-                    <div className="flex gap-2">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`w-10 h-10 rounded-md font-medium ${
-                            currentPage === page
-                              ? "bg-green-600 text-white"
-                              : "border border-gray-300 bg-white hover:bg-gray-50"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Selanjutnya
+                      {loadingMore ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                          <span>Memuat...</span>
+                        </div>
+                      ) : (
+                        'Muat Lebih Banyak'
+                      )}
                     </button>
                   </div>
                 )}
