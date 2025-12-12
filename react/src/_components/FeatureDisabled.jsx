@@ -9,7 +9,7 @@ export default function FeatureDisabled() {
   const featureParam = searchParams.get("feature");
   const featureNames = {
     checkout: "Checkout",
-    chat: "Chat Penjual",
+    chat: "Chat",
     auction: "Lelang",
   };
   const featureTitle = featureNames[featureParam] ? `Fitur ${featureNames[featureParam]}` : "Fitur";
