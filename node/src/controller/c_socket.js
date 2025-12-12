@@ -1,6 +1,7 @@
 import SocketService from "../service/s_socket.js";
 import { UserService } from "../service/s_user.js"; // pastikan ada UserService
 import { AuctionBidsService } from "../service/s_auctionbids.js";
+import { sendNotif } from "../service/s_webpush.js";
 class SocketController {
   constructor(io) {
     this.io = io;
@@ -9,8 +10,20 @@ class SocketController {
   handleConnection(socket) {
     console.log(`[Controller] Klien terhubung: ${socket.id}`);
 
-    socket.userId = `user_${Math.floor(Math.random() * 100)}`;
-    console.log(`[Controller] Socket ${socket.id} diberi ID: ${socket.userId}`);
+    // If authentication middleware attached a user, use it.
+    if (socket.user && socket.user.user_id) {
+      socket.userId = `user_${socket.user.user_id}`;
+      socket.user_meta = socket.user;
+      console.log(
+        `[Controller] Socket ${socket.id} authenticated as ${socket.user.user_id}`
+      );
+    } else {
+      // fallback to an anonymous id (shouldn't normally happen if middleware rejects)
+      socket.userId = `anon_${socket.id}`;
+      console.log(
+        `[Controller] Socket ${socket.id} has no authenticated user, assigned ${socket.userId}`
+      );
+    }
 
     this.io.emit("user_connected", { id: socket.id, userId: socket.userId });
 
@@ -38,27 +51,30 @@ class SocketController {
       return;
     }
 
-    // Ambil PHPSESSID dari cookie handshake
-    const cookie = socket.handshake.headers.cookie || "";
-    const match = cookie.match(/PHPSESSID=([^;]+)/);
-    const phpSessionId = match ? match[1] : null;
-
-    if (!phpSessionId) {
-      socket.emit("error_message", {
-        type: "chat",
-        message: "Tidak ada sesi login",
-      });
-      return;
-    }
-
-    // Ambil user dari session
-    const user = await UserService.getMe(phpSessionId);
+    // Prefer authenticated user object attached by handshake middleware
+    let user = socket.user;
     if (!user) {
-      socket.emit("error_message", {
-        type: "chat",
-        message: "User tidak ditemukan / tidak login",
-      });
-      return;
+      // Fallback: try to read PHPSESSID from cookie and resolve
+      const cookie = socket.handshake.headers.cookie || "";
+      const match = cookie.match(/PHPSESSID=([^;]+)/);
+      const phpSessionId = match ? match[1] : null;
+
+      if (!phpSessionId) {
+        socket.emit("error_message", {
+          type: "chat",
+          message: "Tidak ada sesi login",
+        });
+        return;
+      }
+
+      user = await UserService.getMe(phpSessionId);
+      if (!user) {
+        socket.emit("error_message", {
+          type: "chat",
+          message: "User tidak ditemukan / tidak login",
+        });
+        return;
+      }
     }
 
     const sender_id = user.user_id;
@@ -88,6 +104,13 @@ class SocketController {
         message_type: message_type || "text",
         product_id: product_id || null,
       });
+
+      let targetId = buyerId;
+      if (buyerId == sender_id) {
+        targetId = storeId;
+      }
+      console.log(targetId, " --> targetID");
+      sendNotif(targetId, `CHAT dari ${sender_id}`, message);
 
       // Debug log
       console.log(

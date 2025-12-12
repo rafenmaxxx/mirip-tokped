@@ -14,14 +14,13 @@ export const useChat = (user) => {
   const initialLoadDoneRef = useRef({});
   const fetchMessagesAbortRef = useRef({});
   const typingTimeoutRef = useRef(null);
+  const prevSelectedRoomRef = useRef(null);
 
-  // Helper: buat room key unik
   const getRoomKey = useCallback((room) => {
     if (!room) return "";
     return `${room.store_id?.toString()}-${room.buyer_id?.toString()}`;
   }, []);
 
-  // Format message untuk UI
   const formatMessage = useCallback((msg, currentUser) => {
     if (!msg || !currentUser) return null;
 
@@ -60,7 +59,6 @@ export const useChat = (user) => {
     };
   }, []);
 
-  // Setup socket connection
   useEffect(() => {
     if (!user) return;
 
@@ -72,7 +70,6 @@ export const useChat = (user) => {
 
     const socket = socketManager.connect(SERVER_URL);
 
-    // Setup message listeners
     const handleNewMessage = (msg) => {
       if (!msg || !msg.store_id || !msg.buyer_id || !user) {
         console.log("Invalid message received:", msg);
@@ -85,17 +82,14 @@ export const useChat = (user) => {
       const roomKey = `${msg.store_id.toString()}-${msg.buyer_id.toString()}`;
       const isMyMessage = msg.sender_id === user.user_id;
 
-      // Update messages
       setRoomMessages((prev) => {
         const currentMessages = prev[roomKey] || [];
 
-        // Cek apakah message sudah ada
         const messageExists = currentMessages.some(
           (m) => m.id === msg.message_id
         );
         if (messageExists) return prev;
 
-        // Cari optimistic message untuk pesan sendiri
         if (isMyMessage) {
           const optimisticIndex = currentMessages.findIndex(
             (m) => m.status === "sending" && m.mine === true
@@ -125,7 +119,6 @@ export const useChat = (user) => {
         };
       });
 
-      // Update rooms list
       setRooms((prev) =>
         updateRoomList(prev, msg, user, selectedRoom, getRoomKey)
       );
@@ -140,14 +133,6 @@ export const useChat = (user) => {
         data.user_id !== user.user_id
       ) {
         setIsTyping(true);
-
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        typingTimeoutRef.current = setTimeout(() => {
-          setIsTyping(false);
-        }, 3000);
       }
     };
 
@@ -160,9 +145,6 @@ export const useChat = (user) => {
         data.user_id !== user.user_id
       ) {
         setIsTyping(false);
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
       }
     };
 
@@ -174,11 +156,9 @@ export const useChat = (user) => {
       setRoomMessages((prev) => {
         const updated = { ...prev };
 
-        // Loop melalui semua rooms
         Object.keys(updated).forEach((roomKey) => {
           const [storeId, buyerId] = roomKey.split("-");
 
-          // Cek apakah ini room yang benar
           if (
             parseInt(storeId) === data.store_id &&
             parseInt(buyerId) === data.buyer_id
@@ -186,11 +166,10 @@ export const useChat = (user) => {
             const messages = updated[roomKey];
 
             const updatedMessages = messages.map((msg) => {
-              // Jika ini pesan SENDER yang dibaca oleh RECEIVER
               if (
-                msg.mine && // Hanya pesan kita sendiri
-                data.reader_id !== user.user_id && // Dibaca oleh orang lain
-                data.message_ids?.includes(msg.id) // ID pesan ada di list
+                msg.mine &&
+                data.reader_id !== user.user_id &&
+                data.message_ids?.includes(msg.id)
               ) {
                 console.log(` Marking message ${msg.id} as read`);
                 return {
@@ -209,7 +188,6 @@ export const useChat = (user) => {
         return updated;
       });
 
-      // Update messageReadStatus untuk tracking
       setMessageReadStatus((prev) => {
         const updated = { ...prev };
         data.message_ids?.forEach((messageId) => {
@@ -223,7 +201,6 @@ export const useChat = (user) => {
       console.error(" Socket error:", errorData);
     };
 
-    // Register listeners
     socket.on("new_message", handleNewMessage);
     socket.on("typing", handleTypingEvent);
     socket.on("stop_typing", handleStopTypingEvent);
@@ -243,7 +220,6 @@ export const useChat = (user) => {
     };
   }, [user, selectedRoom, formatMessage, getRoomKey]);
 
-  // Helper function untuk update room list
   const updateRoomList = useCallback((rooms, msg, user, selectedRoom) => {
     const roomIndex = rooms.findIndex(
       (r) => r.store_id === msg.store_id && r.buyer_id === msg.buyer_id
@@ -261,14 +237,12 @@ export const useChat = (user) => {
         selectedRoom.store_id === msg.store_id &&
         selectedRoom.buyer_id === msg.buyer_id;
 
-      // Update last message content
       let lastMessageDisplay = msg.content;
       if (msg.message_type === "item_preview") {
         try {
           const parsed = JSON.parse(msg.content);
           lastMessageDisplay = `📦 ${parsed.product_name}`;
         } catch (e) {
-          // tetap gunakan content asli
           console.log(e);
         }
       } else if (msg.message_type === "image") {
@@ -287,7 +261,6 @@ export const useChat = (user) => {
         room.unread_count = 0;
       }
 
-      // Pindahkan ke atas
       updatedRooms.splice(roomIndex, 1);
       updatedRooms.unshift(room);
 
@@ -297,7 +270,6 @@ export const useChat = (user) => {
     return rooms;
   }, []);
 
-  // Fetch initial messages untuk room
   const fetchInitialMessages = useCallback(
     async (room) => {
       if (!room || !user || initialLoadDoneRef.current[getRoomKey(room)]) {
@@ -307,7 +279,6 @@ export const useChat = (user) => {
       const roomKey = getRoomKey(room);
       setIsLoadingMessages((prev) => ({ ...prev, [roomKey]: true }));
 
-      // Cancel previous fetch jika ada
       if (fetchMessagesAbortRef.current[roomKey]) {
         fetchMessagesAbortRef.current[roomKey].abort();
       }
@@ -332,7 +303,6 @@ export const useChat = (user) => {
 
           const formattedMessages = data.map((msg) => formatMessage(msg, user));
 
-          // Update read status
           const readStatus = {};
           data.forEach((msg) => {
             if (msg.is_read && msg.sender_id === user.user_id) {
@@ -353,7 +323,6 @@ export const useChat = (user) => {
 
           initialLoadDoneRef.current[roomKey] = true;
 
-          // Clear unread count di sidebar
           setRooms((prev) =>
             prev.map((r) =>
               r.store_id === room.store_id && r.buyer_id === room.buyer_id
@@ -376,7 +345,6 @@ export const useChat = (user) => {
     [user, formatMessage, getRoomKey]
   );
 
-  // Load messages ketika room dipilih
   useEffect(() => {
     if (selectedRoom) {
       const roomKey = getRoomKey(selectedRoom);
@@ -384,7 +352,6 @@ export const useChat = (user) => {
       if (!initialLoadDoneRef.current[roomKey]) {
         fetchInitialMessages(selectedRoom);
       } else {
-        // Clear unread count
         setRooms((prev) =>
           prev.map((r) =>
             r.store_id === selectedRoom.store_id &&
@@ -397,18 +364,27 @@ export const useChat = (user) => {
     }
   }, [selectedRoom, fetchInitialMessages, getRoomKey]);
 
-  // Handle sending message
   const sendMessage = useCallback(
-    (input, messageType = "text") => {
+    async (input, messageType = "text") => {
       if (!user || !selectedRoom) {
         console.error("Cannot send - missing requirements");
         return false;
       }
 
+      try {
+        socketManager.sendStopTyping({
+          store_id: selectedRoom.store_id,
+          buyer_id: selectedRoom.buyer_id,
+          user_id: user.user_id,
+          user_name: user.name || "User",
+        });
+      } catch (e) {
+        console.log(e);
+      }
+
       const { store_id, buyer_id } = selectedRoom;
       const roomKey = getRoomKey(selectedRoom);
 
-      // Tentukan content dan product_id
       let content = "";
       let product_id = null;
       let additionalData = {};
@@ -428,7 +404,6 @@ export const useChat = (user) => {
         }
       }
 
-      // Optimistic update
       const optimisticMessage = {
         id: Date.now(),
         text: content,
@@ -444,7 +419,6 @@ export const useChat = (user) => {
         [roomKey]: [...(prev[roomKey] || []), optimisticMessage],
       }));
 
-      // Update room list
       setRooms((prev) => {
         const roomIndex = prev.findIndex(
           (r) => r.store_id === store_id && r.buyer_id === buyer_id
@@ -455,7 +429,6 @@ export const useChat = (user) => {
           const room = { ...updatedRooms[roomIndex] };
           room.last_message_at = new Date().toISOString();
 
-          // Update last message content
           let lastMessageDisplay = content;
           if (messageType === "item_preview") {
             lastMessageDisplay = `📦 ${input.product_name}`;
@@ -471,7 +444,6 @@ export const useChat = (user) => {
         return prev;
       });
 
-      // Kirim via socket
       const socketData = {
         storeId: store_id,
         buyerId: buyer_id,
@@ -481,12 +453,91 @@ export const useChat = (user) => {
       };
 
       const success = socketManager.sendMessage(socketData);
-      return success;
+      if (success) return true;
+
+      try {
+        const res = await fetch("/node/api/chat/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            store_id: store_id,
+            buyer_id: buyer_id,
+            message_type: messageType,
+            content: content,
+            product_id: product_id,
+          }),
+        });
+
+        if (res.ok) {
+          const saved = await res.json();
+
+          setRoomMessages((prev) => {
+            const current = prev[roomKey] || [];
+            const optimisticIndex = current.findIndex(
+              (m) => m.status === "sending" && m.mine === true
+            );
+
+            if (optimisticIndex !== -1) {
+              const updated = [...current];
+              const formatted = formatMessage(saved, user);
+              updated[optimisticIndex] = formatted || updated[optimisticIndex];
+              return { ...prev, [roomKey]: updated };
+            }
+
+            return prev;
+          });
+
+          setRooms((prev) => {
+            const roomIndex = prev.findIndex(
+              (r) => r.store_id === store_id && r.buyer_id === buyer_id
+            );
+
+            if (roomIndex > -1) {
+              const updatedRooms = [...prev];
+              const room = { ...updatedRooms[roomIndex] };
+              room.last_message_at =
+                saved.created_at || new Date().toISOString();
+              room.last_message_content =
+                saved.message_type === "item_preview"
+                  ? `📦 ${JSON.parse(saved.content).product_name}`
+                  : saved.message_type === "image"
+                  ? "📷 Gambar"
+                  : saved.content;
+              updatedRooms.splice(roomIndex, 1);
+              updatedRooms.unshift(room);
+              return updatedRooms;
+            }
+            return prev;
+          });
+
+          return true;
+        }
+      } catch (err) {
+        console.error("Fallback REST send failed:", err);
+      }
+
+      setRoomMessages((prev) => {
+        const current = prev[roomKey] || [];
+        const optimisticIndex = current.findIndex(
+          (m) => m.status === "sending" && m.mine === true
+        );
+        if (optimisticIndex !== -1) {
+          const updated = [...current];
+          updated[optimisticIndex] = {
+            ...updated[optimisticIndex],
+            status: "failed",
+          };
+          return { ...prev, [roomKey]: updated };
+        }
+        return prev;
+      });
+
+      return false;
     },
     [user, selectedRoom, getRoomKey]
   );
 
-  // Handle load more messages
   const handleLoadMore = useCallback(async () => {
     if (!selectedRoom || !hasMoreMessages[getRoomKey(selectedRoom)] || !user)
       return;
@@ -540,7 +591,6 @@ export const useChat = (user) => {
     getRoomKey,
   ]);
 
-  // Mark messages as read
   const markAsRead = useCallback(() => {
     if (!selectedRoom || !user) return false;
 
@@ -552,7 +602,6 @@ export const useChat = (user) => {
     return success;
   }, [selectedRoom, user]);
 
-  // Send typing indicator
   const sendTyping = useCallback(() => {
     if (!selectedRoom || !user) return false;
 
@@ -566,7 +615,6 @@ export const useChat = (user) => {
     return success;
   }, [selectedRoom, user]);
 
-  // Send stop typing indicator
   const sendStopTyping = useCallback(() => {
     if (!selectedRoom || !user) return false;
 
@@ -580,30 +628,57 @@ export const useChat = (user) => {
     return success;
   }, [selectedRoom, user]);
 
-  // Join room
   const joinRoom = useCallback((roomData) => {
     socketManager.joinRoom(roomData);
   }, []);
 
-  // Cleanup on unmount
+  useEffect(() => {
+    const prev = prevSelectedRoomRef.current;
+    if (
+      prev &&
+      user &&
+      (prev.store_id !== selectedRoom?.store_id ||
+        prev.buyer_id !== selectedRoom?.buyer_id)
+    ) {
+      try {
+        socketManager.sendStopTyping({
+          store_id: prev.store_id,
+          buyer_id: prev.buyer_id,
+          user_id: user.user_id,
+          user_name: user.name || "User",
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    prevSelectedRoomRef.current = selectedRoom;
+  }, [selectedRoom, user]);
+
   useEffect(() => {
     return () => {
-      // Abort semua fetch yang sedang berjalan
       Object.values(fetchMessagesAbortRef.current).forEach((controller) => {
         if (controller) controller.abort();
       });
 
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+      try {
+        const current = prevSelectedRoomRef.current;
+        if (current && user) {
+          socketManager.sendStopTyping({
+            store_id: current.store_id,
+            buyer_id: current.buyer_id,
+            user_id: user.user_id,
+            user_name: user.name || "User",
+          });
+        }
+      } catch (e) {
+        console.log(e);
       }
 
-      // Disconnect socket jika tidak ada komponen lain yang menggunakan
       socketManager.disconnect();
     };
   }, []);
 
   return {
-    // State
     rooms,
     setRooms,
     selectedRoom,
@@ -618,10 +693,8 @@ export const useChat = (user) => {
     connectionStatus,
     messageReadStatus,
 
-    // Helper functions
     getRoomKey,
 
-    // Methods
     sendMessage,
     markAsRead,
     sendTyping,

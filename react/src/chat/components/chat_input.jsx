@@ -1,7 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import AttachmentModal from "./attachment_modal";
 
-const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
+const ChatInput = ({
+  onSendMessage,
+  onTypingChange,
+  disabled,
+  isMobile,
+  initialMessagePreview,
+}) => {
   const [input, setInput] = useState("");
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -202,6 +208,23 @@ const ChatInput = ({ onSendMessage, onTypingChange, disabled }) => {
       setSelectedImage(null);
     }
   }, [disabled]);
+
+  // If an initial message preview is provided (from product detail redirect), set it
+  useEffect(() => {
+    if (!initialMessagePreview) return;
+
+    const prod = {
+      product_id: initialMessagePreview.product_id || initialMessagePreview.id,
+      product_name: initialMessagePreview.product_name,
+      price: initialMessagePreview.price,
+      main_image_path: initialMessagePreview.main_image_path,
+      description: initialMessagePreview.description,
+      store_id: initialMessagePreview.store_id,
+      stock: initialMessagePreview.stock,
+    };
+
+    setSelectedProduct(prod);
+  }, [initialMessagePreview]);
 
   return (
     <>
