@@ -553,7 +553,7 @@ async function unsubscribePush() {
       console.log("Unsubscribe result:", result);
       
       if (result) {
-        renderToast("berhasil unsubscribed!", "success");
+        renderToast("berhasil unsubscribe!", "success");
         return true;
       } else {
         renderToast("gagal unsubscribe", "error");
