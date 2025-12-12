@@ -21,7 +21,7 @@ export default function Check() {
         credentials: "include",
       });
       const data = await res.json();
-      setUser(data);
+      setUser(data.data);
       if (data.user_id) {
         setUserId(data.user_id.toString());
       }
