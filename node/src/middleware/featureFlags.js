@@ -13,10 +13,7 @@ export const requireAuctionEnabled = async (req, res, next) => {
     }
 
     if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "User ID diperlukan",
-      });
+      return next();
     }
 
     const result = await FlagsService.isAllowedAuction(userId);
