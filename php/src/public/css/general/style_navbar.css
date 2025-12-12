@@ -270,3 +270,12 @@
 .navbar__dropdown.show .dropdown-content {
   display: block;
 }
+
+#for-chat, #for-auction {
+  display: flex;
+  align-items: center;
+}
+
+#btn-chat, #btn-auction {
+  margin: 0 5px;
+}

@@ -41,7 +41,11 @@ export const UserService = {
     conditions.push(`role::text != 'ADMIN'`);
 
     if (search) {
-      conditions.push(`(name ILIKE $${queryParams.length + 1} OR email ILIKE $${queryParams.length + 1})`);
+      conditions.push(
+        `(name ILIKE $${queryParams.length + 1} OR email ILIKE $${
+          queryParams.length + 1
+        })`
+      );
       queryParams.push(`%${search}%`);
     }
 
@@ -50,7 +54,7 @@ export const UserService = {
       queryParams.push(role.toUpperCase());
     }
 
-    const searchCondition = `WHERE ${conditions.join(' AND ')}`;
+    const searchCondition = `WHERE ${conditions.join(" AND ")}`;
 
     const countQuery = `SELECT COUNT(*) as total FROM users ${searchCondition}`;
     const countResult = await db.query(countQuery, queryParams);

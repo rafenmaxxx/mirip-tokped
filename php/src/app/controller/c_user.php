@@ -170,6 +170,8 @@ switch ($method) {
             break;
         }
 
+        $hashedPassword = null;
+        
         if ($new_password) {
             $checkPass = $model->getById($id);
             if (password_verify($new_password, $checkPass['password']) && !($new_password === $checkPass['password'])) {
