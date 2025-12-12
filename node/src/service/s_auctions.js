@@ -209,6 +209,107 @@ export const AuctionsService = {
     return res.rows;
   },
 
+  async getByStoreIdWithCursor(storeId, options = {}) {
+    const {
+      cursor = null,
+      limit = 4,
+      status = null // 'active', 'ended', 'cancelled', 'scheduled', or null for all
+    } = options;
+
+    // Update auction status first
+    const anyAuctionRes = await db.query(
+      `SELECT a.auction_id
+      FROM auctions a
+      JOIN products p ON a.product_id = p.product_id
+      WHERE p.store_id = $1
+      LIMIT 1`,
+      [storeId]
+    );
+
+    if (anyAuctionRes.rows.length > 0) {
+      await this.updateAuctionStatusByTime(anyAuctionRes.rows[0].auction_id);
+    }
+
+    // Build dynamic query
+    let query = `
+      SELECT 
+        a.auction_id,
+        a.product_id,
+        p.product_name, 
+        p.main_image_path, 
+        p.description AS product_description, 
+        a.quantity, 
+        s.store_name,
+        s.store_id,
+        s.user_id AS seller_id, 
+        a.starting_price, 
+        a.current_price, 
+        a.min_increment, 
+        a.start_time, 
+        a.end_time, 
+        a.status_auction,
+        a.winner_id,
+        a.created_at,
+        (SELECT COUNT(*) FROM auction_bids WHERE auction_id = a.auction_id) AS bid_amount
+      FROM auctions a
+      JOIN products p ON a.product_id = p.product_id
+      JOIN stores s ON p.store_id = s.store_id
+      WHERE s.store_id = $1
+    `;
+
+    const params = [storeId];
+    let paramIndex = 2;
+
+    // Filter by status if provided
+    if (status) {
+      if (status === 'active') {
+        query += ` AND a.status_auction IN ('active', 'scheduled')`;
+      } else {
+        query += ` AND a.status_auction = $${paramIndex}`;
+        params.push(status);
+        paramIndex++;
+      }
+    }
+
+    // Cursor condition for pagination
+    if (cursor) {
+      query += ` AND a.auction_id < $${paramIndex}`;
+      params.push(cursor);
+      paramIndex++;
+    }
+
+    // Order by created_at DESC (newest first), then by auction_id DESC for consistent ordering
+    query += ` ORDER BY a.created_at DESC, a.auction_id DESC`;
+
+    // Fetch one extra to check if there are more pages
+    query += ` LIMIT $${paramIndex}`;
+    params.push(limit + 1);
+
+    const res = await db.query(query, params);
+    const auctions = res.rows;
+
+    // Check if there are more pages
+    const hasMore = auctions.length > limit;
+    if (hasMore) {
+      auctions.pop(); // Remove the extra item
+    }
+
+    // Get next cursor (last item's auction_id)
+    const nextCursor = auctions.length > 0 
+      ? auctions[auctions.length - 1].auction_id 
+      : null;
+
+    return {
+      data: auctions,
+      pagination: {
+        nextCursor,
+        hasMore,
+        limit,
+        count: auctions.length
+      }
+    };
+  },
+
   async create(data) {
     const {
       product_id,
