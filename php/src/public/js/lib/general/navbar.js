@@ -396,7 +396,13 @@ async function morphAuthBtn(data) {
     document.getElementById("balance-n").innerHTML = "";
     document.getElementById("userDropdown").innerHTML = "";
     document.getElementById("for-chat").innerHTML = "";
-    document.getElementById("for-auction").innerHTML = "";
+    document.getElementById("for-auction").innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+
+    const auctionBtn = document.getElementById("btn-auction");
+    auctionBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      window.location.href = "/react/auction";
+    });
   }
 }
 
