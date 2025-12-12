@@ -211,11 +211,11 @@ Akses aplikasi melalui browser di `http://localhost:80`
 - User Profile: 13523025
 - Database : 13523073, 13523025
 - API Routes: 13523073, 13523025, 13523031
-- Websocket Server:
-- Push Notification:
-- Sistem Auction:
-- Sistem Chat:
-- Admin Authentication:
+- Websocket Server: 13523073, 13523025, 13523031
+- Push Notification: 13523073, 13523025, 13523031
+- Sistem Auction: 13523073, 13523025, 13523031
+- Sistem Chat: 13523073, 13523025, 13523031
+- Admin Authentication: 13523073, 13523025, 13523031
 
 ### Client-side
 - Login Page: 13523073,13523025
@@ -234,12 +234,12 @@ Akses aplikasi melalui browser di `http://localhost:80`
 - Order Management: 13523031
 - Responsive Design: 13523031
 - UI/UX Design: 13523031
-- Admin Dashboard :
-- Chat :
-- Auction List:
-- Auction Detail:
-- Auction Manage
+- Admin Dashboard : 13523073, 13523025, 13523031
+- Chat : 13523073, 13523025, 13523031
+- Auction List: 13523073, 13523025, 13523031
+- Auction Detail: 13523073, 13523025, 13523031
+- Auction Manage : 13523073, 13523025, 13523031
 
 ### Additional Tasks
 - Docker Configuration: 13523073
-- NginxConfiguration:
+- NginxConfiguration:13523073, 13523025, 13523031
