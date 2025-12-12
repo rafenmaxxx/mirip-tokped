@@ -113,20 +113,7 @@ function Auction() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(Date.now());
-
-      setAuctions((prev) =>
-        prev.map((auction) => {
-          if (
-            auction.status_auction === "scheduled" &&
-            Date.now() >= auction.start_time
-          ) {
-            return { ...auction, status_auction: "active", bid_amount: 1 };
-          }
-          return auction;
-        })
-      );
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 

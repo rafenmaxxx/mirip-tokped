@@ -9,6 +9,7 @@ import ConfirmationModal from "./components/ConfirmationModal";
 import StatusBanner from "./components/StatusBanner";
 import AutoCloseCountdown from "./components/AutoCloseCountdown";
 import { socketManager } from "../chat/lib/socket";
+import { showToast } from "../lib/toast";
 
 function AuctionDetail() {
   const { auctionId } = useParams();
@@ -62,7 +63,9 @@ function AuctionDetail() {
 
   const handleAuctionEnded = useCallback(() => {
     setAuction((prev) => (prev ? { ...prev, status_auction: "ended" } : null));
-    alert("Lelang telah berakhir!");
+    // alert("Lelang telah berakhir!");
+    showToast("Lelang telah berakhir!", "info");
+
   }, []);
 
   const handleAuctionCancelled = useCallback(() => {
@@ -70,7 +73,8 @@ function AuctionDetail() {
     setAuction((prev) =>
       prev ? { ...prev, status_auction: "cancelled" } : null
     );
-    alert("Lelang telah dibatalkan!");
+    // alert("Lelang telah dibatalkan!");
+    showToast("Lelang telah dibatalkan!", "info");
   }, []);
 
   useEffect(() => {
@@ -118,7 +122,7 @@ function AuctionDetail() {
         }
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        alert(`Error loading auction: ${error.message}`);
+        // alert(`Error loading auction: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -131,7 +135,8 @@ function AuctionDetail() {
 
   const handlePlaceBid = async (bidAmount) => {
     if (!currentUser?.user_id) {
-      alert("Harus login untuk menawar");
+      // alert("Harus login untuk menawar");
+      showToast("Harus login untuk menawar", "warning");
       return;
     }
 
@@ -142,12 +147,14 @@ function AuctionDetail() {
 
     const minBid = currentPrice + auction.min_increment;
     if (bidAmount < minBid) {
-      alert(`Bid minimal adalah Rp ${minBid.toLocaleString()}`);
+      // alert(`Bid minimal adalah Rp ${minBid.toLocaleString()}`);
+      showToast(`Bid minimal adalah Rp ${minBid.toLocaleString()}`, "warning");
       return;
     }
 
     if (bidAmount > currentUser.balance) {
-      alert("Saldo tidak mencukupi");
+      // alert("Saldo tidak mencukupi");
+      showToast("Saldo tidak mencukupi", "error");
       return;
     }
 
@@ -170,7 +177,8 @@ function AuctionDetail() {
       }
     } catch (error) {
       console.error("Error placing bid:", error);
-      alert("Gagal mengirim bid: " + error.message);
+      // alert("Gagal mengirim bid: " + error.message);
+      showToast("Gagal mengirim bid: " + error.message, "error");
     } finally {
       setActionLoading(false);
     }
@@ -191,15 +199,19 @@ function AuctionDetail() {
       );
 
       if (response.ok) {
-        alert("Lelang berhasil dibatalkan");
+        // alert("Lelang berhasil dibatalkan");
+        // showToast("Lelang telah dibatalkan", "info");
+
         window.location.reload();
       } else {
         const data = await response.json();
-        alert(data.message || "Gagal membatalkan lelang");
+        // alert(data.message || "Gagal membatalkan lelang");
+        showToast(data.message || "Gagal membatalkan lelang", "error");
       }
     } catch (error) {
       console.error("Error canceling auction:", error);
-      alert("Terjadi kesalahan saat membatalkan lelang");
+      // alert("Terjadi kesalahan saat membatalkan lelang");
+      showToast("Terjadi kesalahan saat membatalkan lelang", "error");
     } finally {
       setActionLoading(false);
       setShowCancelModal(false);
@@ -219,15 +231,18 @@ function AuctionDetail() {
       );
 
       if (response.ok) {
-        alert("Lelang berhasil dihentikan");
+        // alert("Lelang berhasil dihentikan");
+        // showToast("Lelang berhasil dihentikan", "success");
         window.location.reload();
       } else {
         const data = await response.json();
-        alert(data.message || "Gagal menghentikan lelang");
+        // alert(data.message || "Gagal menghentikan lelang");
+        showToast(data.message || "Gagal menghentikan lelang", "error");
       }
     } catch (error) {
       console.error("Error stopping auction:", error);
-      alert("Terjadi kesalahan saat menghentikan lelang");
+      // alert("Terjadi kesalahan saat menghentikan lelang");
+      showToast("Terjadi kesalahan saat menghentikan lelang", "error");
     } finally {
       setActionLoading(false);
     }
@@ -362,7 +377,7 @@ function AuctionDetail() {
         />
 
         {/* Auto Close Countdown */}
-        {isActive && hasBids && (
+        {isActive && (
           <AutoCloseCountdown
             lastBidTime={lastBidTime}
             onAutoClose={handleAutoClose}
