@@ -85,12 +85,12 @@ export function InitDropdown() {
 
   // Contoh event listener tombol
   document.getElementById("btn-profile").addEventListener("click", () => {
-   router.navigateTo("/profile");
+    router.navigateTo("/profile");
     dropdown.classList.remove("show");
   });
 
   document.getElementById("btn-orders").addEventListener("click", () => {
-      router.navigateTo("/order-history");
+    router.navigateTo("/order-history");
     dropdown.classList.remove("show");
   });
 
@@ -99,7 +99,6 @@ export function InitDropdown() {
     dropdown.classList.remove("show");
   });
 }
-
 
 function morphAuthBtn(data) {
   const btn = document.getElementById("navbar-auth-btn");
@@ -110,54 +109,66 @@ function morphAuthBtn(data) {
   const filter = document.getElementById("filter-btn");
   const menu = document.getElementById("navbar-menu");
 
+  const chat = document.getElementById("for-chat");
+  const auction = document.getElementById("for-auction");
+
   if (data.status == "success") {
     // udah login
-   const viewportWidth = window.innerWidth;
-   console.log(viewportWidth);
-   if (data.data.role == "BUYER" && viewportWidth <= 480) {
-     document.getElementById("balance-n").innerHTML = "";
-     document.getElementById("userDropdown").innerHTML = "";
-        btn.innerHTML = ` <button class="btn btn-login" id="btn-profile">Profile</button>
+    const viewportWidth = window.innerWidth;
+    console.log(viewportWidth);
+    if (data.data.role == "BUYER" && viewportWidth <= 480) {
+      document.getElementById("balance-n").innerHTML = "";
+      document.getElementById("userDropdown").innerHTML = "";
+      btn.innerHTML = ` <button class="btn btn-login" id="btn-profile">Profile</button>
                 <button class="btn btn-login" id="btn-orders">Order History</button>
                 <button class="btn btn-login" id="btn-logout">Logout</button>`;
-    document.getElementById("btn-profile").addEventListener("click", () => {
-   router.navigateTo("/profile");
-    dropdown.classList.remove("show");
-  });
- document.getElementById("btn-orders").addEventListener("click", () => {
-      router.navigateTo("/order-history");
-    dropdown.classList.remove("show");
-  });
+      chat.innerHTML = `<button class="btn btn-login" id="btn-chat">Chat</button>`;
+      auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
 
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    console.log("Logout");
-    dropdown.classList.remove("show");
-  });
+      document.getElementById("btn-profile").addEventListener("click", () => {
+        router.navigateTo("/profile");
+        dropdown.classList.remove("show");
+      });
+      document.getElementById("btn-orders").addEventListener("click", () => {
+        router.navigateTo("/order-history");
+        dropdown.classList.remove("show");
+      });
 
-    document.getElementById("btn-profile").addEventListener("click", () => {
-   router.navigateTo("/profile");
- 
-  });
+      document.getElementById("btn-logout").addEventListener("click", () => {
+        console.log("Logout");
+        dropdown.classList.remove("show");
+      });
 
-  document.getElementById("btn-orders").addEventListener("click", () => {
-      router.navigateTo("/order-history");
+      document.getElementById("btn-profile").addEventListener("click", () => {
+        router.navigateTo("/profile");
+      });
 
-  });
+      document.getElementById("btn-orders").addEventListener("click", () => {
+        router.navigateTo("/order-history");
+      });
 
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    console.log("Logout");
-    
-  })
- 
-    chart.addEventListener("click", () => {
+      document.getElementById("btn-logout").addEventListener("click", () => {
+        console.log("Logout");
+      });
+
+      document.getElementById("btn-chat").addEventListener("click", () => {
+        window.location.href = "/react/chat";
+      });
+
+      document.getElementById("btn-auction").addEventListener("click", () => {
+        window.location.href = "/react/auction";
+      });
+
+      chart.addEventListener("click", () => {
         router.navigateTo("/cart");
       });
       InitBalance();
       InitCountCart();
-   }else 
-    
-    if (data.data.role == "BUYER") {
-        InitDropdown();
+    } else if (data.data.role == "BUYER") {
+      InitDropdown();
+      chat.innerHTML = `<button class="btn btn-login" id="btn-chat">Chat</button>`;
+      auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+      
       chart.addEventListener("click", () => {
         menu.classList.remove("is-active");
         router.navigateTo("/cart");
@@ -166,27 +177,32 @@ function morphAuthBtn(data) {
       document.getElementById("dropdownToggle").innerHTML = data.data.name;
       InitBalance();
       InitCountCart();
-    }
-   else if (data.data.role == "SELLER") {
-          document.getElementById("userDropdown").innerHTML = "";
-       btn.innerHTML = `<button class="btn btn-login" id="btn-home">Dashboard</button><button class="btn btn-login" id="btn-profile">Profile</button>
+    } else if (data.data.role == "SELLER") {
+      document.getElementById("userDropdown").innerHTML = "";
+      btn.innerHTML = `<button class="btn btn-login" id="btn-home">Dashboard</button><button class="btn btn-login" id="btn-profile">Profile</button>
        <button class="btn btn-register" id="btn-logout">Log Out</button>`;
       chart.innerHTML = `<button class="btn btn-login" id="chartBtn">Produk</button>`;
-      document.getElementById("for-order").innerHTML = `<div id="order-hist"> <button class="btn btn-login" id="chartBtn">Order</button></div>`
+      chat.innerHTML = `<button class="btn btn-login" id="btn-chat">Chat</button>`;
+      auction.innerHTML = `<button class="btn btn-login" id="btn-auction">Auction</button>`;
+
+      document.getElementById(
+        "for-order"
+      ).innerHTML = `<div id="order-hist"> <button class="btn btn-login" id="chartBtn">Order</button></div>`;
       chart.addEventListener("click", () => {
         menu.classList.remove("is-active");
         router.navigateTo("/seller/products");
       });
 
-      document.getElementById("btn-home").addEventListener("click",()=>{router.navigateTo("/seller")})
+      document.getElementById("btn-home").addEventListener("click", () => {
+        router.navigateTo("/seller");
+      });
 
-        const orderHist = document.getElementById("order-hist");
+      const orderHist = document.getElementById("order-hist");
       orderHist.addEventListener("click", () => {
         menu.classList.remove("is-active");
         router.navigateTo("/seller/orders");
       });
       balance.innerHTML = ``;
-      InitBalance();
       search.innerHTML = "";
       filter.innerHTML = "";
     }
@@ -213,12 +229,27 @@ function morphAuthBtn(data) {
         () => {}
       );
     });
-        const profile = document.getElementById("btn-profile");
-    profile.addEventListener("click", () => {
-      menu.classList.remove("is-active");
-      router.navigateTo("/profile");
-    });
+    const profile = document.getElementById("btn-profile");
+    if (profile) {
+      profile.addEventListener("click", () => {
+        menu.classList.remove("is-active");
+        router.navigateTo("/profile");
+      });
+    }
+    
+    const chatBtn = document.getElementById("btn-chat");
+    if (chatBtn) {
+      chatBtn.addEventListener("click", () => {
+        window.location.href = "/react/chat";
+      });
+    }
 
+    const auctionBtn = document.getElementById("btn-auction");
+    if (auctionBtn) {
+      auctionBtn.addEventListener("click", () => {
+        window.location.href = "/react/auction";
+      });
+    }
   } else {
     // blom login
 
@@ -228,10 +259,11 @@ function morphAuthBtn(data) {
     balance.innerHTML = "";
     document.getElementById("balance-n").innerHTML = "";
     document.getElementById("userDropdown").innerHTML = "";
+
+    // Di dalam else block (blom login)
+    document.getElementById("for-chat").innerHTML = "";
+    document.getElementById("for-auction").innerHTML = "";
   }
-  
-
-
 }
 
 function showSuggestion(query) {
