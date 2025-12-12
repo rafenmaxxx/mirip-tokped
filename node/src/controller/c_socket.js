@@ -2,6 +2,8 @@ import SocketService from "../service/s_socket.js";
 import { UserService } from "../service/s_user.js"; // pastikan ada UserService
 import { AuctionBidsService } from "../service/s_auctionbids.js";
 import { sendNotif } from "../service/s_webpush.js";
+import NotificationPreferences from "../utils/NotificationPreferences.js";
+
 class SocketController {
   constructor(io) {
     this.io = io;
@@ -110,7 +112,11 @@ class SocketController {
         targetId = storeId;
       }
       console.log(targetId, " --> targetID");
-      sendNotif(targetId, `CHAT dari ${sender_id}`, message);
+      // get user name
+      const user = await UserService.getById(sender_id);
+      NotificationPreferences.isAllowedChatNotif([targetId], () => {
+        sendNotif([targetId], `CHAT dari ${user.name}`, message);
+      });
 
       // Debug log
       console.log(
@@ -313,7 +319,35 @@ class SocketController {
       console.log("[Server] Bid saved to DB:", result.bidId);
 
       // Broadcast ke semua di room
+      const targetId = await AuctionBidsService.getSecondHighestBidder(
+        auctionId
+      );
+      const winner = await UserService.getById(userId);
+      const targetId2 = await UserService.getAllUserIds();
+
       this.io.to(roomName).emit("new_bid", result.bidData);
+
+      await NotificationPreferences.isAllowedAuctionNotif(
+        targetId2,
+        async () => {
+          await sendNotif(
+            targetId2,
+            `Auction ${auctionId} Mau selese`,
+            "sisa 15 detik"
+          );
+        }
+      );
+
+      await NotificationPreferences.isAllowedAuctionNotif(
+        [targetId],
+        async () => {
+          await sendNotif(
+            [targetId],
+            "BID mu DIKALAHKAN",
+            `${winner.name} bid ${amount}`
+          );
+        }
+      );
 
       // Juga kirim ke sender sebagai konfirmasi
       socket.emit("bid_confirmation", {

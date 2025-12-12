@@ -160,3 +160,89 @@ export const PushPreferencesService = {
     return res.rows[0];
   },
 };
+
+class NotificationPreferences {
+  static async isAllowedChatNotif(user_id, callback) {
+    if (!user_id) {
+      throw new Error("User ID is required");
+    }
+
+    const res = await db.query(
+      "SELECT chat_enabled FROM push_preferences WHERE user_id = $1",
+      [user_id]
+    );
+
+    const isAllowed = res.rows.length === 0 ? true : res.rows[0].chat_enabled;
+
+    if (isAllowed) {
+      if (callback) {
+        callback(isAllowed);
+      }
+    } else {
+      // Ask for permission if not granted
+      console.log(
+        `Permission not granted for user ${user_id}. Asking for permission...`
+      );
+      // Logic to ask for permission can be added here
+    }
+
+    return isAllowed;
+  }
+
+  static async isAllowedAuctionNotif(user_id, callback) {
+    if (!user_id) {
+      throw new Error("User ID is required");
+    }
+
+    const res = await db.query(
+      "SELECT auction_enabled FROM push_preferences WHERE user_id = $1",
+      [user_id]
+    );
+
+    const isAllowed =
+      res.rows.length === 0 ? true : res.rows[0].auction_enabled;
+
+    if (isAllowed) {
+      if (callback) {
+        callback(isAllowed);
+      }
+    } else {
+      // Ask for permission if not granted
+      console.log(
+        `Permission not granted for user ${user_id}. Asking for permission...`
+      );
+      // Logic to ask for permission can be added here
+    }
+
+    return isAllowed;
+  }
+
+  static async isAllowedOrderNotif(user_id, callback) {
+    if (!user_id) {
+      throw new Error("User ID is required");
+    }
+
+    const res = await db.query(
+      "SELECT order_enabled FROM push_preferences WHERE user_id = $1",
+      [user_id]
+    );
+
+    const isAllowed = res.rows.length === 0 ? true : res.rows[0].order_enabled;
+
+    if (isAllowed) {
+      if (callback) {
+        callback(isAllowed);
+      }
+    } else {
+      // Ask for permission if not granted
+      console.log(
+        `Permission not granted for user ${user_id}. Asking for permission...`
+      );
+      // Logic to ask for permission can be added here
+    }
+
+    return isAllowed;
+  }
+}
+
+export default NotificationPreferences;

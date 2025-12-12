@@ -1,4 +1,8 @@
 import db from "../config/db.js";
+import NotificationPreferences from "../utils/NotificationPreferences.js";
+import AuctionBidsService from "./s_auctionbids.js";
+import UserService from "./s_user.js";
+import { sendNotif } from "./s_webpush.js";
 
 export const AuctionsService = {
   async updateAuctionStatusByTime(auctionId) {
@@ -462,6 +466,12 @@ export const AuctionsService = {
           finalPrice,
           timestamp: new Date().toISOString(),
         });
+
+        // notif kirim ke semua yang pernah bid
+        const targetID = await AuctionBidsService.getUserIdsByAuctionId(id);
+        NotificationPreferences.isAllowedAuctionNotif(targetID, () => {
+          sendNotif(targetID, `Auction ${id} SELESAI`, "");
+        });
       }
 
       await this.updateAuctionStatusByTime(id);
@@ -532,6 +542,11 @@ export const AuctionsService = {
         ),
         message: `Auction cancelled: ${reason}`,
         timestamp: new Date().toISOString(),
+      });
+
+      const targetId = await UserService.getAllUserIds();
+      NotificationPreferences.isAllowedAuctionNotif(targetId, () => {
+        sendNotif(targetId, `AUCTION ${id} di cancel`, "");
       });
     }
 

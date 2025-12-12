@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../db/db.php';
 require_once __DIR__ . '/../model/m_user.php';
+require_once __DIR__ . '/../model/m_notif.php';
 
 class Order
 {
@@ -55,7 +56,7 @@ class Order
         foreach ($rows as $row) {
             $order_id = $row['order_id'];
 
-            // Jika order ini belum dimasukkan ke array
+
             if (!isset($orders[$order_id])) {
                 $orders[$order_id] = [
                     'order_id' => $row['order_id'],
@@ -74,7 +75,7 @@ class Order
                 ];
             }
 
-            // Jika ada item terkait, tambahkan
+
             if ($row['order_item_id']) {
                 $orders[$order_id]['items'][] = [
                     'order_item_id' => $row['order_item_id'],
@@ -88,20 +89,47 @@ class Order
             }
         }
 
-        // Ubah dari associative ke numerik array
+
         return array_values($orders);
     }
 
 
     public function createOrder($buyer_id, $store_id, $total_price, $shipping_address)
     {
-        $stmt = $this->conn->prepare("INSERT INTO orders (buyer_id, store_id, total_price, shipping_address, created_at) VALUES (:buyer_id, :store_id, :total_price, :shipping_address, NOW()");
+        $stmt = $this->conn->prepare("INSERT INTO orders (buyer_id, store_id, total_price, shipping_address, created_at) VALUES (:buyer_id, :store_id, :total_price, :shipping_address, NOW())");
         $stmt->execute([
             ':buyer_id' => $buyer_id,
             ':store_id' => $store_id,
             ':total_price' => $total_price,
             ':shipping_address' => $shipping_address
         ]);
+
+        $notifModel = new M_Notif();
+
+
+        if ($notifModel->isAllowedOrderNotif($buyer_id)) {
+            $notifModel->sendNotifikasi($buyer_id, [
+                'title' => 'Order Created',
+                'body' => 'Your order has been successfully created.',
+                'data' => [
+                    'order_id' => $this->conn->lastInsertId(),
+                    'status' => 'created'
+                ]
+            ]);
+        }
+
+
+        if ($notifModel->isAllowedOrderNotif($store_id)) {
+            $notifModel->sendNotifikasi($store_id, [
+                'title' => 'New Order Received',
+                'body' => 'You have received a new order.',
+                'data' => [
+                    'order_id' => $this->conn->lastInsertId(),
+                    'status' => 'created'
+                ]
+            ]);
+        }
+
         return $stmt;
     }
 
@@ -137,6 +165,44 @@ class Order
             ':status' => $status,
             ':order_id' => $order_id
         ]);
+
+        $stmtOrder = $this->conn->prepare("SELECT buyer_id, store_id FROM orders WHERE order_id = :order_id");
+        $stmtOrder->execute([':order_id' => $order_id]);
+        $order = $stmtOrder->fetch(PDO::FETCH_ASSOC);
+
+        if (!$order) {
+            error_log("Order not found for order_id: $order_id");
+            return 0;
+        }
+
+        if (!array_key_exists('buyer_id', $order) || !array_key_exists('store_id', $order)) {
+            error_log("Invalid order data: " . json_encode($order));
+            return 0;
+        }
+
+        $notifModel = new M_Notif();
+
+        if ($notifModel->isAllowedOrderNotif($order['buyer_id'])) {
+            $notifModel->sendNotifikasi($order['buyer_id'], [
+                'title' => 'Order Status Updated',
+                'body' => "Your order status has been updated to {$status}.",
+                'data' => [
+                    'order_id' => $order_id,
+                    'status' => $status
+                ]
+            ]);
+        }
+
+        if ($notifModel->isAllowedOrderNotif($order['store_id'])) {
+            $notifModel->sendNotifikasi($order['store_id'], [
+                'title' => 'Order Status Updated',
+                'body' => "The status of an order has been updated to {$status}.",
+                'data' => [
+                    'order_id' => $order_id,
+                    'status' => $status
+                ]
+            ]);
+        }
 
         return $stmt->rowCount();
     }
@@ -583,7 +649,7 @@ class Order
 
     public function updateStatus($order_id, $status, $msg = null, $durasi = null)
     {
-        // ambil status sekarang
+
         $stmt = $this->conn->prepare("SELECT status,total_price,buyer_id,store_id,delivery_time FROM orders WHERE order_id=:id");
         $stmt->execute([':id' => $order_id]);
         $res = $stmt->fetch();
@@ -604,11 +670,11 @@ class Order
                         $isValid = true;
                         $this->updateOrderRejectReason($order_id, $msg);
 
-                        // update balance user
+
                         $model = new User();
                         $model->addBalance($buyer_id, $price);
 
-                        // update stok barang
+
                         $sql = "
                         SELECT product_id, quantity
                         FROM order_items
@@ -654,8 +720,8 @@ class Order
             case 'on_delivery':
                 switch ($status) {
                     case 'received':
-                        // update balance seller
-                        // tambah validasi user baru bisa confirm klo tanggal sekarang > delivered time
+
+
                         $now = new DateTime();
                         $deliveryTime = new DateTime($delivery);
                         if ($now > $deliveryTime) {
