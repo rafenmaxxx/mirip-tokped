@@ -79,6 +79,8 @@ export const ChatService = {
           cr.*, 
           u.name AS buyer_name,
           u.email AS buyer_email,
+          s.store_name,
+          s.store_logo_path,
           (
             SELECT cm.content 
             FROM chat_messages cm 
@@ -105,6 +107,7 @@ export const ChatService = {
           ) as unread_count
         FROM chat_room cr
         JOIN users u ON u.user_id = cr.buyer_id
+        JOIN stores s ON s.store_id = cr.store_id
         WHERE cr.store_id = $1
         ORDER BY COALESCE(
           (SELECT cm.created_at 
