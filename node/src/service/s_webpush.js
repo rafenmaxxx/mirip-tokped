@@ -7,7 +7,7 @@ const REDIS_PENDING_KEY = "push:pending";
 const REDIS_SUBSCRIPTION_KEY = "push:subscriptions";
 
 export async function sendNotif(
-  userId,
+  userIds,
   title,
   body,
   data = {},
@@ -15,6 +15,9 @@ export async function sendNotif(
   type = null
 ) {
   console.log("KIRIM NOTIF");
+
+  const userIdArray = Array.isArray(userIds) ? userIds : [userIds];
+
   const payload = {
     title: title || "Notification",
     body: body || "You have a new notification",
@@ -23,22 +26,29 @@ export async function sendNotif(
     type,
   };
 
-  try {
-    const result = await WebPushService.sendToUser(userId, payload);
-    return {
-      success: true,
-      userId,
-      result,
-    };
-  } catch (err) {
-    console.error("sendNotification error:", err);
-    return {
-      success: false,
-      error: "Failed to send notification",
-    };
-  }
-}
+  const results = [];
 
+  for (const userId of userIdArray) {
+    
+    try {
+      const result = await WebPushService.sendToUser(userId, payload);
+      results.push({
+        success: true,
+        userId,
+        result,
+      });
+    } catch (err) {
+      console.error(`sendNotification error for user ${userId}:`, err);
+      results.push({
+        success: false,
+        userId,
+        error: "Failed to send notification",
+      });
+    }
+  }
+
+  return results;
+}
 export const WebPushService = {
   // ========== SUBSCRIPTION MANAGEMENT (SAMA) ==========
   async getAllSubscriptions() {
