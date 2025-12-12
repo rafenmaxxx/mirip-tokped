@@ -69,7 +69,7 @@ function AuctionManage() {
       setAuctions(sellerAuctions);
       
       const active = sellerAuctions.find(
-        auction => auction.status_auction === "active" || auction.status_auction === "scheduled"
+        auction => auction.status_auction === "active"
       );
       setActiveAuction(active || null);
       
