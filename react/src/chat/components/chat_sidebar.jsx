@@ -209,6 +209,16 @@ function ChatSidebar({
   );
 
   const handleNewChat = async (storeId) => {
+    // If a room for this store already exists in the sidebar, just select it
+    const existingRoom = sortedRooms.find((r) => r.store_id === storeId);
+    if (existingRoom) {
+      setShowNewChatModal(false);
+      setNewChatSearch("");
+      // notify parent to select the existing room
+      onSelect?.(existingRoom);
+      return;
+    }
+
     try {
       const res = await fetch("/node/api/chat/start", {
         method: "POST",
@@ -229,9 +239,11 @@ function ChatSidebar({
           last_message: { content: "Percakapan dimulai" },
         };
 
+        // let parent add the new room to its list and then select it
         onNewRoomCreated?.(formattedRoom);
         setShowNewChatModal(false);
         setNewChatSearch("");
+        onSelect?.(formattedRoom);
       } else {
         const error = await res.json();
         alert(`Gagal memulai chat baru: ${error.message}`);
