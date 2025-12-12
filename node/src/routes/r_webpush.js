@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { WebPushController } from "../controller/c_webpush.js";
-import { sessionMiddleware } from "../middleware/Session.js";
+import { sessionMiddleware } from "../middleware/session.js";
 
 const router = Router();
 
