@@ -2,7 +2,9 @@
 
 ## Deskripsi Aplikasi
 
-Aplikasi web e-commerce ini adalah platform jual beli online yang memungkinkan pengguna untuk menjelajahi produk, mengelola keranjang belanja, dan melakukan transaksi pembelian. Aplikasi ini dibangun dengan menggunakan arsitektur MVC (Model-View-Controller) dengan PHP native sebagai backend dan HTML, CSS, JavaScript vanilla untuk frontend.
+Aplikasi web e-commerce ini merupakan platform jual beli online yang menyediakan fitur pencarian produk, pengelolaan keranjang belanja, pemesanan, serta interaksi real-time melalui chat dan sistem auction. Arsitektur aplikasi menggunakan kombinasi PHP Native (MVC), Node.js, dan React SPA, yang saling terhubung melalui Nginx sebagai reverse proxy.
+
+Pada sisi server tradisional, PHP Native dengan pola MVC menangani seluruh fitur e-commerce inti seperti autentikasi buyer/seller, manajemen produk, keranjang, checkout, dan riwayat pesanan. Sementara itu, fitur yang membutuhkan interaksi real-time—seperti chat, auction (bidding, timer, announcement), dan admin dashboard—dibangun menggunakan React (JSX) dan berkomunikasi dengan Node.js WebSocket Server. Halaman interaktif (auction, chat, admin) dijalankan sebagai React Single Page Application. Semua data disimpan menggunakan PostgreSQL yang diakses oleh PHP maupun Node.js.
 
 ### Teknologi yang Digunakan
 
@@ -12,12 +14,27 @@ Aplikasi web e-commerce ini adalah platform jual beli online yang memungkinkan p
 - JavaScript vanilla untuk interaktivitas
 - Implementasi request menggunakan basic form handling dan AJAX
 - Quill.js untuk rich text editor
+- React + JSX
+- Vite sebagai build too react
+- Socket.io-client untuk WebSocket
 
 **Server-side:**
+#### PHP Backend
 - PHP murni (native PHP)
 - Arsitektur MVC 
 - Implementasi RESTful API dengan HTTP method (GET, POST, PUT, DELETE)
 - Routing system custom untuk manajemen URL
+
+#### Node.js
+- Express.js untuk REST API Admin
+- Socket.io untuk WebSocket server
+- JWT-based authentication untuk admin
+
+**Web Server Layer:**
+### Nginx
+- Reverse proxy untuk request client
+- Static file server untuk React build
+- WebSocket proxy untuk koneksi real-time
 
 **Database:**
 - Postgre untuk database
@@ -32,6 +49,9 @@ Aplikasi web e-commerce ini adalah platform jual beli online yang memungkinkan p
 - Sistem checkout dan pembayaran
 - Riwayat order/pembelian
 - Halaman profil pengguna
+- Halaman lelang dan detail lelang
+- Halaman chat dengan penjual
+- Pengaturan notifikasi
 
 #### Untuk Penjual
 - Sistem autentikasi (Login & Register sebagai Seller)
@@ -39,6 +59,13 @@ Aplikasi web e-commerce ini adalah platform jual beli online yang memungkinkan p
 - Manajemen produk (tambah, edit, hapus)
 - Manajemen order dari pembeli
 - Rich text editor untuk deskripsi produk
+- Halaman manajemen lelang dan detail lelang
+- Halaman chat dengan pembeli
+
+#### Untuk Admin
+- Manajemen pengguna
+- Manajemen feature flags
+- Manajemen global feature flags
 
 ## Daftar Requirement
 
@@ -46,6 +73,8 @@ Aplikasi web e-commerce ini adalah platform jual beli online yang memungkinkan p
 - PHP >= 8.0
 - PostgreSQL >= 12
 - Docker & Docker Compose 
+- Node.js >= 18.x
+- Nginx >= 1.20
 
 ### Browser Requirements
 - Google Chrome (versi terbaru)
@@ -81,7 +110,7 @@ docker-compose up --build
 docker-compose up -d
 ```
 
-Akses aplikasi melalui browser di `http://localhost:8000`
+Akses aplikasi melalui browser di `http://localhost:80`
 
 
 ## Tangkapan Layar
@@ -150,6 +179,25 @@ Akses aplikasi melalui browser di `http://localhost:8000`
 ![Halaman Order Manajemen](docs/image-16.png)
 *Halaman penjual untuk manajemen order*
 
+### 17. Halaman Auction List
+![Halaman Auction List]()
+*Halaman pembeli untuk melihat lelang*
+
+### 18. Halaman Auction Detail
+![Halaman Auction Detail]()
+*Halaman pembeli dan penjual untuk melihat detail lelang*
+
+### 19. Halaman Auction Manage
+![Halaman Auction Manage]()
+*Halaman penjual untuk manajemen lelang*
+
+### 20. Halaman Admin Dashboard
+![Halaman Admin]()
+*Halaman admin untuk manajemen pengguna dan feature flags*
+
+### 21. Halaman Chat
+![Halaman Chat]()
+*Halaman pembeli dan penjual untuk berinteraksi*
 
 ## Pembagian Tugas
 
@@ -163,6 +211,11 @@ Akses aplikasi melalui browser di `http://localhost:8000`
 - User Profile: 13523025
 - Database : 13523073, 13523025
 - API Routes: 13523073, 13523025, 13523031
+- Websocket Server:
+- Push Notification:
+- Sistem Auction:
+- Sistem Chat:
+- Admin Authentication:
 
 ### Client-side
 - Login Page: 13523073,13523025
@@ -174,13 +227,19 @@ Akses aplikasi melalui browser di `http://localhost:8000`
 - Checkout Page: 13523025
 - Order History: 13523073,13523025
 - User Profile Page: 13523025
-- Seller Dashboard: 13523031, 13523xxx
+- Seller Dashboard: 13523031
 - Product Management: 13523031
-- Add Product: 13523031 , 13523073
+- Add Product: 13523031, 13523073
 - Edit Product: 13523031 13523073
 - Order Management: 13523031
 - Responsive Design: 13523031
 - UI/UX Design: 13523031
+- Admin Dashboard :
+- Chat :
+- Auction List:
+- Auction Detail:
+- Auction Manage
 
 ### Additional Tasks
 - Docker Configuration: 13523073
+- NginxConfiguration:
