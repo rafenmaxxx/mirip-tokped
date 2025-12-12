@@ -10,7 +10,7 @@ export const UserService = {
 
     const [key, value] = raw.split("|");
     const parsed = phpUnserialize(value);
-    const userId = parsed.id;
+    const userId = parsed.user_id;
 
     if (!userId) return null;
     const res = await db.query("SELECT * FROM users WHERE user_id = $1", [
