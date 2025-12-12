@@ -2,28 +2,81 @@ import db from "../config/db.js";
 
 export const AuctionsService = {
   async updateAuctionStatusByTime(auctionId) {
-    await db.query(
-      `UPDATE auctions
-       SET status_auction = CASE
-         WHEN status_auction = 'scheduled' AND NOW() >= start_time AND NOW() < end_time THEN 'active'
-         WHEN status_auction IN ('scheduled', 'active') AND NOW() >= end_time THEN 'ended'
-         ELSE status_auction
-       END
-       WHERE auction_id = $1 AND status_auction NOT IN ('cancelled', 'ended')`,
+    const auctionRes = await db.query(
+      `SELECT a.auction_id, a.status_auction, a.start_time, a.end_time, p.store_id
+       FROM auctions a
+       JOIN products p ON a.product_id = p.product_id
+       WHERE a.auction_id = $1`,
       [auctionId]
     );
+
+    if (auctionRes.rows.length === 0) {
+      return;
+    }
+
+    const auction = auctionRes.rows[0];
+    const storeId = auction.store_id;
+
+    await db.query(
+      `UPDATE auctions a
+       SET status_auction = 'ended'
+       FROM products p
+       WHERE a.product_id = p.product_id
+         AND p.store_id = $1
+         AND a.status_auction IN ('scheduled', 'active')
+         AND a.winner_id IS NOT NULL`,
+      [storeId]
+    );
+
+    const activeAuctionRes = await db.query(
+      `SELECT a.auction_id
+       FROM auctions a
+       JOIN products p ON a.product_id = p.product_id
+       WHERE p.store_id = $1
+         AND a.status_auction = 'active'
+         AND NOW() < a.end_time
+       LIMIT 1`,
+      [storeId]
+    );
+
+    if (activeAuctionRes.rows.length === 0) {
+      await db.query(
+        `UPDATE auctions a
+         SET status_auction = 'active'
+         FROM products p
+         WHERE a.product_id = p.product_id
+           AND p.store_id = $1
+           AND a.status_auction = 'scheduled'
+           AND NOW() >= a.start_time
+           AND NOW() < a.end_time
+           AND a.auction_id = (
+             SELECT a2.auction_id
+             FROM auctions a2
+             JOIN products p2 ON a2.product_id = p2.product_id
+             WHERE p2.store_id = $1
+               AND a2.status_auction = 'scheduled'
+               AND NOW() >= a2.start_time
+               AND NOW() < a2.end_time
+             ORDER BY a2.start_time ASC
+             LIMIT 1
+           )`,
+        [storeId]
+      );
+    }
   },
 
   async getAll() {
-    await db.query(
-      `UPDATE auctions
-       SET status_auction = CASE
-         WHEN status_auction = 'scheduled' AND NOW() >= start_time AND NOW() < end_time THEN 'active'
-         WHEN status_auction IN ('scheduled', 'active') AND NOW() >= end_time THEN 'ended'
-         ELSE status_auction
-       END
-       WHERE status_auction NOT IN ('cancelled', 'ended')`
+    const storesRes = await db.query(
+      `SELECT DISTINCT p.store_id, a.auction_id
+       FROM auctions a
+       JOIN products p ON a.product_id = p.product_id
+       WHERE a.status_auction NOT IN ('cancelled', 'ended')
+       LIMIT 1`
     );
+
+    for (const store of storesRes.rows) {
+      await this.updateAuctionStatusByTime(store.auction_id);
+    }
 
     const res =
       await db.query(`SELECT a.auction_id, p.product_name, p.main_image_path, a.quantity, s.store_name, a.starting_price, a.current_price, a.start_time, a.end_time, COUNT(ab.bid_id) AS bidders_amount, a.status_auction
@@ -93,6 +146,19 @@ export const AuctionsService = {
   },
 
   async getByStoreId(storeId) {
+    const anyAuctionRes = await db.query(
+      `SELECT a.auction_id
+       FROM auctions a
+       JOIN products p ON a.product_id = p.product_id
+       WHERE p.store_id = $1
+       LIMIT 1`,
+      [storeId]
+    );
+
+    if (anyAuctionRes.rows.length > 0) {
+      await this.updateAuctionStatusByTime(anyAuctionRes.rows[0].auction_id);
+    }
+
     const res = await db.query(
       `SELECT 
         a.auction_id,
@@ -173,17 +239,24 @@ export const AuctionsService = {
       [quantity, product_id]
     );
 
+    const startTimeDate = new Date(start_time);
+    const endTimeDate = new Date(end_time);
+
+    if (isNaN(startTimeDate.getTime()) || isNaN(endTimeDate.getTime())) {
+      throw new Error("Invalid date format");
+    }
+
     const res = await db.query(
       `INSERT INTO auctions (product_id, starting_price, current_price, min_increment, quantity, start_time, end_time)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         product_id,
-        starting_price,
-        current_price,
-        min_increment,
-        quantity,
-        start_time,
-        end_time,
+        parseFloat(starting_price),
+        parseFloat(current_price),
+        parseFloat(min_increment),
+        parseInt(quantity),
+        startTimeDate.toISOString(),
+        endTimeDate.toISOString(),
       ]
     );
     return res.rows[0];
@@ -279,7 +352,6 @@ export const AuctionsService = {
         [id, winnerId]
       );
 
-      // BROADCAST SOCKET EVENT
       console.log("[BC] EMIT AUCTION END");
       if (io) {
         const roomName = `auction-room-${id}`;
@@ -290,6 +362,8 @@ export const AuctionsService = {
           timestamp: new Date().toISOString(),
         });
       }
+
+      await this.updateAuctionStatusByTime(id);
 
       return updateRes.rows[0];
     } catch (error) {
@@ -341,7 +415,6 @@ export const AuctionsService = {
 
     const cancelledAuction = updateRes.rows[0];
 
-    // 4. BROADCAST SOCKET EVENT
     if (io) {
       const roomName = `auction-room-${id}`;
       console.log(`[CANCEL] Broadcasting to room: ${roomName}`);
@@ -360,6 +433,8 @@ export const AuctionsService = {
         timestamp: new Date().toISOString(),
       });
     }
+
+    await this.updateAuctionStatusByTime(id);
 
     return {
       ...cancelledAuction,
