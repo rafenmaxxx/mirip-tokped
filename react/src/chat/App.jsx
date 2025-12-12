@@ -73,8 +73,6 @@ function Chat() {
         );
 
         const flagData = await flagResponse.json();
-
-        // Handle both error response and success response structure
         const isAllowed =
           flagData.data?.isAllowed ?? flagData.isAllowed ?? true;
         const reason =
@@ -83,16 +81,10 @@ function Chat() {
           "Fitur Live Chat sedang tidak tersedia";
 
         if (!isAllowed) {
-          // Determine scope: check if this is global or user-specific
-          const scope = reason.toLowerCase().includes("global")
-            ? "global"
-            : "user";
-
-          // Navigate to feature-disabled page with query params
           navigate(
             `/feature-disabled?feature=chat&reason=${encodeURIComponent(
               reason
-            )}&scope=${scope}`
+            )}`
           );
         }
       } catch (error) {
