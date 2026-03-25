@@ -180,66 +180,21 @@ Akses aplikasi melalui browser di `http://localhost:80`
 *Halaman penjual untuk manajemen order*
 
 ### 17. Halaman Auction List
-![Halaman Auction List]()
+![Halaman Auction List](docs/image-17.png)
 *Halaman pembeli untuk melihat lelang*
 
 ### 18. Halaman Auction Detail
-![Halaman Auction Detail]()
+![Halaman Auction Detail](docs/image-18.png)
 *Halaman pembeli dan penjual untuk melihat detail lelang*
 
 ### 19. Halaman Auction Manage
-![Halaman Auction Manage]()
+![Halaman Auction Manage](docs/image-19.png)
 *Halaman penjual untuk manajemen lelang*
 
 ### 20. Halaman Admin Dashboard
-![Halaman Admin]()
+![Halaman Admin](docs/image-20.png)
 *Halaman admin untuk manajemen pengguna dan feature flags*
 
 ### 21. Halaman Chat
-![Halaman Chat]()
+![Halaman Chat](docs/image-21.png)
 *Halaman pembeli dan penjual untuk berinteraksi*
-
-## Pembagian Tugas
-
-### Server-side
-- Login: 13523073, 13523025, 13523031
-- Register: 13523073,13523025
-- Product Management: 13523031
-- Cart Management: 13523073,13523025
-- Checkout : 13523073,13523025
-- Order Management: 13523073, 13523025,13523031
-- User Profile: 13523025
-- Database : 13523073, 13523025
-- API Routes: 13523073, 13523025, 13523031
-- Websocket Server: 13523073, 13523025, 13523031
-- Push Notification: 13523073, 13523025, 13523031
-- Sistem Auction: 13523073, 13523025, 13523031
-- Sistem Chat: 13523073, 13523025, 13523031
-- Admin Authentication: 13523073, 13523025, 13523031
-
-### Client-side
-- Login Page: 13523073,13523025
-- Register Page: 13523073,13523025
-- Home Page: 13523073
-- Product Detail: 13523031
-- Store Detail: 13523073,13523025
-- Shopping Cart: 13523025
-- Checkout Page: 13523025
-- Order History: 13523073,13523025
-- User Profile Page: 13523025
-- Seller Dashboard: 13523031
-- Product Management: 13523031
-- Add Product: 13523031, 13523073
-- Edit Product: 13523031 13523073
-- Order Management: 13523031
-- Responsive Design: 13523031
-- UI/UX Design: 13523031
-- Admin Dashboard : 13523073, 13523025, 13523031
-- Chat : 13523073, 13523025, 13523031
-- Auction List: 13523073, 13523025, 13523031
-- Auction Detail: 13523073, 13523025, 13523031
-- Auction Manage : 13523073, 13523025, 13523031
-
-### Additional Tasks
-- Docker Configuration: 13523073
-- NginxConfiguration:13523073, 13523025, 13523031
